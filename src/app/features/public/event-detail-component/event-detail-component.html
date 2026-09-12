@@ -1,1 +1,396 @@
-<p>event-detail-component works!</p>
+@if (loading()) {
+  <p class="text-center text-slate-400 py-20">Chargement de l'événement...</p>
+} @else if (!event()) {
+  <p class="text-center text-slate-400 py-20">Cet événement n'existe pas.</p>
+} @else {
+
+  <!-- ═══════════ FIL D'ARIANE ═══════════ -->
+  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 text-[11px] text-slate-400 flex items-center gap-2">
+    <a routerLink="/" class="hover:text-blue-600">Accueil</a>
+    <span>›</span>
+    <a routerLink="/evenements" [queryParams]="{ categorie: event()!.categoryId }" class="hover:text-blue-600">{{ categoryName() }}</a>
+    <span>›</span>
+    <span class="text-slate-600 font-medium">{{ event()!.title }}</span>
+  </div>
+
+  <!-- ═══════════ BARRE DE CONFIANCE ═══════════ -->
+  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 flex items-center justify-end gap-3">
+
+    <button type="button" (click)="partager()" class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-full border border-slate-200">
+      <app-icon name="share" [size]="12"></app-icon>
+      Partager
+    </button>
+  </div>
+
+  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+    <!-- ═══════════ COLONNE PRINCIPALE ═══════════ -->
+    <div class="lg:col-span-7 space-y-5">
+
+      <!-- Banner principal -->
+      <div class="relative rounded-2xl overflow-hidden shadow-sm">
+        <img [src]="event()!.coverImageUrl" [alt]="event()!.title" class="w-full h-64 sm:h-80 object-cover" />
+
+        <div class="absolute top-4 left-4">
+          <span class="bg-blue-600/90 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wide uppercase">
+            Édition Spéciale {{ dateLabel() }}
+          </span>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-5 pt-16">
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 tracking-tight">{{ event()!.title }}</h1>
+          <p class="flex items-center gap-1.5 text-white/90 text-xs">
+            <app-icon name="map-pin" [size]="13" class="text-slate-300"></app-icon>
+            {{ event()!.venue }}, {{ cityName() }}
+          </p>
+        </div>
+      </div>
+
+      <!-- 3 cartes d'information -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-white border border-slate-100 rounded-xl p-3 flex items-start gap-2.5 shadow-sm">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+            <app-icon name="calendar" [size]="16"></app-icon>
+          </div>
+          <div>
+            <span class="block text-[9px] font-bold text-slate-400 tracking-wider">DATE</span>
+            <span class="block font-bold text-slate-800 text-xs leading-snug">{{ dateLabel() }}</span>
+            <span class="block text-[10px] text-slate-400 leading-tight">{{ heureLabel() }}</span>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-100 rounded-xl p-3 flex items-start gap-2.5 shadow-sm">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+            <app-icon name="map-pin" [size]="16"></app-icon>
+          </div>
+          <div>
+            <span class="block text-[9px] font-bold text-slate-400 tracking-wider">LIEU EXACT</span>
+            <span class="block font-bold text-slate-800 text-xs leading-snug truncate max-w-[110px]">{{ event()!.venue }}</span>
+            <span class="block text-[10px] text-slate-400 leading-tight">{{ cityName() }}, Sénégal</span>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-100 rounded-xl p-3 flex items-start gap-2.5 shadow-sm">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+            <app-icon name="shield-check" [size]="16"></app-icon>
+          </div>
+          <div>
+            <span class="block text-[9px] font-bold text-slate-400 tracking-wider">CONTRÔLE ACCÈS</span>
+            <span class="block font-bold text-slate-800 text-xs leading-snug">QR Dynamique</span>
+            <span class="block text-[10px] text-emerald-600 font-medium leading-tight">Anti-fraude certifié</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Programmation -->
+      @if (scheduleItems().length > 0) {
+        <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Programmation Officielle</h2>
+              <p class="text-[11px] text-slate-400">Concert live exceptionnel en plein air</p>
+            </div>
+            <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-full">
+              {{ scheduleItems().length }} Titres d'Affiche
+            </span>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            @for (item of scheduleItems(); track item.id) {
+              <div class="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden text-center p-2">
+                <div class="h-24 bg-slate-200 rounded-lg overflow-hidden mb-2">
+                  @if (item.imageUrl) {
+                    <img [src]="item.imageUrl" [alt]="item.title" class="w-full h-full object-cover" />
+                  } @else {
+                    <div class="w-full h-full flex items-center justify-center bg-blue-50 text-blue-400">
+                      <app-icon name="zap" [size]="20"></app-icon>
+                    </div>
+                  }
+                </div>
+                <span class="inline-block bg-blue-100 text-blue-700 text-[9px] font-bold px-1.5 py-0.5 rounded mb-1">
+                  {{ item.time }}
+                </span>
+                <h3 class="font-bold text-slate-800 text-xs leading-tight truncate">{{ item.title }}</h3>
+                @if (item.description) {
+                  <p class="text-[10px] text-slate-400 truncate mt-0.5">{{ item.description }}</p>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Lieu & Accès -->
+      <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+            <app-icon name="map-pin" [size]="16" class="text-blue-600"></app-icon>
+            Lieu &amp; Accès Sécurisé
+          </h2>
+          <a [href]="urlItineraire()" target="_blank" rel="noopener" class="text-[11px] font-semibold text-blue-600 hover:underline flex items-center gap-1 border border-blue-200 px-2.5 py-1 rounded-lg">
+            <app-icon name="map-pin" [size]="11"></app-icon>
+            Itinéraire Google Maps
+          </a>
+        </div>
+        <p class="text-xs text-slate-500 mb-3">{{ event()!.venue }} — {{ event()!.address }}</p>
+        <iframe [src]="urlDeLaCarte()" class="w-full h-44 rounded-xl border border-slate-200 mb-2" loading="lazy"></iframe>
+        <div class="bg-slate-50 border border-slate-100 rounded-lg p-2 flex items-center gap-2 text-[11px] text-slate-600">
+          <span class="w-5 h-5 rounded bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">P</span>
+          <div>
+            <span class="font-bold">Parking Sécurisé &amp; Gardé</span>
+            <span class="text-slate-400 ml-1">· Accès direct Voie de Dégagement Ouest</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Garantie -->
+      <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+        <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Garantie SamaPass</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-slate-50 rounded-xl p-3 flex items-start gap-2.5">
+            <app-icon name="qr-code" [size]="16" class="text-blue-600 shrink-0 mt-0.5"></app-icon>
+            <div>
+              <h3 class="font-bold text-slate-800 text-xs mb-0.5">QR Code Dynamique</h3>
+              <p class="text-[10px] text-slate-400 leading-snug">Protection anti-capture d'écran et authentification unique à l'entrée.</p>
+            </div>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-3 flex items-start gap-2.5">
+            <app-icon name="lock" [size]="16" class="text-emerald-600 shrink-0 mt-0.5"></app-icon>
+            <div>
+              <h3 class="font-bold text-slate-800 text-xs mb-0.5">Paiement Mobile Direct</h3>
+              <p class="text-[10px] text-slate-400 leading-snug">Connexion directe Wave &amp; Orange Money sans intermédiaire.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════ BARRE LATÉRALE D'ACHAT ═══════════ -->
+    <div class="lg:col-span-5 lg:sticky lg:top-6">
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-lg p-5">
+
+        <!-- En-tête de la carte -->
+        <div class="mb-4">
+          <h2 class="font-black text-slate-900 text-xl">Acheter en 3 clics</h2>
+          <p class="text-[11px] text-slate-400">Recevez instantanément vos billets certifiés sur WhatsApp &amp; SMS.</p>
+        </div>
+
+        <!-- Étape 1 : Choix des billets -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center font-bold">1</span>
+              Sélectionner vos billets
+            </span>
+            <span class="text-[9px] font-bold text-slate-400">Devise : FCFA</span>
+          </div>
+
+          <div class="space-y-2">
+            @for (type of ticketTypes(); track type.id; let i = $index) {
+              <div
+                class="border rounded-xl p-3 transition-all"
+                [class]="(quantiteDuType(type.id) > 0) ? 'border-blue-600 bg-blue-50/40 ring-1 ring-blue-600' : 'border-slate-200 bg-white'"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="font-bold text-slate-900 text-xs">{{ type.name }}</span>
+                      @if (i === 0) {
+                        <span class="bg-blue-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded">Recommandé</span>
+                      }
+                      @if (type.quantitySold >= type.quantityTotal) {
+                        <span class="bg-rose-100 text-rose-600 text-[8px] font-black px-1.5 py-0.5 rounded">Sold Out</span>
+                      }
+                    </div>
+                    @if (type.description) {
+                      <span class="block text-[10px] text-slate-400 mt-0.5">{{ type.description }}</span>
+                    }
+                  </div>
+
+                  <div class="text-right">
+                    <span class="font-black text-slate-900 text-xs block">{{ type.price.toLocaleString('fr-FR') }} FCFA</span>
+                  </div>
+                </div>
+
+                @if (type.quantitySold < type.quantityTotal) {
+                  <div class="flex items-center justify-end gap-2 mt-2">
+                    <button
+                      type="button"
+                      (click)="diminuerQuantite(type.id)"
+                      class="w-6 h-6 rounded-md bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 flex items-center justify-center text-xs transition-colors"
+                    >−</button>
+                    <span class="w-4 text-center font-bold text-xs text-slate-800">{{ quantiteDuType(type.id) }}</span>
+                    <button
+                      type="button"
+                      (click)="augmenterQuantite(type)"
+                      class="w-6 h-6 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center justify-center text-xs transition-colors"
+                    >+</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Étape 2 : Moyen de paiement direct -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center font-bold">2</span>
+              Moyen de paiement direct
+            </span>
+            <span class="text-[9px] font-bold text-emerald-600">Instantannée &amp; Sécurisé</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <!-- Wave -->
+            <button
+              type="button"
+              (click)="methodePaiement.set('wave')"
+              class="relative border-2 rounded-xl p-2.5 text-left transition-all flex items-center gap-2.5"
+              [class]="methodePaiement() === 'wave' ? 'border-sky-500 bg-sky-50/50' : 'border-slate-100 bg-slate-50 hover:bg-slate-100/60'"
+            >
+              <div class="w-7 h-7 rounded-lg bg-sky-400 text-white flex items-center justify-center shrink-0">
+                <app-icon name="wave" [size]="14"></app-icon>
+              </div>
+              <div class="flex-1 min-w-0">
+                <span class="block font-black text-slate-800 text-xs leading-none">Wave</span>
+                <span class="block text-[8px] font-bold text-sky-600 mt-0.5">Recommandé</span>
+              </div>
+              <div class="w-3.5 h-3.5 rounded-full border border-slate-300 flex items-center justify-center" [class.border-sky-500]="methodePaiement() === 'wave'">
+                <div class="w-2 h-2 rounded-full bg-sky-500" [class.hidden]="methodePaiement() !== 'wave'"></div>
+              </div>
+            </button>
+
+            <!-- Orange Money -->
+            <button
+              type="button"
+              (click)="methodePaiement.set('orange_money')"
+              class="relative border-2 rounded-xl p-2.5 text-left transition-all flex items-center gap-2.5"
+              [class]="methodePaiement() === 'orange_money' ? 'border-orange-500 bg-orange-50/50' : 'border-slate-100 bg-slate-50 hover:bg-slate-100/60'"
+            >
+              <div class="w-7 h-7 rounded-lg bg-orange-500 text-white font-black text-[9px] flex items-center justify-center shrink-0">
+                OM
+              </div>
+              <div class="flex-1 min-w-0">
+                <span class="block font-black text-slate-800 text-xs leading-none">Orange</span>
+                <span class="block text-[8px] font-bold text-slate-400 mt-0.5">Code QR / SMS</span>
+              </div>
+              <div class="w-3.5 h-3.5 rounded-full border border-slate-300 flex items-center justify-center" [class.border-orange-500]="methodePaiement() === 'orange_money'">
+                <div class="w-2 h-2 rounded-full bg-orange-500" [class.hidden]="methodePaiement() !== 'orange_money'"></div>
+              </div>
+            </button>
+
+            <!-- Free Money -->
+            <button
+              type="button"
+              (click)="methodePaiement.set('free_money')"
+              class="relative border-2 rounded-xl p-2.5 text-left transition-all flex items-center gap-2.5"
+              [class]="methodePaiement() === 'free_money' ? 'border-red-500 bg-red-50/50' : 'border-slate-100 bg-slate-50 hover:bg-slate-100/60'"
+            >
+              <div class="w-7 h-7 rounded-lg bg-red-600 text-white font-bold text-[8px] flex items-center justify-center shrink-0">
+                Free
+              </div>
+              <div class="flex-1 min-w-0">
+                <span class="block font-black text-slate-800 text-xs leading-none">Free Money</span>
+                <span class="block text-[8px] font-bold text-slate-400 mt-0.5">Validation PIN</span>
+              </div>
+              <div class="w-3.5 h-3.5 rounded-full border border-slate-300 flex items-center justify-center" [class.border-red-500]="methodePaiement() === 'free_money'">
+                <div class="w-2 h-2 rounded-full bg-red-500" [class.hidden]="methodePaiement() !== 'free_money'"></div>
+              </div>
+            </button>
+
+            <!-- Carte Bancaire -->
+            <button
+              type="button"
+              (click)="methodePaiement.set('card')"
+              class="relative border-2 rounded-xl p-2.5 text-left transition-all flex items-center gap-2.5"
+              [class]="methodePaiement() === 'card' ? 'border-slate-800 bg-slate-100' : 'border-slate-100 bg-slate-50 hover:bg-slate-100/60'"
+            >
+              <div class="w-7 h-7 rounded-lg bg-slate-800 text-white flex items-center justify-center shrink-0">
+                <app-icon name="credit-card" [size]="14"></app-icon>
+              </div>
+              <div class="flex-1 min-w-0">
+                <span class="block font-black text-slate-800 text-xs leading-none">Carte</span>
+                <span class="block text-[8px] font-bold text-slate-400 mt-0.5">Visa / Mastercard</span>
+              </div>
+              <div class="w-3.5 h-3.5 rounded-full border border-slate-300 flex items-center justify-center" [class.border-slate-800]="methodePaiement() === 'card'">
+                <div class="w-2 h-2 rounded-full bg-slate-800" [class.hidden]="methodePaiement() !== 'card'"></div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Champs Numéro de Téléphone -->
+        <div class="mb-4">
+          <label class="block">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[11px] font-bold text-slate-700">Numéro de téléphone pour réception du Pass</span>
+              <span class="text-[9px] font-bold text-sky-600">SMS &amp; WhatsApp</span>
+            </div>
+            <div class="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 bg-slate-50 focus-within:bg-white focus-within:border-blue-600">
+              <span class="text-xs font-bold text-slate-500">🇸🇳 +221</span>
+              <input
+                type="tel"
+                [value]="telephoneReception()"
+                (input)="telephoneReception.set($any($event.target).value)"
+                placeholder="77 456 78 90"
+                class="flex-1 outline-none text-xs font-bold text-slate-800 bg-transparent placeholder:font-normal placeholder:text-slate-400"
+              />
+              <app-icon name="check-circle-2" [size]="15" class="text-emerald-500 shrink-0"></app-icon>
+            </div>
+            <span class="block text-[9px] text-slate-400 mt-1">Le billet électronique officiel sera généré immédiatement sur ce numéro.</span>
+          </label>
+        </div>
+
+        <!-- Récapitulatif dynamique du panier -->
+        @if (lignesPanier().length > 0) {
+          <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-3 mb-4 space-y-1">
+            @for (ligne of lignesPanier(); track ligne.type.id) {
+              <div class="flex items-center justify-between text-xs text-slate-600 font-medium">
+                <span>{{ ligne.quantity }}x {{ ligne.type.name }}</span>
+                <span class="font-bold text-slate-800">{{ (ligne.quantity * ligne.type.price).toLocaleString('fr-FR') }} FCFA</span>
+              </div>
+            }
+            <div class="flex items-center justify-between text-[10px] text-emerald-600 font-semibold pt-1">
+              <span>Frais d'émission SamaPass Wave</span>
+              <span>0 FCFA (Offerts)</span>
+            </div>
+            <div class="flex items-center justify-between pt-2 mt-1 border-t border-blue-100">
+              <span class="font-black text-slate-900 text-xs">Total à régler</span>
+              <span class="font-black text-blue-700 text-base">{{ montantTotal().toLocaleString('fr-FR') }} FCFA</span>
+            </div>
+          </div>
+        }
+
+        @if (erreurPaiement()) {
+          <p class="text-rose-600 text-xs mb-3 text-center font-semibold bg-rose-50 py-1.5 rounded-lg border border-rose-100">{{ erreurPaiement() }}</p>
+        }
+
+        <!-- Bouton de paiement principal -->
+        <button
+          type="button"
+          [disabled]="!peutPayer() || paiementEnCours()"
+          (click)="payerMaintenant()"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 font-bold text-sm shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+        >
+          @if (paiementEnCours()) {
+            Paiement en cours...
+          } @else {
+            <span>Payer {{ montantTotal().toLocaleString('fr-FR') }} FCFA avec Wave</span>
+            <app-icon name="arrow-right" [size]="15"></app-icon>
+          }
+        </button>
+
+        <!-- Pied de page de sécurité -->
+        <div class="mt-3 flex items-center justify-center gap-4 text-[9px] text-slate-400 font-medium border-t border-slate-100 pt-3">
+          <span class="flex items-center gap-1">
+            <app-icon name="shield-check" [size]="11" class="text-emerald-500"></app-icon>
+            Validation instantanée sans compte ni mot de passe.
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+}

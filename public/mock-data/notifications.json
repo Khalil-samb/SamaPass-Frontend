@@ -1,0 +1,6 @@
+[
+  { "id": "notif-001", "userId": "usr-001", "type": "payment_confirmation", "title": "Paiement confirmé", "message": "Votre achat de 2 billets pour Dakar Music Night a été confirmé.", "isRead": true, "createdAt": "2026-07-01T10:13:00Z" },
+  { "id": "notif-002", "userId": "usr-001", "type": "event_reminder", "title": "Votre événement approche", "message": "Dakar Music Night a lieu dans 5 jours, n'oubliez pas votre billet.", "isRead": false, "createdAt": "2026-08-10T09:00:00Z" },
+  { "id": "notif-003", "userId": "usr-002", "type": "payment_confirmation", "title": "Paiement échoué", "message": "Votre paiement pour Saly Beach Party n'a pas abouti. Veuillez réessayer.", "isRead": false, "createdAt": "2026-07-16T18:06:00Z" },
+  { "id": "notif-004", "userId": "usr-003", "type": "new_event", "title": "Nouvel événement à Thiès", "message": "Un nouvel événement sportif vient d'être publié près de chez vous.", "isRead": false, "createdAt": "2026-07-06T08:00:00Z" }
+]

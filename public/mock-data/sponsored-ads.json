@@ -1,0 +1,4 @@
+[
+  { "id": "ad-001", "organizerId": "org-001", "eventId": "evt-001", "transactionId": "txn-008", "videoUrl": "assets/mock-videos/dakar-music-night-ad.mp4", "packageName": "Pack Premium", "price": 50000, "status": "active", "startDate": "2026-07-01T00:00:00Z", "endDate": "2026-08-15T00:00:00Z", "createdAt": "2026-06-22T09:00:00Z" },
+  { "id": "ad-002", "organizerId": "org-001", "eventId": "evt-004", "transactionId": "txn-009", "videoUrl": "assets/mock-videos/saly-white-party-ad.mp4", "packageName": "Pack Découverte", "price": 20000, "status": "expired", "startDate": "2026-07-10T00:00:00Z", "endDate": "2026-08-22T00:00:00Z", "createdAt": "2026-07-10T14:00:00Z" }
+]

@@ -1,1 +1,312 @@
-<p>ticket-confimation-component works!</p>
+@if (loading()) {
+  <p class="text-center text-slate-400 py-20">Chargement de votre billet...</p>
+} @else if (!ticket() || !event()) {
+  <p class="text-center text-slate-400 py-20">Ce billet est introuvable.</p>
+} @else {
+
+  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ═══════════ EN-TÊTE ═══════════ -->
+    <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
+      <div>
+        <div class="flex items-center gap-2 mb-2 flex-wrap">
+          <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            TRANSACTION SÉCURISÉE #{{ transaction()?.reference }}
+          </span>
+          <span class="text-[10px] text-slate-400 font-medium">{{ dateAchatLabel() }}</span>
+        </div>
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
+          Votre pass est prêt pour <span class="text-blue-600">{{ event()!.title }}</span>
+        </h1>
+        <p class="text-slate-500 text-xs mt-1 max-w-2xl leading-relaxed">
+          Confirmation immédiate sans inscription préalable. Votre e-billet est sécurisé par signature cryptographique et contrôle anti-capture d'écran.
+        </p>
+      </div>
+
+      <!-- Actions rapides Header -->
+      <div class="flex items-center gap-2 shrink-0 self-start">
+        <button type="button" (click)="imprimer()" class="inline-flex items-center gap-1.5 border border-slate-200 bg-white rounded-xl px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm transition-all">
+          <app-icon name="printer" [size]="14"></app-icon>
+          Imprimer
+        </button>
+        <button type="button" (click)="imprimer()" class="inline-flex items-center gap-1.5 bg-blue-600 text-white rounded-xl px-4 py-2 text-xs font-bold hover:bg-blue-700 shadow-md shadow-blue-600/20 transition-all">
+          <app-icon name="download" [size]="14"></app-icon>
+          Télécharger le pass PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- ═══════════ COLONNE PRINCIPALE : BILLET DE SPECTACLE ═══════════ -->
+      <div class="lg:col-span-7 space-y-4">
+
+        <!-- Ticket Card Principal avec bordures & encoches style Pass -->
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+
+          <!-- Header du billet -->
+          <div class="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50/80">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+              <span class="text-[10px] font-black text-blue-900 uppercase tracking-wider">Billet Officiel Électronique</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-slate-400 font-mono">CERT-UID: {{ idBilletFormate() }}</span>
+              <span class="bg-blue-50 text-blue-700 border border-blue-100 text-[9px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1">
+                <app-icon name="shield-check" [size]="10"></app-icon>
+                ANTI-CAPTURE ACTIF
+              </span>
+            </div>
+          </div>
+
+          <div class="p-4 sm:p-5">
+            <!-- Details Event Header -->
+            <div class="flex items-start gap-4 mb-4">
+              <div class="relative shrink-0">
+                <img [src]="event()!.coverImageUrl" [alt]="event()!.title" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover shadow-sm" />
+                <span class="absolute bottom-1 left-1 bg-blue-600 text-white text-[8px] font-bold px-1 rounded">LIVE PASS</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">FESTIVAL INTERNATIONAL</span>
+                <h2 class="font-black text-slate-900 text-base sm:text-lg leading-snug truncate">{{ event()!.title }}</h2>
+                <p class="text-xs text-slate-500 font-medium truncate mt-0.5">{{ event()!.venue }}</p>
+              </div>
+            </div>
+
+            <!-- Date & Emplacement Grid -->
+            <div class="grid grid-cols-2 gap-3 p-3 bg-slate-50/60 rounded-xl border border-slate-100 mb-4">
+              <div>
+                <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">DATE &amp; OUVERTURE</span>
+                <span class="block text-xs font-bold text-slate-800 flex items-center gap-1">
+                  <app-icon name="calendar" [size]="12" class="text-blue-600"></app-icon>
+                  {{ dateEvenementLabel() }}
+                </span>
+                @if (event()!.doorsOpenTime) {
+                  <span class="inline-block text-[9px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded mt-1">
+                    Portes ouvertes à {{ heureOuvertureLabel() }}
+                  </span>
+                }
+              </div>
+              <div>
+                <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">EMPLACEMENT RÉSERVÉ</span>
+                <span class="block text-xs font-bold text-slate-800 flex items-center gap-1">
+                  <app-icon name="map-pin" [size]="12" class="text-blue-600"></app-icon>
+                  {{ event()!.venue }}
+                </span>
+                <span class="block text-[10px] text-slate-400 mt-0.5">{{ cityName() }}, Sénégal</span>
+              </div>
+            </div>
+
+            <!-- Titulaire & Prix -->
+            <div class="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 text-left">
+              <div>
+                <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">TITULAIRE DU PASS</span>
+                <span class="block text-xs font-bold text-slate-900 truncate mt-0.5">{{ nomTitulaire() }}</span>
+                <span class="text-[9px] font-bold text-blue-600 block">Visiteur Invité</span>
+              </div>
+              <div>
+                <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">FORMULE</span>
+                @for (ligne of lignesAchat(); track ligne.nom) {
+                  <span class="block text-xs font-bold text-slate-800 mt-0.5">{{ ligne.nom }} <span class="text-blue-600">x{{ ligne.quantite }}</span></span>
+                }
+              </div>
+              <div class="text-right">
+                <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">PRIX TOTAL RÉGLÉ</span>
+                <span class="block text-sm font-black text-blue-600 mt-0.5">{{ montantTotalLabel() }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ligne de séparation style Coupon -->
+          <div class="relative flex items-center my-1">
+            <div class="w-4 h-8 bg-slate-100 rounded-r-full border-r border-y border-slate-200 -ml-0.5"></div>
+            <div class="flex-1 border-b-2 border-dashed border-slate-200 mx-2"></div>
+            <div class="w-4 h-8 bg-slate-100 rounded-l-full border-l border-y border-slate-200 -mr-0.5"></div>
+          </div>
+
+          <!-- Section QR Code dynamique -->
+          <div class="p-4 sm:p-5 bg-gradient-to-b from-white to-slate-50/50">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div class="flex-1">
+                <div class="inline-flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-md mb-2">
+                  <app-icon name="shield-check" [size]="11"></app-icon>
+                  Certifié SamaPass &amp; {{ labelMoyenPaiement() }}
+                </div>
+                <h3 class="font-extrabold text-slate-900 text-sm mb-1">QR Code Dynamique d'Accès</h3>
+                <p class="text-[11px] text-slate-500 leading-relaxed max-w-xs">
+                  Ce code sécurisé se régénère automatiquement pour bloquer les copies et captures frauduleuses. Présentez-le directement à la borne d'entrée.
+                </p>
+                <div class="mt-3 flex items-center gap-2">
+                  <span class="text-[9px] font-mono bg-slate-100 text-slate-500 px-2 py-1 rounded border border-slate-200">
+                    S/N: {{ idBilletFormate() }}
+                  </span>
+                  <span class="text-[9px] text-emerald-600 font-bold flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Généré en temps réel
+                  </span>
+                </div>
+              </div>
+
+              <!-- Encadrement visuel du QR Code -->
+              <div class="p-3 bg-white border-2 border-blue-100 rounded-2xl shadow-inner shrink-0 text-center relative group">
+                <img [src]="urlQrCode()" width="130" height="130" alt="QR Code du billet" class="rounded-lg object-contain" />
+                <span class="block text-[8px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Prêt au scan</span>
+              </div>
+            </div>
+
+            <!-- Footer Cryptographique -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-400 font-mono">
+              <span>Cryptographie SHA-256 certifiée par SamaPass SN</span>
+              <span>IP: Protected</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sauvegarder & Transférer -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+          <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Sauvegarder &amp; Transférer</span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <button type="button" (click)="ajouterAuWallet()" class="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-3 py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+              <app-icon name="wallet" [size]="14"></app-icon>
+              Apple / Google Wallet
+            </button>
+            <a [href]="lienWhatsApp()" target="_blank" rel="noopener" class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-3 py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-center">
+              <app-icon name="message-square" [size]="14"></app-icon>
+              WhatsApp / SMS
+            </a>
+            <button type="button" (click)="imprimer()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl px-3 py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+              <app-icon name="file-text" [size]="14"></app-icon>
+              Pass PDF
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══════════ SIDEBAR ═══════════ -->
+      <div class="lg:col-span-5 space-y-4">
+
+        <!-- Carte Accès Sans Mot de passe -->
+        <div class="bg-gradient-to-br from-blue-50/60 to-white border border-blue-100 rounded-2xl p-5 shadow-sm">
+          <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center mb-3 shadow-md shadow-blue-600/20">
+            <app-icon name="key" [size]="16"></app-icon>
+          </div>
+
+          <span class="text-[9px] font-black text-blue-700 uppercase tracking-wider block mb-0.5">Accès sans mot de passe</span>
+          <h3 class="font-extrabold text-slate-900 text-base mb-1">Ne perdez jamais ce billet</h3>
+          <p class="text-xs text-slate-500 leading-relaxed mb-4">
+            Renseignez simplement votre nom et numéro de téléphone pour retrouver tous vos billets sur n'importe quel appareil. Pas de mot de passe requis !
+          </p>
+
+          <div class="space-y-3 mb-4">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Nom complet</label>
+              <input
+                type="text"
+                [value]="nomProfil()"
+                (input)="nomProfil.set($any($event.target).value)"
+                placeholder="Ex: Amadou Diallo"
+                class="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm"
+              />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Numéro WhatsApp / Téléphone</label>
+              <div class="flex items-center gap-2 border border-slate-200 bg-white rounded-xl px-3 py-2 shadow-sm focus-within:border-blue-600">
+                <span class="text-xs font-bold text-slate-400">🇸🇳 +221</span>
+                <input
+                  type="tel"
+                  [value]="telephoneProfil()"
+                  (input)="telephoneProfil.set($any($event.target).value)"
+                  placeholder="77 123 45 67"
+                  class="w-full text-xs font-semibold text-slate-800 outline-none bg-transparent"
+                />
+              </div>
+            </div>
+          </div>
+
+          <button type="button" (click)="enregistrerProfil()" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-2.5 text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
+            <app-icon name="check" [size]="14"></app-icon>
+            Enregistrer mon profil
+          </button>
+
+          @if (profilEnregistre()) {
+            <p class="text-center text-xs text-emerald-600 font-bold mt-2 flex items-center justify-center gap-1">
+              <app-icon name="check-circle-2" [size]="13"></app-icon>
+              Profil mis à jour avec succès
+            </p>
+          }
+          <p class="text-[9px] text-center text-slate-400 mt-2">Connexion future en 1 clic par code SMS instantané.</p>
+        </div>
+
+        <!-- Accès & Infos Pratiques -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+          <h3 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <app-icon name="info" [size]="14" class="text-blue-600"></app-icon>
+            Accès &amp; Infos Pratiques
+          </h3>
+          <ul class="space-y-2.5 text-xs text-slate-600">
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0"></span>
+              <span><strong>Navettes SamaPass :</strong> Départs réguliers depuis Place du Souvenir dès 17h45.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0"></span>
+              <span><strong>Contrôle :</strong> Munissez-vous d'une pièce d'identité originale en plus de ce billet.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0"></span>
+              <span>Paiements 100% Cashless sur place (Wave, Orange Money &amp; bracelet).</span>
+            </li>
+          </ul>
+          <a [href]="urlItineraire()" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-blue-600 text-xs font-bold mt-3 hover:underline">
+            Voir l'itinéraire sur la carte
+            <app-icon name="arrow-right" [size]="12"></app-icon>
+          </a>
+        </div>
+
+        <!-- Aide rapide -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 text-xs mb-0.5">Besoin d'aide immédiate ?</h3>
+            <p class="text-[10px] text-slate-400">Support SamaPass disponible 24/7</p>
+          </div>
+          <a
+            href="https://wa.me/221338000008"
+            target="_blank"
+            rel="noopener"
+            class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl px-3 py-1.5 text-xs font-bold transition-all flex items-center gap-1.5"
+          >
+            <app-icon name="message-square" [size]="13"></app-icon>
+            WhatsApp
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ═══════════ ÉVÉNEMENTS RECOMMANDÉS (AFTER-PARTIES) ═══════════ -->
+    @if (evenementsRecommandes().length > 0) {
+      <div class="mt-12 pt-6 border-t border-slate-200">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <span class="text-[9px] font-black text-blue-600 uppercase tracking-widest block">PROLONGEZ VOTRE SOIRÉE</span>
+            <h2 class="text-base sm:text-lg font-black text-slate-900">After-parties recommandées aux Almadies</h2>
+          </div>
+          <a routerLink="/evenements" class="text-blue-600 text-xs font-bold hover:underline flex items-center gap-1">
+            Explorer tous les afters ce soir
+            <app-icon name="arrow-right" [size]="12"></app-icon>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (carte of evenementsRecommandes(); track carte.id) {
+            <app-card-event-component [event]="carte" />
+          }
+        </div>
+      </div>
+    }
+
+  </div>
+}

@@ -1,0 +1,7 @@
+[
+  { "id": "rev-001", "eventId": "evt-006", "userId": "usr-003", "rating": 4, "comment": "Très bon tournoi, bien organisé, seul bémol l'attente pour la restauration.", "status": "approved", "createdAt": "2026-06-06T10:00:00Z" },
+  { "id": "rev-002", "eventId": "evt-006", "userId": "usr-004", "rating": 4, "comment": "Belle ambiance, à refaire l'année prochaine.", "status": "approved", "createdAt": "2026-06-07T12:30:00Z" },
+  { "id": "rev-003", "eventId": "evt-002", "userId": "usr-002", "rating": 5, "comment": "Match incroyable, tribune bien organisée.", "status": "approved", "createdAt": "2026-06-15T09:00:00Z" },
+  { "id": "rev-004", "eventId": "evt-002", "userId": "usr-001", "rating": 3, "comment": "Bon match mais peu de places assises disponibles.", "status": "pending", "createdAt": "2026-06-16T11:00:00Z" },
+  { "id": "rev-005", "eventId": "evt-001", "userId": "usr-002", "rating": 5, "comment": "Meilleure soirée de l'année, line-up exceptionnel.", "status": "approved", "createdAt": "2026-06-20T20:00:00Z" }
+]

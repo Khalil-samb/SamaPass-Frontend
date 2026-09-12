@@ -1,1 +1,18 @@
-<p>how-it-works-steps-component works!</p>
+<div class="text-center">
+  @if (title) {
+    <h2 class="text-2xl font-extrabold text-slate-800 mb-8">{{ title }}</h2>
+  }
+
+  <div class="grid gap-6" [style.gridTemplateColumns]="'repeat(' + steps.length + ', minmax(0, 1fr))'">
+    @for (etape of steps; track $index) {
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+        <!-- Le numéro (1, 2, 3...) est calculé automatiquement, jamais écrit à la main -->
+        <div class="w-9 h-9 mx-auto mb-4 rounded-full bg-blue-900 text-white font-bold flex items-center justify-center">
+            {{ $index + 1 }}
+        </div>
+        <h3 class="font-bold text-slate-800 mb-2">{{ etape.title }}</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">{{ etape.description }}</p>
+        </div>
+    }
+  </div>
+</div>

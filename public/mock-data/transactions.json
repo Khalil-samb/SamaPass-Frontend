@@ -1,0 +1,11 @@
+[
+  { "id": "txn-001", "userId": "usr-001", "eventId": "evt-001", "type": "ticket_purchase", "amount": 10000, "paymentMethod": "wave", "status": "success", "reference": "WAVE-SN-8842190", "createdAt": "2026-07-01T10:12:00Z" },
+  { "id": "txn-002", "userId": "usr-002", "eventId": "evt-001", "type": "ticket_purchase", "amount": 15000, "paymentMethod": "orange_money", "status": "success", "reference": "OM-SN-1123847", "createdAt": "2026-07-02T16:45:00Z" },
+  { "id": "txn-003", "userId": "usr-003", "eventId": "evt-002", "type": "ticket_purchase", "amount": 5000, "paymentMethod": "free_money", "status": "success", "reference": "FM-SN-9938211", "createdAt": "2026-07-05T09:30:00Z" },
+  { "id": "txn-004", "userId": "usr-004", "eventId": "evt-004", "type": "ticket_purchase", "amount": 15000, "paymentMethod": "card", "status": "success", "reference": "VISA-4471X", "createdAt": "2026-07-08T14:00:00Z" },
+  { "id": "txn-005", "userId": "usr-001", "eventId": "evt-003", "type": "ticket_purchase", "amount": 10000, "paymentMethod": "wave", "status": "pending", "reference": "WAVE-SN-8842567", "createdAt": "2026-07-15T11:20:00Z" },
+  { "id": "txn-006", "userId": "usr-002", "eventId": "evt-004", "type": "ticket_purchase", "amount": 20000, "paymentMethod": "orange_money", "status": "failed", "reference": "OM-SN-1124002", "createdAt": "2026-07-16T18:05:00Z" },
+  { "id": "txn-007", "userId": "usr-003", "eventId": "evt-006", "type": "ticket_purchase", "amount": 1000, "paymentMethod": "wave", "status": "success", "reference": "WAVE-SN-8801122", "createdAt": "2026-05-20T08:00:00Z" },
+  { "id": "txn-008", "userId": "usr-005", "eventId": "evt-001", "type": "sponsored_ad", "amount": 50000, "paymentMethod": "wave", "status": "success", "reference": "WAVE-SN-8850001", "createdAt": "2026-06-22T09:00:00Z" },
+  { "id": "txn-009", "userId": "usr-005", "eventId": "evt-004", "type": "sponsored_ad", "amount": 20000, "paymentMethod": "orange_money", "status": "success", "reference": "OM-SN-1130045", "createdAt": "2026-07-10T14:00:00Z" }
+]

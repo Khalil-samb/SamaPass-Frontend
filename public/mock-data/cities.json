@@ -1,0 +1,7 @@
+[
+  { "id": "city-001", "name": "Dakar", "region": "Dakar" },
+  { "id": "city-002", "name": "Thiès", "region": "Thiès" },
+  { "id": "city-003", "name": "Saint-Louis", "region": "Saint-Louis" },
+  { "id": "city-004", "name": "Saly / Mbour", "region": "Thiès" },
+  { "id": "city-005", "name": "Ziguinchor", "region": "Ziguinchor" }
+]

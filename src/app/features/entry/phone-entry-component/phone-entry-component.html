@@ -1,1 +1,67 @@
-<p>phone-entry-component works!</p>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-white p-6">
+  <div class="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-900/10 p-10 text-center">
+
+    <!-- Logo -->
+    <div class="flex items-center justify-center gap-2 mb-7">
+      <span class="w-9 h-9 rounded-xl bg-blue-900 text-white font-extrabold flex items-center justify-center">S</span>
+      <span class="font-extrabold text-blue-900 text-lg">SamaPass</span>
+    </div>
+
+    <h1 class="text-2xl font-extrabold text-slate-800 mb-2">Bienvenue sur SamaPass</h1>
+    <p class="text-sm text-slate-500 leading-relaxed mb-7">
+      Entrez votre nom et votre numéro de téléphone pour découvrir et acheter
+      vos billets d'événements au Sénégal.
+    </p>
+
+    <form (ngSubmit)="onSubmit()" class="flex flex-col gap-4 text-left">
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-slate-700">Votre nom Complet</span>
+        <input
+          type="text"
+          name="firstName"
+          [(ngModel)]="firstName"
+          placeholder="Ex. khalil samb"
+          autocomplete="given-name"
+          class="border-[1.5px] border-slate-200 rounded-xl px-3.5 py-3 text-[15px] outline-none focus:border-blue-900 transition-colors"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-slate-700">Numéro de téléphone</span>
+        <input
+          type="tel"
+          name="phone"
+          [(ngModel)]="phone"
+          placeholder="Ex. 77 123 45 67"
+          autocomplete="tel"
+          class="border-[1.5px] border-slate-200 rounded-xl px-3.5 py-3 text-[15px] outline-none focus:border-blue-900 transition-colors"
+        />
+      </label>
+
+      @if (errorMessage()) {
+        <p class="text-red-700 text-sm m-0">{{ errorMessage() }}</p>
+      }
+
+      <button
+        type="submit"
+        class="mt-1.5 bg-blue-900 text-white rounded-xl py-3.5 text-[15px] font-bold hover:bg-blue-950 transition-colors"
+      >
+        Continuer
+      </button>
+    </form>
+
+    <p class="mt-5 text-xs text-slate-400 leading-relaxed">
+      Un code de vérification vous sera envoyé par WhatsApp pour confirmer
+      votre numéro.
+    </p>
+  </div>
+</div>
+
+@if (showOtpSheet()) {
+  <app-otp-bottom-sheet-component
+    [phone]="phone"
+    (verified)="onOtpVerified()"
+    (closed)="onOtpSheetClosed()"
+  />
+}

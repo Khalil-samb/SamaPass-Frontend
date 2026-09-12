@@ -1,0 +1,10 @@
+[
+  { "id": "usr-001", "phone": "+221 77 123 45 01", "phoneVerified": true, "firstName": "Awa", "lastName": "Diop", "role": "user", "status": "active", "cityId": "city-001", "avatarUrl": null, "createdAt": "2026-02-10T09:00:00Z" },
+  { "id": "usr-002", "phone": "+221 76 234 56 02", "phoneVerified": true, "firstName": "Moussa", "lastName": "Ndiaye", "role": "user", "status": "active", "cityId": "city-002", "avatarUrl": null, "createdAt": "2026-02-15T14:30:00Z" },
+  { "id": "usr-003", "phone": "+221 78 345 67 03", "phoneVerified": true, "firstName": "Fatou", "lastName": "Sarr", "role": "user", "status": "active", "cityId": "city-001", "avatarUrl": null, "createdAt": "2026-03-01T11:15:00Z" },
+  { "id": "usr-004", "phone": "+221 70 456 78 04", "phoneVerified": true, "firstName": "Ibrahima", "lastName": "Fall", "role": "user", "status": "suspended", "cityId": "city-004", "avatarUrl": null, "createdAt": "2026-03-05T18:45:00Z" },
+  { "id": "usr-005", "phone": "+221 77 567 89 05", "phoneVerified": true, "firstName": "Cheikh", "lastName": "Ba", "email": "cheikh.ba@evenpro.sn", "passwordHash": "mock_hash_1", "role": "organizer", "status": "active", "cityId": "city-001", "avatarUrl": null, "createdAt": "2026-01-20T08:00:00Z" },
+  { "id": "usr-006", "phone": "+221 76 678 90 06", "phoneVerified": true, "firstName": "Mariama", "lastName": "Sy", "email": "mariama.sy@culturebox.sn", "passwordHash": "mock_hash_2", "role": "organizer", "status": "active", "cityId": "city-003", "avatarUrl": null, "createdAt": "2026-01-25T10:30:00Z" },
+  { "id": "usr-007", "phone": "+221 78 789 01 07", "phoneVerified": true, "firstName": "Ousmane", "lastName": "Gueye", "email": "ousmane.gueye@sportsn.sn", "passwordHash": "mock_hash_3", "role": "organizer", "status": "suspended", "cityId": "city-001", "avatarUrl": null, "createdAt": "2026-02-02T13:00:00Z" },
+  { "id": "usr-008", "phone": "+221 33 800 00 08", "phoneVerified": true, "firstName": "Admin", "lastName": "Plateforme", "email": "admin@samapass.sn", "passwordHash": "mock_hash_admin", "role": "admin", "status": "active", "cityId": "city-001", "avatarUrl": null, "createdAt": "2026-01-01T00:00:00Z" }
+]

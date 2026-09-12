@@ -1,0 +1,9 @@
+[
+  { "id": "tkt-001", "ticketTypeId": "tt-001", "eventId": "evt-001", "userId": "usr-001", "transactionId": "txn-001", "qrCode": "QR-EVT001-USR001-A1B2C3", "status": "valid", "price": 5000, "purchaseDate": "2026-07-01T10:12:00Z", "scannedAt": null },
+  { "id": "tkt-002", "ticketTypeId": "tt-001", "eventId": "evt-001", "userId": "usr-001", "transactionId": "txn-001", "qrCode": "QR-EVT001-USR001-D4E5F6", "status": "valid", "price": 5000, "purchaseDate": "2026-07-01T10:12:00Z", "scannedAt": null },
+  { "id": "tkt-003", "ticketTypeId": "tt-002", "eventId": "evt-001", "userId": "usr-002", "transactionId": "txn-002", "qrCode": "QR-EVT001-USR002-G7H8I9", "status": "valid", "price": 15000, "purchaseDate": "2026-07-02T16:45:00Z", "scannedAt": null },
+  { "id": "tkt-004", "ticketTypeId": "tt-004", "eventId": "evt-002", "userId": "usr-003", "transactionId": "txn-003", "qrCode": "QR-EVT002-USR003-J1K2L3", "status": "valid", "price": 5000, "purchaseDate": "2026-07-05T09:30:00Z", "scannedAt": null },
+  { "id": "tkt-005", "ticketTypeId": "tt-006", "eventId": "evt-004", "userId": "usr-004", "transactionId": "txn-004", "qrCode": "QR-EVT004-USR004-M4N5O6", "status": "valid", "price": 7500, "purchaseDate": "2026-07-08T14:00:00Z", "scannedAt": null },
+  { "id": "tkt-006", "ticketTypeId": "tt-006", "eventId": "evt-004", "userId": "usr-004", "transactionId": "txn-004", "qrCode": "QR-EVT004-USR004-P7Q8R9", "status": "valid", "price": 7500, "purchaseDate": "2026-07-08T14:00:00Z", "scannedAt": null },
+  { "id": "tkt-007", "ticketTypeId": "tt-010", "eventId": "evt-006", "userId": "usr-003", "transactionId": "txn-007", "qrCode": "QR-EVT006-USR003-S1T2U3", "status": "used", "price": 1000, "purchaseDate": "2026-05-20T08:00:00Z", "scannedAt": "2026-06-05T15:07:00Z" }
+]

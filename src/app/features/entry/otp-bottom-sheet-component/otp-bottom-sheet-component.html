@@ -1,1 +1,58 @@
-<p>otp-bottom-sheet-component works!</p>
+<!-- Fond assombri derrière le panneau -->
+<div class="fixed inset-0 bg-slate-900/45 z-40" (click)="close()"></div>
+
+<!-- Le panneau qui remonte du bas -->
+<div class="fixed left-0 right-0 bottom-0 z-50 bg-white rounded-t-3xl px-7 pb-8 pt-3 max-w-md mx-auto shadow-2xl text-center">
+
+  <!-- Petite barre décorative en haut du panneau -->
+  <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
+
+  <button (click)="close()" aria-label="Fermer" class="absolute top-4 right-4 text-slate-400 text-base">
+    ✕
+  </button>
+
+  <h2 class="text-lg font-extrabold text-slate-800 mb-2">Vérification</h2>
+  <p class="text-[13.5px] text-slate-500 leading-relaxed mb-6">
+    Entrez le code à 4 chiffres envoyé par WhatsApp au
+    <strong>{{ phone }}</strong>
+  </p>
+
+  <!-- Les 4 cases du code -->
+  <div class="flex justify-center gap-3 mb-4">
+    @for (digit of digits(); track $index) {
+      <input
+        type="text"
+        inputmode="numeric"
+        maxlength="1"
+        [value]="digit"
+        (input)="onDigitInput($index, $event)"
+        (keydown)="onBackspace($event)"
+        class="w-12 h-14 text-center text-xl font-bold border-[1.5px] border-slate-200 rounded-xl outline-none focus:border-blue-900 transition-colors"
+      />
+    }
+  </div>
+
+  @if (errorMessage()) {
+    <p class="text-red-700 text-sm mb-3">{{ errorMessage() }}</p>
+  }
+
+  <button
+    [disabled]="isVerifying()"
+    (click)="verifierLeCode()"
+    class="w-full bg-blue-900 text-white rounded-xl py-3.5 text-[15px] font-bold disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+  >
+    @if (isVerifying()) { Vérification... } @else { Confirmer }
+  </button>
+
+  <button
+    [disabled]="resendCooldown() > 0"
+    (click)="resendCode()"
+    class="block mx-auto mt-4 text-blue-900 text-[13.5px] font-semibold disabled:text-slate-400 disabled:cursor-not-allowed"
+  >
+    @if (resendCooldown() > 0) {
+      Renvoyer le code ({{ resendCooldown() }}s)
+    } @else {
+      Renvoyer le code
+    }
+  </button>
+</div>

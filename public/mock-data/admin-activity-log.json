@@ -1,0 +1,7 @@
+[
+  { "id": "aal-001", "type": "new_event", "message": "Un nouvel événement a été créé par EvenPro Sénégal : Dakar Music Night — Spécial Afrobeat", "relatedEventId": "evt-001", "relatedOrganizerId": "org-001", "createdAt": "2026-06-01T09:00:00Z" },
+  { "id": "aal-002", "type": "new_organizer", "message": "Sport Sénégal Events a rejoint la plateforme", "relatedOrganizerId": "org-003", "createdAt": "2026-02-02T13:10:00Z" },
+  { "id": "aal-003", "type": "new_event", "message": "Un nouvel événement a été créé par CultureBox : Conférence Entreprendre au Sénégal 2026", "relatedEventId": "evt-003", "relatedOrganizerId": "org-002", "createdAt": "2026-06-10T08:30:00Z" },
+  { "id": "aal-004", "type": "account_suspended", "message": "Le compte organisateur Sport Sénégal Events a été suspendu", "relatedOrganizerId": "org-003", "createdAt": "2026-07-20T09:00:00Z" },
+  { "id": "aal-005", "type": "account_suspended", "message": "Le compte utilisateur Ibrahima Fall a été suspendu", "relatedUserId": "usr-004", "createdAt": "2026-07-22T14:00:00Z" }
+]

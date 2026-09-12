@@ -1,1 +1,444 @@
-<p>home-component works!</p>
+<!-- ═══════════ HERO ═══════════ -->
+    <section class="bg-gradient-to-b from-blue-50/60 to-white px-6 md:px-12 py-16 text-center">
+      <h1 class="text-3xl md:text-5xl font-extrabold text-slate-900 leading-tight mb-5">
+        Vivez le meilleur de la culture<br class="hidden md:block" />
+        et des événements au
+        <br>
+        <span class="text-blue-700 relative inline-block">
+          Sénégal
+          <span class="block h-1 bg-blue-200 rounded-full mt-1"></span>
+        </span>
+      </h1>
+
+      <p class="text-slate-500 max-w-2xl mx-auto mb-10 text-[15px] leading-relaxed">
+        Réservez vos places en 3 clics en toute sécurité via Wave et Orange Money.
+        Pas de création de compte obligatoire, e-billet QR sécurisé immédiat.
+      </p>
+
+      <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg shadow-slate-900/5 border border-slate-100 p-3 flex flex-col md:flex-row gap-3">
+
+        <label class="flex-1 flex items-center gap-3 px-4 py-2.5 rounded-xl border border-slate-200 text-left">
+          <app-icon name="calendar" [size]="18" class="text-blue-700 shrink-0"></app-icon>
+          <span class="flex flex-col w-full">
+            <span class="text-[10px] font-bold text-slate-400 tracking-wider">DATE</span>
+            <select [(ngModel)]="dateChoisie" class="text-sm font-semibold text-slate-700 outline-none bg-transparent -ml-0.5">
+              <option value="">Toutes les dates</option>
+              <option value="today">Aujourd'hui</option>
+              <option value="weekend">Ce week-end</option>
+              <option value="week">Cette semaine</option>
+              <option value="month">Ce mois-ci</option>
+            </select>
+          </span>
+        </label>
+
+        <label class="flex-1 flex items-center gap-3 px-4 py-2.5 rounded-xl border border-slate-200 text-left">
+          <app-icon name="tag" [size]="18" class="text-blue-700 shrink-0"></app-icon>
+          <span class="flex flex-col w-full">
+            <span class="text-[10px] font-bold text-slate-400 tracking-wider">CATÉGORIE</span>
+            <select [(ngModel)]="categorieChoisie" class="text-sm font-semibold text-slate-700 outline-none bg-transparent -ml-0.5">
+              <option value="">Toutes les catégories</option>
+              @for (categorie of categories(); track categorie.id) {
+                <option [value]="categorie.id">{{ categorie.name }}</option>
+              }
+            </select>
+          </span>
+        </label>
+
+        <button
+          type="button"
+          (click)="lancerLaRecherche()"
+          class="flex items-center justify-center gap-2 bg-blue-700 text-white rounded-xl px-7 py-3 font-bold text-sm hover:bg-blue-800 transition-colors"
+        >
+          <app-icon name="search" [size]="16"></app-icon>
+          Rechercher
+        </button>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mt-8 text-sm text-slate-500">
+        <span class="flex items-center gap-1.5">
+          <app-icon name="check-circle-2" [size]="16" class="text-green-600"></app-icon>
+          100% Billets Officiels
+        </span>
+        <span class="flex items-center gap-1.5">
+          <app-icon name="zap" [size]="16" class="text-blue-600"></app-icon>
+          Paiement Wave &amp; OM sécurisé
+        </span>
+        <span class="flex items-center gap-1.5">
+          <app-icon name="qr-code" [size]="16" class="text-slate-500"></app-icon>
+          E-Billet avec QR Code anti-fraude
+        </span>
+      </div>
+    </section>
+
+    <!-- ═══════════ ÉVÉNEMENTS À LA UNE ═══════════ -->
+    <section class="px-6 md:px-12 py-14 w-full">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+        <div>
+          <div class="flex items-center gap-1.5 text-blue-700 text-xs font-bold tracking-wider mb-1">
+            <app-icon name="bookmark" [size]="14"></app-icon>
+            TENDANCES &amp; SÉLECTION PRESTIGE
+          </div>
+          <h2 class="text-2xl font-extrabold text-slate-900">Événements à la une</h2>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <button
+            type="button"
+            (click)="categorieFiltre.set('')"
+            class="px-4 py-2 rounded-2xl text-sm font-semibold transition-colors"
+            [class]="categorieFiltre() === '' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'"
+          >
+            Tous
+          </button>
+          @for (categorie of categories().slice(0, 3); track categorie.id) {
+            <button
+              type="button"
+              (click)="categorieFiltre.set(categorie.id)"
+              class="px-4 py-2 rounded-2xl text-sm font-semibold transition-colors"
+              [class]="categorieFiltre() === categorie.id ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'"
+            >
+              {{ categorie.name }}
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (loading()) {
+        <p class="text-slate-400">Chargement des événements...</p>
+      } @else if (eventsVM().length === 0) {
+        <p class="text-slate-400">Aucun événement disponible pour le moment.</p>
+      } @else {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          @for (event of eventsVM(); track event.id) {
+            <app-card-event-component [event]="event" />
+          }
+        </div>
+
+        <div class="text-center mt-8">
+          <a routerLink="/evenements" class="text-blue-700 font-semibold text-sm hover:underline">
+            Voir tous les événements →
+          </a>
+        </div>
+      }
+    </section>
+
+    <!-- ═══════════ COMMENT ÇA MARCHE ═══════════ -->
+
+<section class="w-full bg-[#f5f5ff] px-6 md:px-8 lg:px-10 py-16 md:py-20">
+
+  <!-- TITRE -->
+  <div class="text-center mb-20">
+
+    <h2
+      class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-5"
+    >
+      Comment ça marche ?
+    </h2>
+
+    <p
+      class="max-w-4xl mx-auto text-lg md:text-xl text-slate-600 leading-relaxed"
+    >
+      Achetez vos billets en 3 clics par Wave ou Orange Money, sans création
+      de compte obligatoire ni mot de passe à mémoriser.
+    </p>
+
+  </div>
+
+
+  <!-- CARTES -->
+  <div
+    class="w-full max-w-[1680px] mx-auto
+           grid grid-cols-1 md:grid-cols-3
+           gap-6 lg:gap-10"
+  >
+
+    <!-- ══════════════ CARTE 01 ══════════════ -->
+    <div
+      class="bg-white
+             rounded-xl
+             border border-slate-300
+             shadow-sm
+             p-8 md:p-10
+             flex flex-col
+             min-h-[410px]"
+    >
+
+      <!-- NUMÉRO -->
+      <span
+        class="w-[66px] h-[66px]
+               rounded-xl
+               bg-blue-100
+               text-blue-700
+               text-2xl
+               font-extrabold
+               flex items-center justify-center
+               mb-10"
+      >
+        01
+      </span>
+
+
+      <!-- TITRE -->
+      <h3
+        class="text-xl md:text-2xl
+               font-extrabold
+               text-slate-900
+               mb-4
+               leading-tight"
+      >
+        Choisissez votre événement
+      </h3>
+
+
+      <!-- DESCRIPTION -->
+      <p
+        class="text-base md:text-lg
+               text-slate-600
+               leading-relaxed"
+      >
+        Parcourez les concerts, festivals ou matchs et sélectionnez le type
+        de billet souhaité (Standard, VIP, Pass Journée).
+      </p>
+
+
+      <!-- FOOTER -->
+      <div
+        class="mt-auto
+               pt-6
+               border-t border-slate-200
+               flex items-center
+               justify-between
+               gap-4
+               text-sm"
+      >
+
+        <span
+          class="flex items-center gap-1.5
+                 text-slate-600
+                 font-medium"
+        >
+          <span class="text-blue-700 font-bold text-lg">✓</span>
+          Choix immédiat
+        </span>
+
+        <span
+          class="text-slate-500
+                 font-medium"
+        >
+          Sans inscription préalable
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- ══════════════ CARTE 02 ══════════════ -->
+    <div
+      class="bg-white
+             rounded-xl
+             border border-slate-300
+             shadow-sm
+             p-8 md:p-10
+             flex flex-col
+             min-h-[410px]"
+    >
+
+      <!-- NUMÉRO -->
+      <span
+        class="w-[66px] h-[66px]
+               rounded-xl
+               bg-indigo-100
+               text-blue-700
+               text-2xl
+               font-extrabold
+               flex items-center justify-center
+               mb-10"
+      >
+        02
+      </span>
+
+
+      <!-- TITRE -->
+      <h3
+        class="text-xl md:text-2xl
+               font-extrabold
+               text-slate-900
+               mb-4
+               leading-tight"
+      >
+        Payez en 1 clic par Wave ou OM
+      </h3>
+
+
+      <!-- DESCRIPTION -->
+      <p
+        class="text-base md:text-lg
+               text-slate-600
+               leading-relaxed"
+      >
+        Validation instantanée depuis votre compte mobile money. Pas besoin
+        de carte bancaire ni de démarches compliquées.
+      </p>
+
+
+      <!-- FOOTER -->
+      <div
+        class="mt-auto
+               pt-6
+               border-t border-slate-200
+               flex flex-wrap
+               items-center
+               gap-3"
+      >
+
+        <!-- WAVE -->
+        <span
+          class="px-3 py-2
+                 rounded-md
+                 border border-blue-200
+                 bg-blue-50/40
+                 text-blue-700
+                 text-sm
+                 font-semibold"
+        >
+          Wave
+        </span>
+
+        <!-- ORANGE MONEY -->
+        <span
+          class="px-3 py-2
+                 rounded-md
+                 border border-orange-200
+                 bg-orange-50/40
+                 text-orange-600
+                 text-sm
+                 font-semibold"
+        >
+          Orange Money
+        </span>
+
+        <!-- FREE MONEY -->
+        <span
+          class="px-3 py-2
+                 rounded-md
+                 border border-green-200
+                 bg-green-50/40
+                 text-green-700
+                 text-sm
+                 font-semibold"
+        >
+          Free Money
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- ══════════════ CARTE 03 ══════════════ -->
+    <div
+      class="bg-white
+             rounded-xl
+             border border-slate-300
+             shadow-sm
+             p-8 md:p-10
+             flex flex-col
+             min-h-[410px]"
+    >
+
+      <!-- NUMÉRO -->
+      <span
+        class="w-[66px] h-[66px]
+               rounded-xl
+               bg-orange-100
+               text-orange-700
+               text-2xl
+               font-extrabold
+               flex items-center justify-center
+               mb-10"
+      >
+        03
+      </span>
+
+
+      <!-- TITRE -->
+      <h3
+        class="text-xl md:text-2xl
+               font-extrabold
+               text-slate-900
+               mb-4
+               leading-tight"
+      >
+        Recevez votre QR Code infalsifiable
+      </h3>
+
+
+      <!-- DESCRIPTION -->
+      <p
+        class="text-base md:text-lg
+               text-slate-600
+               leading-relaxed"
+      >
+        Votre e-billet sécurisé avec QR code dynamique vous est envoyé par
+        WhatsApp et SMS. Présentez-le simplement à l'entrée.
+      </p>
+
+
+      <!-- FOOTER -->
+      <div
+        class="mt-auto
+               pt-6
+               border-t border-slate-200
+               flex items-center
+               gap-2
+               text-green-700
+               text-sm
+               font-semibold"
+      >
+
+        <app-icon
+          name="qr-code"
+          [size]="17"
+        ></app-icon>
+
+        <span>
+          E-billet crypté anti-capture
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+    <!-- ═══════════ BANDEAU DEVENIR ORGANISATEUR ═══════════ -->
+    <section class="px-6 md:px-12 py-16 w-full">
+      <div class="w-full bg-[#0B1220] rounded-3xl p-10 md:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+        <div class="max-w-xl">
+          <span class="inline-block bg-orange-600 text-white text-[11px] font-bold tracking-wider rounded-full px-3 py-1 mb-4">
+            ESPACE ORGANISATEURS &amp; PROMOTEURS
+          </span>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-3 leading-snug">
+            Vous organisez un concert, festival ou spectacle ?
+          </h2>
+          <p class="text-slate-300 leading-relaxed">
+            Profitez de la billetterie la plus rapide du Sénégal : encaissez vos
+            ventes directement sur votre compte Wave ou Orange Money, contrôlez
+            les entrées avec notre application de scan QR rapide et suivez vos
+            statistiques en direct.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 shrink-0">
+          <a routerLink="/devenir-organisateur" class="bg-blue-700 text-white rounded-xl px-6 py-3 text-sm font-bold hover:bg-blue-800 transition-colors whitespace-nowrap">
+            Créer un événement
+          </a>
+          <a routerLink="/devenir-organisateur" class="bg-slate-800 text-white rounded-xl px-6 py-3 text-sm font-bold hover:bg-slate-700 transition-colors whitespace-nowrap">
+            En savoir plus
+          </a>
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,12 @@
+[
+  { "id": "tt-001", "eventId": "evt-001", "name": "Standard", "description": "Accès général au festival, zone debout", "price": 5000, "quantityTotal": 500, "quantitySold": 340 },
+  { "id": "tt-002", "eventId": "evt-001", "name": "VIP", "description": "Tribune surélevée, accès prioritaire", "price": 15000, "quantityTotal": 100, "quantitySold": 62 },
+  { "id": "tt-003", "eventId": "evt-002", "name": "Tribune populaire", "description": "Places debout, ambiance garantie", "price": 2000, "quantityTotal": 2000, "quantitySold": 1450 },
+  { "id": "tt-004", "eventId": "evt-002", "name": "Tribune couverte", "description": "Places assises à l'abri", "price": 5000, "quantityTotal": 300, "quantitySold": 210 },
+  { "id": "tt-005", "eventId": "evt-003", "name": "Accès journée", "description": "Accès à toutes les conférences et ateliers", "price": 10000, "quantityTotal": 200, "quantitySold": 85 },
+  { "id": "tt-006", "eventId": "evt-004", "name": "Entrée simple", "description": "Accès à la soirée dès 19h", "price": 7500, "quantityTotal": 400, "quantitySold": 400 },
+  { "id": "tt-007", "eventId": "evt-004", "name": "Carré Or", "description": "Espace privilège en bord de plage", "price": 20000, "quantityTotal": 80, "quantitySold": 80 },
+  { "id": "tt-008", "eventId": "evt-005", "name": "Pass 3 jours", "description": "Accès complet aux 3 jours du festival", "price": 12000, "quantityTotal": 600, "quantitySold": 0 },
+  { "id": "tt-009", "eventId": "evt-005", "name": "Pass 1 jour", "description": "Accès à la journée de votre choix", "price": 5000, "quantityTotal": 800, "quantitySold": 0 },
+  { "id": "tt-010", "eventId": "evt-006", "name": "Entrée générale", "description": "Accès à l'ensemble du tournoi", "price": 1000, "quantityTotal": 300, "quantitySold": 275 }
+]

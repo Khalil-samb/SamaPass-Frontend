@@ -1,1 +1,13 @@
-<p>favorite-button-component works!</p>
+<button
+      type="button"
+      (click)="onClic()"
+      [attr.aria-label]="isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+      class="w-9 h-9 rounded-full bg-white/90 flex items-center justify-center shadow-sm hover:scale-105 transition-transform"
+    >
+      <!-- Le cœur change juste de couleur selon isFavorite. Ce composant
+           n'a pas de mémoire à lui : c'est le parent qui décide de la valeur
+           via [isFavorite], et on le prévient juste quand on clique. -->
+      <span [class]="isFavorite ? 'text-red-600' : 'text-slate-400'" class="text-lg">
+        {{ isFavorite ? '♥' : '♡' }}
+      </span>
+</button>

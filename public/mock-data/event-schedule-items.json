@@ -1,0 +1,9 @@
+[
+  { "id": "esi-001", "eventId": "evt-001", "time": "20:00", "title": "Ouverture des portes", "description": "Accueil du public et animations DJ", "order": 1 },
+  { "id": "esi-002", "eventId": "evt-001", "time": "21:00", "title": "Première partie", "description": "Artistes locaux émergents", "order": 2 },
+  { "id": "esi-003", "eventId": "evt-001", "time": "23:00", "title": "Artiste principal", "description": "Concert de la tête d'affiche", "order": 3 },
+  { "id": "esi-004", "eventId": "evt-001", "time": "01:00", "title": "After party", "description": "DJ set jusqu'au bout de la nuit", "order": 4 },
+  { "id": "esi-005", "eventId": "evt-003", "time": "09:00", "title": "Accueil et petit-déjeuner", "description": null, "order": 1 },
+  { "id": "esi-006", "eventId": "evt-003", "time": "10:00", "title": "Conférence d'ouverture", "description": "Financer sa startup au Sénégal", "order": 2 },
+  { "id": "esi-007", "eventId": "evt-003", "time": "14:00", "title": "Ateliers pratiques", "description": "En petits groupes, par thématique", "order": 3 }
+]

@@ -1,0 +1,8 @@
+[
+  { "id": "cat-001", "name": "Concerts / Musique live", "icon": "music" },
+  { "id": "cat-002", "name": "Événements sportifs", "icon": "trophy" },
+  { "id": "cat-003", "name": "Conférences / Séminaires", "icon": "presentation" },
+  { "id": "cat-004", "name": "Soirées / Clubbing", "icon": "party-popper" },
+  { "id": "cat-005", "name": "Festivals culturels", "icon": "drama" },
+  { "id": "cat-006", "name": "Événements religieux", "icon": "sparkles" }
+]

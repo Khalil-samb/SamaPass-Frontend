@@ -1,0 +1,5 @@
+[
+  { "id": "org-001", "userId": "usr-005", "organizationName": "EvenPro Sénégal", "categoryId": "cat-001", "description": "Agence événementielle spécialisée dans les concerts et festivals à Dakar.", "logoUrl": null, "contactPhone": "+221 77 567 89 05", "mobileMoneyAccount": "77 567 89 05 (Wave)", "status": "active", "createdAt": "2026-01-20T08:10:00Z" },
+  { "id": "org-002", "userId": "usr-006", "organizationName": "CultureBox", "categoryId": "cat-003", "description": "Collectif culturel organisant conférences, expositions et soirées littéraires.", "logoUrl": null, "contactPhone": "+221 76 678 90 06", "mobileMoneyAccount": "76 678 90 06 (Orange Money)", "status": "active", "createdAt": "2026-01-25T10:40:00Z" },
+  { "id": "org-003", "userId": "usr-007", "organizationName": "Sport Sénégal Events", "categoryId": "cat-002", "description": "Organisation de tournois et rencontres sportives amateurs et professionnels.", "logoUrl": null, "contactPhone": "+221 78 789 01 07", "mobileMoneyAccount": "78 789 01 07 (Wave)", "status": "suspended", "createdAt": "2026-02-02T13:10:00Z" }
+]

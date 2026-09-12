@@ -1,1 +1,10 @@
-<p>button-component works!</p>
+<button
+  [type]="type"
+  [disabled]="disabled"
+  [class]="classesCalculees"
+  >
+  <!-- ng-content : tout ce que le composant parent met entre <app-button>...</app-button>
+     s'affiche ici. Ça permet de changer le texte du bouton sans toucher à ce fichier. -->
+  <ng-content></ng-content>
+</button>
+

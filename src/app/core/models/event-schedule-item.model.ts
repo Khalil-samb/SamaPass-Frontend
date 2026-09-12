@@ -5,6 +5,7 @@ export interface EventScheduleItem {
   eventId: string;
   time: string;
   title: string;
-  descripton?: string;
-  order: number; //pour l'ordre d'affichage
+  description?: string;
+  imageUrl?: string;   // optionnel : photo si l'étape représente un artiste/intervenant
+  order: number;
 }
