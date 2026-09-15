@@ -1,110 +1,154 @@
 <div class="min-h-screen flex bg-slate-50">
 
-      <!-- ═══════════ SIDEBAR ═══════════ -->
-      <aside class="w-64 bg-white border-r border-slate-100 flex flex-col shrink-0">
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="w-64 bg-white border-r border-slate-100 flex flex-col justify-between shrink-0 h-screen">
 
-        <div class="h-20 flex items-center gap-2.5 px-5 border-b border-slate-100">
-          <span class="w-9 h-9 rounded-xl bg-orange-600 text-white flex items-center justify-center">
-            <app-icon name="ticket" [size]="18"></app-icon>
+    <div>
+      <!-- Header / Logo -->
+      <div class="p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-md">
+            <app-icon name="ticket" [size]="20"></app-icon>
           </span>
-          <span class="leading-tight">
-            <span class="block font-extrabold text-slate-900 text-sm">SamaPass</span>
-            <span class="block text-[10px] font-bold text-orange-600 tracking-wider">ESPACE ORGANISATEUR</span>
-          </span>
-        </div>
-
-        <nav class="flex-1 py-4 px-3 space-y-1">
-          @for (item of navItems; track item.path) {
-            <a
-              [routerLink]="item.path"
-              routerLinkActive="bg-orange-600 text-white"
-              [routerLinkActiveOptions]="{ exact: item.path === '/organisateur' }"
-              class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
-            >
-              <app-icon [name]="item.icon" [size]="17"></app-icon>
-              {{ item.label }}
-            </a>
-          }
-        </nav>
-
-        <!-- Solde à reverser (global, pas lié à l'événement sélectionné) -->
-        <div class="p-3">
-          <div class="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
-            <span class="block text-[10px] font-bold text-slate-400 tracking-wide">SOLDE À REVERSER</span>
-            <span class="block font-extrabold text-slate-900 mb-2.5">
-              {{ eventStore.soldeAReverser().toLocaleString('fr-FR') }} FCFA
+          <div>
+            <span class="block font-black text-slate-900 text-base leading-tight">SamaPass</span>
+            <span class="inline-block mt-0.5 px-2 py-0.5 bg-orange-100 text-orange-600 text-[9px] font-bold tracking-wider rounded-md">
+              ESPACE ORGANISATEUR
             </span>
-            <a
-              routerLink="/organisateur/reversements"
-              class="block text-center bg-orange-600 text-white rounded-lg py-2 text-xs font-bold hover:bg-orange-700 transition-colors"
-            >
-              Demander un virement
-            </a>
           </div>
         </div>
+        <div class="border-b border-slate-100 mt-4"></div>
+      </div>
 
-        <!-- Profil organisateur -->
-        <a routerLink="/organisateur/parametres" class="flex items-center gap-2.5 p-4 border-t border-slate-100 hover:bg-slate-50">
-          <span class="w-8 h-8 rounded-full bg-orange-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
-            {{ initiales() }}
-          </span>
-          <span class="min-w-0">
-            <span class="block text-xs font-bold text-slate-800 truncate">{{ eventStore.organizer()?.organizationName }}</span>
-            <span class="block text-[10px] text-slate-400">Org. Certifiée</span>
-          </span>
-        </a>
-      </aside>
-
-      <!-- ═══════════ COLONNE PRINCIPALE ═══════════ -->
-      <div class="flex-1 flex flex-col min-w-0">
-
-        <!-- En-tête : salutation + sélecteur d'événement + notifications -->
-        <header class="h-20 bg-white border-b border-slate-100 px-8 flex items-center justify-between shrink-0">
-          <h1 class="font-extrabold text-slate-900">
-            Bonjour, {{ eventStore.organizer()?.organizationName }}
-          </h1>
-
-          <div class="flex items-center gap-4">
-            <!-- Sélecteur d'événement -->
-            <div class="relative">
-              <button
-                type="button"
-                (click)="menuOuvert.set(!menuOuvert())"
-                class="flex items-center gap-2 border border-slate-200 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                {{ eventStore.selectedEvent()?.title ?? 'Choisir un événement' }}
-                <app-icon name="chevron-down" [size]="14" class="text-slate-400"></app-icon>
-              </button>
-
-              @if (menuOuvert()) {
-                <div class="absolute right-0 top-full mt-2 w-80 bg-white border border-slate-100 rounded-xl shadow-lg z-20 overflow-hidden">
-                  @for (event of eventStore.events(); track event.id) {
-                    <button
-                      type="button"
-                      (click)="choisir(event.id)"
-                      class="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-slate-50 border-b border-slate-50 last:border-0"
-                      [class.bg-orange-50]="event.id === eventStore.selectedEventId()"
-                    >
-                      <span class="text-sm font-semibold text-slate-800 truncate mr-2">{{ event.title }}</span>
-                      <app-badge-status [status]="event.status"></app-badge-status>
-                    </button>
-                  }
-                  @if (eventStore.events().length === 0) {
-                    <p class="px-4 py-3 text-xs text-slate-400">Aucun événement pour l'instant</p>
-                  }
-                </div>
-              }
+      <!-- Navigation -->
+      <nav class="px-3 space-y-1.5">
+        @for (item of navItems; track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="bg-[#c84411] text-white shadow-sm"
+            [routerLinkActiveOptions]="{ exact: item.path === '/organisateur' }"
+            class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+          >
+            <div class="flex items-center gap-3">
+              <app-icon [name]="item.icon" [size]="18"></app-icon>
+              <span>{{ item.label }}</span>
             </div>
 
-            <button type="button" class="relative text-slate-400 hover:text-slate-700">
-              <app-icon name="bell" [size]="20"></app-icon>
-            </button>
-          </div>
-        </header>
+            <!-- Badges optionnels (Ex: Compteur ou badge Live) -->
+            @if (item.badge) {
+              <span class="px-2 py-0.5 text-xs font-bold rounded-md bg-slate-100 text-slate-600">
+                {{ item.badge }}
+              </span>
+            } @else if (item.isLive) {
+              <span class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-emerald-100 text-emerald-600 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live
+              </span>
+            }
+          </a>
+        }
+      </nav>
+    </div>
 
-        <main class="flex-1 p-8 overflow-auto">
-          <router-outlet></router-outlet>
-        </main>
+    <!-- Section Bas de Sidebar -->
+    <div class="p-3 space-y-3">
+      <!-- Solde à reverser -->
+      <div class="bg-[#f3f3fd] border border-indigo-100/60 rounded-2xl p-4">
+        <span class="block text-[10px] font-bold text-slate-500 tracking-wider uppercase mb-1">
+          SOLDE À REVERSER
+        </span>
+        <div class="flex items-baseline gap-1 mb-3">
+          <span class="text-2xl font-black text-slate-900 tracking-tight">
+            {{ eventStore.soldeAReverser().toLocaleString('fr-FR') }}
+          </span>
+          <span class="text-xs font-bold text-slate-700">FCFA</span>
+        </div>
+
+        <a
+          routerLink="/organisateur/reversements"
+          class="flex items-center justify-center gap-2 w-full bg-[#c84411] hover:bg-[#b33c0f] text-white rounded-xl py-2.5 text-xs font-bold transition-colors shadow-sm"
+        >
+          <app-icon name="wallet" [size]="15"></app-icon>
+          <span>Demander un virement Wave / OM</span>
+        </a>
+      </div>
+
+      <!-- Profil organisateur -->
+      <div class="flex items-center justify-between p-2 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
+        <a routerLink="/organisateur/parametres" class="flex items-center gap-3 min-w-0 flex-1">
+          <span class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold shrink-0">
+            {{ initiales() }}
+          </span>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1">
+              <span class="block text-xs font-bold text-slate-900 truncate">
+                {{ eventStore.organizer()?.organizationName ?? 'Dakar Musique Prod' }}
+              </span>
+              <!-- Icône vérifiée bleue -->
+              <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span class="block text-[10px] font-medium text-slate-400">Org. Certifiée SAMA-942</span>
+          </div>
+        </a>
+
+        <!-- Bouton Paramètres -->
+        <a routerLink="/organisateur/parametres" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
+          <app-icon name="settings" [size]="16"></app-icon>
+        </a>
       </div>
     </div>
+
+  </aside>
+
+  <!-- ═══════════ COLONNE PRINCIPALE ═══════════ -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <header class="h-20 bg-white border-b border-slate-100 px-8 flex items-center justify-between shrink-0">
+      <h1 class="font-extrabold text-slate-900">
+        Bonjour, {{ eventStore.organizer()?.organizationName }}
+      </h1>
+
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <button
+            type="button"
+            (click)="menuOuvert.set(!menuOuvert())"
+            class="flex items-center gap-2 border border-slate-200 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+            {{ eventStore.selectedEvent()?.title ?? 'Choisir un événement' }}
+            <app-icon name="chevron-down" [size]="14" class="text-slate-400"></app-icon>
+          </button>
+
+          @if (menuOuvert()) {
+            <div class="absolute right-0 top-full mt-2 w-80 bg-white border border-slate-100 rounded-xl shadow-lg z-20 overflow-hidden">
+              @for (event of eventStore.events(); track event.id) {
+                <button
+                  type="button"
+                  (click)="choisir(event.id)"
+                  class="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-slate-50 border-b border-slate-50 last:border-0"
+                  [class.bg-orange-50]="event.id === eventStore.selectedEventId()"
+                >
+                  <span class="text-sm font-semibold text-slate-800 truncate mr-2">{{ event.title }}</span>
+                  <app-badge-status [status]="event.status"></app-badge-status>
+                </button>
+              }
+              @if (eventStore.events().length === 0) {
+                <p class="px-4 py-3 text-xs text-slate-400">Aucun événement pour l'instant</p>
+              }
+            </div>
+          }
+        </div>
+
+        <button type="button" class="relative text-slate-400 hover:text-slate-700">
+          <app-icon name="bell" [size]="20"></app-icon>
+        </button>
+      </div>
+    </header>
+
+    <main class="flex-1 p-8 overflow-auto">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+</div>

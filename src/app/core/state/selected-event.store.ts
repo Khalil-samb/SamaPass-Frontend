@@ -6,36 +6,55 @@ import { OrganizersService } from '../services/organizers.service';
 import { EventsService } from '../services/events.service';
 import { TransactionsService } from '../services/transactions.service';
 import { PayoutsService } from '../services/payouts.service';
+import { TicketTypesService } from '../services/ticket-types.service';
+import { TicketsService } from '../services/tickets.service';
 
 import { EventEntiy } from '../models/event.model';
 import { Organizer } from '../models/organizer.model';
+import { Transaction } from '../models/transaction.model';
+import { TicketType } from '../models/ticket-type.model';
+import { Ticket } from '../models/ticket.model';
 
 @Injectable({ providedIn: 'root' })
 export class SelectedEventStore {
-  // Tous les événements de l'organisateur connecté
+  // Toutes les données de l'organisateur connecté, chargées une seule fois.
+  // Les pages (Tableau de bord, Ventes, Scanner...) filtrent ensuite localement
+  // par événement sélectionné, sans jamais re-télécharger quoi que ce soit.
   events = signal<EventEntiy[]>([]);
+  allTransactions = signal<Transaction[]>([]);
+  allTicketTypes = signal<TicketType[]>([]);
+  allTickets = signal<Ticket[]>([]);
 
-  // L'événement actuellement choisi dans le sélecteur (pilote la plupart des pages)
   selectedEventId = signal<string | null>(null);
-
   organizer = signal<Organizer | null>(null);
   loading = signal(true);
 
-  // Le solde à reverser reste GLOBAL, tous événements confondus — contrairement
-  // au reste de ce store qui tourne autour de l'événement sélectionné.
+  // Reste global, tous événements confondus — voir SPEC_Organisateur_SamaPass.md
   soldeAReverser = signal(0);
 
   selectedEvent = computed(() => this.events().find((e) => e.id === this.selectedEventId()) ?? null);
+
+  // Les 3 filtres les plus utiles, prêts à être réutilisés par n'importe quelle page organisateur
+  ticketTypesEvenementSelectionne = computed(() =>
+    this.allTicketTypes().filter((t) => t.eventId === this.selectedEventId())
+  );
+  transactionsEvenementSelectionne = computed(() =>
+    this.allTransactions().filter((t) => t.eventId === this.selectedEventId() && t.type === 'ticket_purchase')
+  );
+  ticketsEvenementSelectionne = computed(() =>
+    this.allTickets().filter((t) => t.eventId === this.selectedEventId())
+  );
 
   constructor(
     private authStore: AuthStore,
     private organizersService: OrganizersService,
     private eventsService: EventsService,
     private transactionsService: TransactionsService,
-    private payoutsService: PayoutsService
+    private payoutsService: PayoutsService,
+    private ticketTypesService: TicketTypesService,
+    private ticketsService: TicketsService
   ) {}
 
-  // Appelé une fois, depuis OrganizerLayoutComponent, à l'entrée dans l'espace organisateur.
   charger() {
     const utilisateur = this.authStore.currentUser();
     if (!utilisateur) {
@@ -56,13 +75,17 @@ export class SelectedEventStore {
         events: this.eventsService.getAll(),
         transactions: this.transactionsService.getAll(),
         payouts: this.payoutsService.getAll(),
-      }).subscribe(({ events, transactions, payouts }) => {
+        ticketTypes: this.ticketTypesService.getAll(),
+        tickets: this.ticketsService.getAll(),
+      }).subscribe(({ events, transactions, payouts, ticketTypes, tickets }) => {
         const mesEvenements = (events ?? []).filter((e) => e.organizerId === monOrganizer.id);
         this.events.set(mesEvenements);
+        this.allTransactions.set(transactions ?? []);
+        this.allTicketTypes.set(ticketTypes ?? []);
+        this.allTickets.set(tickets ?? []);
 
         this.calculerSolde(monOrganizer.id, mesEvenements, transactions ?? [], payouts ?? []);
 
-        // Sélectionne par défaut l'événement publié le plus récent, sinon le premier de la liste
         if (!this.selectedEventId() && mesEvenements.length > 0) {
           const enCours = mesEvenements.find((e) => e.status === 'published') ?? mesEvenements[0];
           this.selectedEventId.set(enCours.id);
@@ -77,15 +100,10 @@ export class SelectedEventStore {
     this.selectedEventId.set(eventId);
   }
 
-  // ⚠️ Calcul simplifié pour l'instant : on suppose que les frais SamaPass (5%)
-  // sont toujours à la charge de l'organisateur (Event.feesBornBy = 'organizer').
-  // Le cas "frais à la charge de l'acheteur" sera affiné quand on codera la page
-  // Reversements en détail — pour l'instant, cette carte de sidebar donne un
-  // ordre de grandeur correct dans le cas le plus courant.
   private calculerSolde(
     organizerId: string,
     mesEvenements: EventEntiy[],
-    transactions: { type: string; status: string; eventId: string; amount: number }[],
+    transactions: Transaction[],
     payouts: { organizerId: string; status: string; amount: number }[]
   ) {
     const idsEvenements = new Set(mesEvenements.map((e) => e.id));

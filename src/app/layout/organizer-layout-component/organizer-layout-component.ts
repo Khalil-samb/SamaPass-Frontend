@@ -10,6 +10,8 @@ interface NavItem {
   label: string;
   path: string;
   icon: IconName;
+  badge?: string;
+  isLive?: boolean;
 }
 
 @Component({
