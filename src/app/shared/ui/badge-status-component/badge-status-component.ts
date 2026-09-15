@@ -22,7 +22,7 @@ const STATUTS_CONNUS: Record<string, { texte: string; classes: string }> = {
 
 @Component({
   imports: [],
-  selector: 'app-badge-status-component',
+  selector: 'app-badge-status',
   styleUrl: './badge-status-component.css',
   templateUrl: './badge-status-component.html',
 })

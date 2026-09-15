@@ -32,7 +32,7 @@ import { NotificationsListComponent } from './features/user/notifications-list-c
 // ───────────────────────────────────────────────────────────
 import { BecomeOrganizerLandingComponent } from './features/become-organizer/become-organizer-landing-component/become-organizer-landing-component';
 import { OrganizerApplicationFormComponent } from './features/become-organizer/organizer-application-form-component/organizer-application-form-component';
-import { OrganizerWelcomeComponent } from './features/become-organizer/organizer-welcome-component/organizer-welcome-component'
+import { OrganizerWelcomeComponent } from './features/become-organizer/organizer-welcome-component/organizer-welcome-component';
 
 // ───────────────────────────────────────────────────────────
 // CONNEXIONS ORGANISATEUR / ADMIN
@@ -52,6 +52,8 @@ import { EventSupervisionComponent } from './features/organizer/event-supervisio
 import { TicketScannerComponent } from './features/organizer/ticket-scanner-component/ticket-scanner-component';
 import { SponsoredAdComponent } from './features/organizer/sponsored-ad-component/sponsored-ad-component';
 import { OrganizerSettingsComponent } from './features/organizer/organizer-settings-component/organizer-settings-component';
+import { PayoutsComponent } from './features/organizer/payouts-component/payouts-component';
+
 
 // ───────────────────────────────────────────────────────────
 // ESPACE ADMINISTRATEUR
@@ -103,20 +105,21 @@ export const routes: Routes = [
 
   // ───────────── ESPACE ORGANISATEUR ─────────────
   {
-    path: 'organisateur',
-    component: OrganizerLayoutComponent,
-    children: [
-      { path: '', component: OrganizerDashboardComponent },
-      { path: 'evenements', component: MyEventsListComponent },
-      { path: 'evenements/nouveau', component: EventWizardComponent },
-      { path: 'evenements/:id/publie', component: EventPublishedComponent },
-      { path: 'evenements/:id/ventes', component: EventSalesDetailComponent },
-      { path: 'evenements/:id/supervision', component: EventSupervisionComponent },
-      { path: 'scanner', component: TicketScannerComponent },
-      { path: 'evenements/:id/publicite', component: SponsoredAdComponent },
-      { path: 'parametres', component: OrganizerSettingsComponent },
-    ],
-  },
+  path: 'organisateur',
+  component: OrganizerLayoutComponent,
+  children: [
+    { path: '', component: OrganizerDashboardComponent },
+    { path: 'evenements', component: MyEventsListComponent },
+    { path: 'evenements/nouveau', component: EventWizardComponent },
+    { path: 'evenements/:id/publie', component: EventPublishedComponent },
+    { path: 'ventes', component: EventSalesDetailComponent },
+    { path: 'scanner', component: EventSupervisionComponent },
+    { path: 'scanner/camera', component: TicketScannerComponent },
+    { path: 'campagnes', component: SponsoredAdComponent },
+    { path: 'reversements', component: PayoutsComponent },
+    { path: 'parametres', component: OrganizerSettingsComponent },
+  ],
+},
 
   // ───────────── ESPACE ADMINISTRATEUR ─────────────
   {

@@ -107,6 +107,7 @@ export class TicketPurchasePanelComponent {
       price: this.unitPrice,
       purchaseDate: new Date().toISOString(),
       scannedAt: undefined,
+      disputeStatus: 'none',
     }));
     this.ticketsService.ajouterBillets(nouveauxBillets);
 

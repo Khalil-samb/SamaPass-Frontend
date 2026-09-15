@@ -1,0 +1,3 @@
+[
+  { "id": "pay-001", "organizerId": "org-001", "amount": 3200000, "status": "completed", "paymentMethod": "wave", "destinationAccount": "77 567 89 05", "reference": "WAVE-PAYOUT-77234", "requestedAt": "2026-06-10T09:00:00Z", "processedAt": "2026-06-10T11:00:00Z" }
+]

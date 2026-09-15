@@ -1,4 +1,5 @@
 export type TicketStatus = 'valid' | 'used' | 'cancelled';
+export type TicketDisputeStatus = 'none' | 'flagged';
 
 export interface Ticket {
   id: string;
@@ -8,7 +9,12 @@ export interface Ticket {
   transactionId: string;
   qrCode: string;
   status: TicketStatus;
-  price: number;  // prix payé au moment de l'achat
+  price: number;
   purchaseDate: string;
   scannedAt?: string;
+
+  // Contrôle d'accès
+  gateId?: string;              // quelle porte a scanné ce billet
+  scannedByAgentId?: string;    // quel agent l'a scanné
+  disputeStatus: TicketDisputeStatus;
 }

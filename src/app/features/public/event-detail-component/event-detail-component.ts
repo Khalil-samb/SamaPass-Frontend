@@ -247,6 +247,7 @@ export class EventDetailComponent implements OnInit {
           price: ligne.type.price,
           purchaseDate: new Date().toISOString(),
           scannedAt: undefined,
+          disputeStatus: 'none',
         });
       }
     });
