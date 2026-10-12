@@ -1,1 +1,476 @@
-<p>organizer-settings-component works!</p>
+@if (chargement()) {
+  <p class="text-center text-slate-400 py-20">Chargement de votre profil...</p>
+
+} @else if (erreurChargement()) {
+  <p class="text-center text-red-600 py-20">{{ erreurChargement() }}</p>
+
+} @else if (profil(); as p) {
+  <div class="max-w-6xl mx-auto font-sans text-slate-800">
+
+    <div class="mb-6">
+      <h1 class="text-lg font-extrabold text-slate-900">Profil de l'organisation</h1>
+      <p class="text-xs text-slate-400 mt-1">
+        Ces informations apparaissent sur vos événements et servent à vous verser vos recettes.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- ═══════════════ COLONNE PRINCIPALE ═══════════════ -->
+      <div class="lg:col-span-2 space-y-6 order-2 lg:order-1">
+
+        <!-- 1. Mon organisation -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6">
+          <h2 class="font-extrabold text-slate-900 text-base mb-1">Mon organisation</h2>
+          <p class="text-xs text-slate-400 mb-5">Le nom et le logo que le public voit sur vos événements.</p>
+
+          <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-5">
+            <div class="w-20 h-20 rounded-xl border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center shrink-0">
+              @if (logoUrl()) {
+                <img [src]="logoUrl()" class="w-full h-full object-cover" alt="Logo de l'organisation" />
+              } @else {
+                <app-icon name="image" [size]="24" class="text-slate-300"></app-icon>
+              }
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                (click)="inputLogo.click()"
+                [disabled]="logoEnCours()"
+                class="border border-slate-200 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                {{ logoEnCours() ? 'Envoi en cours...' : logoUrl() ? 'Changer le logo' : 'Ajouter un logo' }}
+              </button>
+              @if (logoUrl()) {
+                <button type="button" (click)="retirerLogo()" class="text-xs font-semibold text-red-600 hover:text-red-700 px-2 py-2">Retirer</button>
+              }
+              <span class="text-[11px] text-slate-400">JPEG, PNG ou WebP · 5 Mo maximum</span>
+            </div>
+            <input #inputLogo type="file" accept="image/jpeg,image/png,image/webp" (change)="onLogoSelectionne($event)" class="hidden" />
+          </div>
+
+          <label class="block mb-4">
+            <span class="text-xs font-bold text-slate-700 block mb-1.5">NOM DE L'ORGANISATION <span class="text-orange-700">*</span></span>
+            <input
+              type="text"
+              [ngModel]="nomOrg()"
+              (ngModelChange)="nomOrg.set($event)"
+              maxlength="200"
+              class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 font-medium text-slate-900"
+            />
+          </label>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <label class="block">
+              <span class="text-xs font-bold text-slate-700 block mb-1.5">CATÉGORIE D'ACTIVITÉ</span>
+              <select
+                [ngModel]="categorieId()"
+                (ngModelChange)="categorieId.set($event)"
+                class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 bg-white font-medium text-slate-800"
+              >
+                <option value="">Sélectionner...</option>
+                @for (cat of categories(); track cat.id) {
+                  <option [value]="cat.id">{{ cat.name }}</option>
+                }
+              </select>
+            </label>
+            <label class="block">
+              <span class="text-xs font-bold text-slate-700 block mb-1.5">NUMÉRO D'ENREGISTREMENT (RCCM / NINEA)</span>
+              <input
+                type="text"
+                [ngModel]="numeroRC()"
+                (ngModelChange)="numeroRC.set($event)"
+                maxlength="100"
+                class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 font-medium text-slate-800"
+              />
+            </label>
+          </div>
+
+          <label class="block mb-5">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-xs font-bold text-slate-700">DESCRIPTION</span>
+              <span class="text-[11px] text-slate-400">{{ description().length }}/1000</span>
+            </div>
+            <textarea
+              [ngModel]="description()"
+              (ngModelChange)="description.set($event)"
+              rows="4"
+              maxlength="1000"
+              placeholder="Présentez votre organisation en quelques phrases..."
+              class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 resize-none text-slate-800"
+            ></textarea>
+          </label>
+
+          @if (etats.organisation.message(); as m) {
+            <p class="text-xs font-semibold rounded-lg px-3 py-2 mb-4" [class]="m.type === 'succes' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'">{{ m.texte }}</p>
+          }
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              (click)="enregistrerOrganisation()"
+              [disabled]="!organisationModifiee() || etats.organisation.enCours() || logoEnCours()"
+              class="bg-orange-600 hover:bg-orange-700 text-white rounded-xl px-5 py-2.5 font-bold text-sm disabled:opacity-50 transition-colors"
+            >
+              {{ etats.organisation.enCours() ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
+            @if (organisationModifiee()) {
+              <button type="button" (click)="annuler('organisation')" class="text-sm font-semibold text-slate-500 hover:text-slate-700">Annuler</button>
+            }
+          </div>
+        </div>
+
+        <!-- 2. Responsable du compte -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6">
+          <h2 class="font-extrabold text-slate-900 text-base mb-1">Responsable du compte</h2>
+          <p class="text-xs text-slate-400 mb-5">La personne qui gère cet espace organisateur.</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <label class="block">
+              <span class="text-xs font-bold text-slate-700 block mb-1.5">PRÉNOM <span class="text-orange-700">*</span></span>
+              <input
+                type="text"
+                [ngModel]="prenom()"
+                (ngModelChange)="prenom.set($event)"
+                maxlength="100"
+                class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 font-medium text-slate-800"
+              />
+            </label>
+            <label class="block">
+              <span class="text-xs font-bold text-slate-700 block mb-1.5">NOM</span>
+              <input
+                type="text"
+                [ngModel]="nom()"
+                (ngModelChange)="nom.set($event)"
+                maxlength="100"
+                class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 font-medium text-slate-800"
+              />
+            </label>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <label class="block">
+              <span class="text-xs font-bold text-slate-700 block mb-1.5">ADRESSE EMAIL (IDENTIFIANT DE CONNEXION) <span class="text-orange-700">*</span></span>
+              <input
+                type="email"
+                [ngModel]="email()"
+                (ngModelChange)="email.set($event)"
+                maxlength="254"
+                class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 font-medium text-slate-800"
+              />
+            </label>
+            <label class="block">
+              <span class="text-xs font-bold text-slate-700 block mb-1.5">TÉLÉPHONE</span>
+              <input
+                type="text"
+                [value]="p.phone"
+                disabled
+                class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm bg-slate-50 text-slate-500 font-medium cursor-not-allowed"
+              />
+              <span class="text-[11px] text-slate-400 mt-1 block">Il sert à vous identifier : pour le changer, contactez le support.</span>
+            </label>
+          </div>
+
+          <label class="block mb-5 sm:w-1/2 sm:pr-2">
+            <span class="text-xs font-bold text-slate-700 block mb-1.5">VILLE</span>
+            <select
+              [ngModel]="villeId()"
+              (ngModelChange)="villeId.set($event)"
+              class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 bg-white font-medium text-slate-800"
+            >
+              <option value="">Sélectionner...</option>
+              @for (ville of cities(); track ville.id) {
+                <option [value]="ville.id">{{ ville.name }}</option>
+              }
+            </select>
+          </label>
+
+          @if (emailModifie()) {
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-5">
+              <p class="text-xs text-amber-800 font-semibold mb-2">Changer d'adresse email modifie votre identifiant de connexion : confirmez avec votre mot de passe actuel.</p>
+              <input
+                type="password"
+                [ngModel]="mdpResponsable()"
+                (ngModelChange)="mdpResponsable.set($event)"
+                autocomplete="current-password"
+                placeholder="Mot de passe actuel"
+                class="w-full border border-amber-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 bg-white"
+              />
+            </div>
+          }
+
+          @if (etats.responsable.message(); as m) {
+            <p class="text-xs font-semibold rounded-lg px-3 py-2 mb-4" [class]="m.type === 'succes' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'">{{ m.texte }}</p>
+          }
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              (click)="enregistrerResponsable()"
+              [disabled]="!responsableModifie() || etats.responsable.enCours()"
+              class="bg-orange-600 hover:bg-orange-700 text-white rounded-xl px-5 py-2.5 font-bold text-sm disabled:opacity-50 transition-colors"
+            >
+              {{ etats.responsable.enCours() ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
+            @if (responsableModifie()) {
+              <button type="button" (click)="annuler('responsable')" class="text-sm font-semibold text-slate-500 hover:text-slate-700">Annuler</button>
+            }
+          </div>
+        </div>
+
+        <!-- 3. Compte de reversement -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6">
+          <div class="flex items-center gap-2 mb-1">
+            <app-icon name="wallet" [size]="18" class="text-orange-700"></app-icon>
+            <h2 class="font-extrabold text-slate-900 text-base">Compte de reversement</h2>
+          </div>
+          <p class="text-xs text-slate-400 mb-5">Le compte mobile money sur lequel vos recettes (moins la commission) sont versées.</p>
+
+          <span class="text-xs font-bold text-slate-700 block mb-1.5">OPÉRATEUR</span>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <button
+              type="button"
+              (click)="methode.set('wave')"
+              class="rounded-lg border-2 px-4 py-3 text-sm font-bold transition-colors"
+              [class]="methode() === 'wave' ? 'border-orange-600 bg-orange-600 text-orange-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+            >
+              Wave
+            </button>
+            <button
+              type="button"
+              (click)="methode.set('orange_money')"
+              class="rounded-lg border-2 px-4 py-3 text-sm font-bold transition-colors"
+              [class]="methode() === 'orange_money' ? 'border-orange-600 bg-orange-600 text-orange-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+            >
+              Orange Money
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <label class="block">
+              <span class="text-xs font-bold text-slate-700 block mb-1.5">NUMÉRO DU COMPTE <span class="text-orange-700">*</span></span>
+              <input
+                type="text"
+                inputmode="tel"
+                [ngModel]="numero()"
+                (ngModelChange)="numero.set($event)"
+                placeholder="77 123 45 67"
+                maxlength="30"
+                class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 font-medium text-slate-800"
+              />
+            </label>
+            <label class="block">
+              <span class="text-xs font-bold text-slate-700 block mb-1.5">NOM DU TITULAIRE <span class="text-orange-700">*</span></span>
+              <input
+                type="text"
+                [ngModel]="titulaire()"
+                (ngModelChange)="titulaire.set($event)"
+                maxlength="100"
+                class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 font-medium text-slate-800"
+              />
+            </label>
+          </div>
+
+          @if (reversementModifie()) {
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-5">
+              <p class="text-xs text-amber-800 font-semibold mb-2">
+                Pour votre sécurité, confirmez avec votre mot de passe actuel : ce compte reçoit tout l'argent de vos ventes.
+              </p>
+              <input
+                type="password"
+                [ngModel]="mdpReversement()"
+                (ngModelChange)="mdpReversement.set($event)"
+                autocomplete="current-password"
+                placeholder="Mot de passe actuel"
+                class="w-full border border-amber-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 bg-white"
+              />
+            </div>
+          }
+
+          @if (etats.reversement.message(); as m) {
+            <p class="text-xs font-semibold rounded-lg px-3 py-2 mb-4" [class]="m.type === 'succes' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'">{{ m.texte }}</p>
+          }
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              (click)="enregistrerReversement()"
+              [disabled]="!reversementModifie() || etats.reversement.enCours()"
+              class="bg-orange-600 hover:bg-orange-700 text-white rounded-xl px-5 py-2.5 font-bold text-sm disabled:opacity-50 transition-colors"
+            >
+              {{ etats.reversement.enCours() ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
+            @if (reversementModifie()) {
+              <button type="button" (click)="annuler('reversement')" class="text-sm font-semibold text-slate-500 hover:text-slate-700">Annuler</button>
+            }
+          </div>
+        </div>
+
+        <!-- 4. Notifications -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6">
+          <h2 class="font-extrabold text-slate-900 text-base mb-1">Notifications</h2>
+          <p class="text-xs text-slate-400 mb-5">Choisissez ce dont vous voulez être prévenu.</p>
+
+          <div class="flex items-center justify-between gap-4 mb-5">
+            <div>
+              <span class="block text-sm font-bold text-slate-800">Alertes de vente</span>
+              <span class="block text-xs text-slate-400">Une notification à chaque billet vendu pour vos événements.</span>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              [attr.aria-checked]="alertes()"
+              aria-label="Alertes de vente"
+              (click)="alertes.set(!alertes())"
+              class="relative w-11 h-6 rounded-full transition-colors shrink-0"
+              [class]="alertes() ? 'bg-orange-600' : 'bg-slate-300'"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
+                [class]="alertes() ? 'translate-x-5' : ''"
+              ></span>
+            </button>
+          </div>
+
+          @if (etats.notifications.message(); as m) {
+            <p class="text-xs font-semibold rounded-lg px-3 py-2 mb-4" [class]="m.type === 'succes' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'">{{ m.texte }}</p>
+          }
+          <button
+            type="button"
+            (click)="enregistrerNotifications()"
+            [disabled]="!alertesModifiees() || etats.notifications.enCours()"
+            class="bg-orange-600 hover:bg-orange-700 text-white rounded-xl px-5 py-2.5 font-bold text-sm disabled:opacity-50 transition-colors"
+          >
+            {{ etats.notifications.enCours() ? 'Enregistrement...' : 'Enregistrer' }}
+          </button>
+        </div>
+
+        <!-- 5. Sécurité -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6">
+          <div class="flex items-center gap-2 mb-1">
+            <app-icon name="shield-check" [size]="18" class="text-orange-700"></app-icon>
+            <h2 class="font-extrabold text-slate-900 text-base">Sécurité</h2>
+          </div>
+          <p class="text-xs text-slate-400 mb-5">Changer votre mot de passe de connexion.</p>
+
+          <label class="block mb-4">
+            <span class="text-xs font-bold text-slate-700 block mb-1.5">MOT DE PASSE ACTUEL</span>
+            <input
+              [type]="voirMdp() ? 'text' : 'password'"
+              [ngModel]="mdpActuel()"
+              (ngModelChange)="mdpActuel.set($event)"
+              autocomplete="current-password"
+              class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 font-medium text-slate-800"
+            />
+          </label>
+
+          <label class="block mb-3">
+            <span class="text-xs font-bold text-slate-700 block mb-1.5">NOUVEAU MOT DE PASSE</span>
+            <input
+              [type]="voirMdp() ? 'text' : 'password'"
+              [ngModel]="mdpNouveau()"
+              (ngModelChange)="mdpNouveau.set($event)"
+              autocomplete="new-password"
+              class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 font-medium text-slate-800"
+            />
+          </label>
+
+          @if (mdpNouveau()) {
+            <div class="mb-4">
+              <div class="flex gap-1 mb-2">
+                @for (critere of criteres(); track critere.label; let i = $index) {
+                  <span
+                    class="h-1.5 flex-1 rounded-full"
+                    [class]="i < nbCriteres() ? (nbCriteres() <= 2 ? 'bg-red-400' : nbCriteres() === 3 ? 'bg-amber-400' : 'bg-emerald-500') : 'bg-slate-200'"
+                  ></span>
+                }
+              </div>
+              <span class="text-[11px] font-bold text-slate-500 block mb-2">Robustesse : {{ niveauMdp() }}</span>
+              <ul class="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                @for (critere of criteres(); track critere.label) {
+                  <li class="text-[11px] font-medium flex items-center gap-1.5" [class]="critere.ok ? 'text-emerald-600' : 'text-slate-400'">
+                    <span>{{ critere.ok ? '✓' : '○' }}</span>
+                    {{ critere.label }}
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          <label class="block mb-3">
+            <span class="text-xs font-bold text-slate-700 block mb-1.5">CONFIRMER LE NOUVEAU MOT DE PASSE</span>
+            <input
+              [type]="voirMdp() ? 'text' : 'password'"
+              [ngModel]="mdpConfirmation()"
+              (ngModelChange)="mdpConfirmation.set($event)"
+              autocomplete="new-password"
+              class="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-orange-600 font-medium text-slate-800"
+            />
+          </label>
+
+          <button type="button" (click)="voirMdp.set(!voirMdp())" class="text-xs font-semibold text-slate-500 hover:text-slate-700 mb-5">
+            {{ voirMdp() ? 'Masquer les mots de passe' : 'Afficher les mots de passe' }}
+          </button>
+
+          @if (etats.securite.message(); as m) {
+            <p class="text-xs font-semibold rounded-lg px-3 py-2 mb-4" [class]="m.type === 'succes' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'">{{ m.texte }}</p>
+          }
+          <button
+            type="button"
+            (click)="changerMotDePasse()"
+            [disabled]="!mdpActuel() || !mdpNouveau() || etats.securite.enCours()"
+            class="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-5 py-2.5 font-bold text-sm disabled:opacity-50 transition-colors"
+          >
+            {{ etats.securite.enCours() ? 'Modification...' : 'Changer le mot de passe' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══════════════ COLONNE DE DROITE : RÉSUMÉ + COMPLÉTUDE ═══════════════ -->
+      <div class="space-y-4 order-1 lg:order-2">
+        <div class="bg-white border border-slate-200 rounded-xl p-5 lg:sticky lg:top-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-14 h-14 rounded-xl overflow-hidden bg-orange-600 text-orange-700 font-extrabold text-lg flex items-center justify-center shrink-0">
+              @if (p.logoUrl) {
+                <img [src]="p.logoUrl" class="w-full h-full object-cover" alt="" />
+              } @else {
+                {{ initiales() }}
+              }
+            </div>
+            <div class="min-w-0">
+              <h2 class="font-extrabold text-slate-900 text-sm truncate">{{ p.organizationName }}</h2>
+              <span
+                class="inline-block mt-1 text-[10px] font-bold rounded px-1.5 py-0.5"
+                [class]="p.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'"
+              >
+                {{ p.status === 'active' ? 'COMPTE ACTIF' : 'COMPTE SUSPENDU' }}
+              </span>
+            </div>
+          </div>
+
+          <dl class="text-xs space-y-1.5 mb-5">
+            <div class="flex justify-between gap-2"><dt class="text-slate-400">Responsable</dt><dd class="font-semibold text-slate-700 truncate">{{ p.firstName }} {{ p.lastName }}</dd></div>
+            <div class="flex justify-between gap-2"><dt class="text-slate-400">Email</dt><dd class="font-semibold text-slate-700 truncate">{{ p.email }}</dd></div>
+            <div class="flex justify-between gap-2"><dt class="text-slate-400">Membre depuis</dt><dd class="font-semibold text-slate-700">{{ membreDepuis() }}</dd></div>
+          </dl>
+
+          <div class="border-t border-slate-100 pt-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-700">Profil complété</span>
+              <span class="text-xs font-extrabold text-orange-700">{{ completude().pourcentage }} %</span>
+            </div>
+            <div class="h-1.5 rounded-full bg-slate-100 mb-3 overflow-hidden">
+              <div class="h-full rounded-full bg-orange-600 transition-all" [style.width.%]="completude().pourcentage"></div>
+            </div>
+            <ul class="space-y-2">
+              @for (element of completude().elements; track element.label) {
+                <li class="flex items-center gap-2 text-xs" [class]="element.ok ? 'text-emerald-600 font-medium' : 'text-slate-400'">
+                  <app-icon name="check-circle-2" [size]="14"></app-icon>
+                  {{ element.label }}
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}
