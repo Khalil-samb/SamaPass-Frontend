@@ -1,0 +1,122 @@
+<div class="space-y-6 max-w-7xl mx-auto">
+
+  <!-- ═══════════ BANDEAU : SOLDE + DEMANDE DE VIREMENT ═══════════ -->
+  <section appReveal class="banner-hero p-6 sm:p-8" aria-label="Solde disponible">
+    <p class="text-[11px] font-bold uppercase tracking-widest text-white/60">Reversements Wave / Orange Money</p>
+
+    <div class="mt-4 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div class="min-w-0">
+        <span class="block text-xs font-bold uppercase tracking-wider text-white/70">Solde disponible</span>
+        <span class="block mt-1 text-4xl sm:text-5xl font-black tracking-tight">
+          {{ eventStore.soldeAReverser().toLocaleString('fr-FR') }}
+          <span class="text-lg font-bold text-white/60">FCFA</span>
+        </span>
+        <span class="block mt-3 max-w-xl text-xs leading-relaxed text-white/60">
+          Vos ventes confirmées, tous événements confondus, moins la commission Kcrowd de chaque vente et vos virements déjà demandés.
+        </span>
+      </div>
+
+      <button
+        type="button"
+        [disabled]="eventStore.soldeAReverser() <= 0 || demandeEnCours()"
+        (click)="ouvrirConfirmation()"
+        class="btn-glow w-full md:w-auto shrink-0 px-7 py-3.5 text-sm whitespace-nowrap"
+      >
+        {{ demandeEnCours() ? 'Demande en cours...' : 'Demander un virement' }}
+      </button>
+    </div>
+  </section>
+
+  <!-- Confirmation : un virement envoie de l'argent, on montre le montant et le compte AVANT -->
+  @if (confirmationOuverte()) {
+    <div class="glass-strong rounded-3xl p-5 sm:p-6 !border-orange-300" role="alertdialog" aria-label="Confirmer le virement">
+      <h2 class="section-title text-lg mb-1">Confirmer le virement</h2>
+      <p class="text-sm text-slate-600 mb-5">
+        Vous allez recevoir votre solde disponible, <strong class="text-slate-900">{{ eventStore.soldeAReverser().toLocaleString('fr-FR') }} FCFA</strong>, sur votre compte
+        <strong class="text-slate-900">{{ labelMoyenPaiement() }} {{ eventStore.organizer()?.mobileMoneyAccountNumber }}</strong>.
+        Le montant exact est recalculé par le serveur au moment de la demande.
+      </p>
+      <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+        <button type="button" (click)="annulerConfirmation()" [disabled]="demandeEnCours()" class="btn-glass px-5 py-2.5 text-sm disabled:opacity-50">Annuler</button>
+        <button type="button" (click)="confirmerVirement()" [disabled]="demandeEnCours()" class="btn-glow px-5 py-2.5 text-sm">
+          {{ demandeEnCours() ? 'Demande en cours...' : 'Confirmer le virement' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (message(); as m) {
+    <p
+      class="text-sm font-semibold rounded-2xl px-4 py-3 border"
+      [class]="m.type === 'succes' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-800 border-red-200'"
+      [attr.role]="m.type === 'erreur' ? 'alert' : 'status'"
+    >{{ m.texte }}</p>
+  }
+
+  <!-- ═══════════ 4 CHIFFRES ═══════════ -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div appReveal class="glass-card !rounded-2xl p-4 sm:p-5">
+      <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Total déjà reversé</span>
+      <span class="block text-lg font-black text-slate-900">{{ totalDejaReverse().toLocaleString('fr-FR') }} <span class="text-xs font-bold text-slate-500">FCFA</span></span>
+    </div>
+    <div [appReveal]="80" class="glass-card !rounded-2xl p-4 sm:p-5">
+      <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Virements effectués</span>
+      <span class="block text-lg font-black text-slate-900">{{ payoutsTermines().length }}</span>
+    </div>
+    <div [appReveal]="160" class="glass-card !rounded-2xl p-4 sm:p-5">
+      <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Dernier virement</span>
+      <span class="block text-lg font-black text-slate-900">{{ dernierVirementLabel() }}</span>
+    </div>
+    <div [appReveal]="240" class="glass-card !rounded-2xl p-4 sm:p-5">
+      <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Compte de réception</span>
+      <span class="block text-sm font-black text-slate-900 break-words">{{ labelMoyenPaiement() }} · {{ eventStore.organizer()?.mobileMoneyAccountNumber }}</span>
+    </div>
+  </div>
+
+  <!-- ═══════════ HISTORIQUE ═══════════ -->
+  <section appReveal class="glass-card p-4 sm:p-6">
+    <h2 class="section-title text-lg mb-4">Historique des reversements</h2>
+
+    @if (chargement()) {
+      <div class="space-y-3 animate-pulse" aria-busy="true">
+        <div class="h-10 rounded-xl bg-slate-200/70"></div>
+        <div class="h-10 rounded-xl bg-slate-200/70"></div>
+        <div class="h-10 rounded-xl bg-slate-200/70"></div>
+      </div>
+    } @else if (erreurChargement(); as erreurHistorique) {
+      <p class="text-sm font-semibold text-red-700" role="alert">{{ erreurHistorique }}</p>
+    } @else if (payouts().length === 0) {
+      <p class="text-sm text-slate-500">Aucun virement pour l'instant.</p>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <th class="pb-3 font-bold">Date</th>
+              <th class="pb-3 font-bold">Montant</th>
+              <th class="pb-3 font-bold">Moyen</th>
+              <th class="pb-3 font-bold">Référence</th>
+              <th class="pb-3 font-bold">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (payout of payouts(); track payout.id) {
+              <tr class="border-t border-slate-200/70">
+                <td class="py-3.5 pr-3 text-slate-600 whitespace-nowrap">{{ formaterDate(payout.requestedAt) }}</td>
+                <td class="py-3.5 pr-3 font-extrabold text-slate-900 whitespace-nowrap">{{ payout.amount.toLocaleString('fr-FR') }} FCFA</td>
+                <td class="py-3.5 pr-3 text-slate-600">{{ LABEL_METHODE[payout.paymentMethod] ?? payout.paymentMethod }}</td>
+                <td class="py-3.5 pr-3 font-mono text-xs text-slate-500">{{ payout.reference }}</td>
+                <td class="py-3.5">
+                  <span class="inline-block text-xs font-bold px-2.5 py-1 rounded-full" [class]="statut(payout).classes">
+                    {{ statut(payout).texte }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+</div>
