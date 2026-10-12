@@ -1,1 +1,78 @@
-<p>notification-bell-component works!</p>
+<div class="sm:relative">
+  <button
+    type="button"
+    (click)="basculer()"
+    [attr.aria-label]="store.nonLues() > 0 ? 'Notifications, ' + store.nonLues() + ' non lue(s)' : 'Notifications'"
+    [attr.aria-expanded]="ouvert()"
+    class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+    [class]="ouvert() ? '!bg-slate-900 !text-white !border-slate-900' : ''"
+  >
+    <app-icon name="bell" [size]="18"></app-icon>
+    @if (store.nonLues() > 0) {
+      <span
+        class="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-white bg-orange-600 px-1 text-[10px] font-bold leading-none text-white"
+      >
+        {{ store.nonLues() > 9 ? '9+' : store.nonLues() }}
+      </span>
+    }
+  </button>
+
+  @if (ouvert()) {
+    <div
+      class="absolute top-full z-40 mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white max-sm:left-4 max-sm:right-4 sm:w-[22rem]"
+      [class]="alignement === 'gauche' ? 'sm:left-0' : 'sm:right-0'"
+    >
+      <div class="flex items-center justify-between bg-slate-900 px-4 py-3 text-white">
+        <h3 class="text-sm font-bold">Notifications</h3>
+        @if (store.nonLues() > 0) {
+          <button type="button" (click)="store.toutMarquerCommeLu()" class="rounded-lg bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-white/20">
+            Tout marquer comme lu
+          </button>
+        }
+      </div>
+
+      @if (recentes().length === 0) {
+        <div class="flex flex-col items-center px-6 py-9 text-center">
+          @if (store.chargement()) {
+            <p class="text-xs text-slate-400">Chargement...</p>
+          } @else {
+            <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><app-icon name="bell" [size]="20"></app-icon></span>
+            <p class="text-sm font-bold text-slate-900">Tout est à jour</p>
+            <p class="mt-1 text-xs text-slate-500">Tu n'as aucune notification pour le moment.</p>
+          }
+        </div>
+      } @else {
+        <div class="max-h-96 divide-y divide-slate-100 overflow-y-auto">
+          @for (n of recentes(); track n.id) {
+            <button
+              type="button"
+              (click)="ouvrir(n)"
+              class="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50"
+              [class]="n.isRead ? '' : 'bg-orange-50/60'"
+            >
+              <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" [class]="stylePastille(n.type)">
+                <app-icon [name]="iconeDe(n.type)" [size]="16"></app-icon>
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-[13px] text-slate-900" [class]="n.isRead ? 'font-semibold' : 'font-bold'">{{ n.title }}</span>
+                <span class="line-clamp-2 block text-xs leading-snug text-slate-500">{{ n.message }}</span>
+                <span class="mt-1 block text-[11px] font-medium text-slate-400">{{ ilYA(n.createdAt) }}</span>
+              </span>
+              @if (!n.isRead) {
+                <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-orange-600" aria-label="Non lue"></span>
+              }
+            </button>
+          }
+        </div>
+      }
+
+      <a
+        [routerLink]="lienVoirTout"
+        (click)="fermer()"
+        class="flex items-center justify-center gap-1.5 border-t border-slate-100 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 hover:bg-slate-100"
+      >
+        Voir toutes les notifications <app-icon name="arrow-right" [size]="14"></app-icon>
+      </a>
+    </div>
+  }
+</div>

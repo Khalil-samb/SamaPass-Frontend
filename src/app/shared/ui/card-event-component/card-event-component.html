@@ -1,7 +1,8 @@
-<div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 flex flex-col h-full">
+<div class="bg-white rounded-2xl overflow-hidden   transition-shadow border border-slate-100 flex flex-col h-full"
+     [class.opacity-60]="event.disabled" [class.grayscale]="event.disabled" [attr.aria-disabled]="event.disabled ? true : null">
 
       <!-- Image + badges + lieu en surimpression -->
-      <a [routerLink]="['/evenements', event.id]" class="relative block">
+      <a [routerLink]="['/evenements', event.id]" class="relative block" [class.pointer-events-none]="event.disabled" [attr.tabindex]="event.disabled ? -1 : null">
         <img [src]="event.imageUrl" [alt]="event.title" class="w-full h-44 object-cover" />
 
         <div class="absolute top-3 left-3 flex gap-2">
@@ -25,7 +26,7 @@
           {{ event.dateTimeLabel }}
         </div>
 
-        <a [routerLink]="['/evenements', event.id]">
+        <a [routerLink]="['/evenements', event.id]" [class.pointer-events-none]="event.disabled" [attr.tabindex]="event.disabled ? -1 : null">
           <h3 class="font-bold text-slate-900 mb-1.5 leading-snug hover:text-blue-700 transition-colors">
             {{ event.title }}
           </h3>
@@ -38,13 +39,19 @@
             <span class="block text-[10px] font-bold text-slate-400 tracking-wide">{{ event.ticketLabel }}</span>
             <span class="block text-blue-700 font-extrabold">{{ event.priceLabel }}</span>
           </div>
-          <a
-            [routerLink]="['/evenements', event.id]"
-            class="flex items-center gap-1.5 bg-blue-700 text-white rounded-xl px-4 py-2 text-sm font-bold hover:bg-blue-800 transition-colors whitespace-nowrap"
-          >
-            Acheter
-            <app-icon name="arrow-right" [size]="14"></app-icon>
-          </a>
+          @if (event.disabled) {
+            <span class="flex items-center gap-1.5 bg-slate-200 text-slate-500 rounded-xl px-4 py-2 text-sm font-bold whitespace-nowrap cursor-not-allowed select-none">
+              {{ event.stateLabel }}
+            </span>
+          } @else {
+            <a
+              [routerLink]="['/evenements', event.id]"
+              class="flex items-center gap-1.5 bg-blue-700 text-white rounded-xl px-4 py-2 text-sm font-bold hover:bg-blue-800 transition-colors whitespace-nowrap"
+            >
+              Acheter
+              <app-icon name="arrow-right" [size]="14"></app-icon>
+            </a>
+          }
         </div>
       </div>
     </div>

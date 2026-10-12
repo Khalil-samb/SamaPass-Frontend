@@ -4,6 +4,9 @@ import { IconComponent } from '../icon-component/icon-component';
 // Les différents types de badge qu'on peut poser sur une carte, avec leur couleur.
 export type EventCardBadgeVariant = 'featured' | 'official' | 'dark' | 'urgent' | 'vip';
 
+// État des ventes calculé par le serveur (champ « salesState » de l'API).
+export type EtatVentes = 'open' | 'not_open' | 'closed' | 'sold_out' | 'ended' | 'unavailable';
+
 export interface EventCardBadge {
   text: string;
   variant: EventCardBadgeVariant;
@@ -21,6 +24,10 @@ export interface EventCardVM {
   ticketLabel: string;       // ex: "PRIX DU BILLET", "PASS FESTIVAL", "BILLET VIP"
   priceLabel: string;        // ex: "10 000 FCFA"
   badges: EventCardBadge[];
+  // Si true, la carte est grisée et non cliquable (événement terminé, complet ou ventes closes).
+  disabled?: boolean;
+  // Texte affiché à la place du bouton « Acheter » quand la carte est désactivée.
+  stateLabel?: string;
 }
 
 const CLASSES_PAR_BADGE: Record<EventCardBadgeVariant, string> = {

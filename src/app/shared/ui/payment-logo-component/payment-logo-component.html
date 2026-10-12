@@ -1,0 +1,16 @@
+    @if (logo() && !imageIndisponible()) {
+      <img
+        [src]="logo()!.src"
+        [alt]="libelle()"
+        class="inline-block w-auto object-contain align-middle"
+        [style.height.px]="height"
+        (error)="imageIndisponible.set(true)"
+      />
+    } @else {
+      <!-- Filet de sécurité : si l'image est introuvable (mauvais nom, mauvais
+           dossier), on affiche le nom en texte plutôt qu'une image cassée. -->
+      <span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-700 align-middle">
+        {{ libelle() }}
+      </span>
+    }
+

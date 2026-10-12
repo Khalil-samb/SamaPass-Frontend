@@ -5,7 +5,7 @@
 
   <div class="grid gap-6" [style.gridTemplateColumns]="'repeat(' + steps.length + ', minmax(0, 1fr))'">
     @for (etape of steps; track $index) {
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+      <div class="bg-white rounded-2xl border border-slate-100  p-6">
         <!-- Le numéro (1, 2, 3...) est calculé automatiquement, jamais écrit à la main -->
         <div class="w-9 h-9 mx-auto mb-4 rounded-full bg-blue-900 text-white font-bold flex items-center justify-center">
             {{ $index + 1 }}
