@@ -1,1 +1,76 @@
-<p>my-events-list-component works!</p>
+<div class="flex items-center justify-between mb-6">
+      <h1 class="text-lg font-extrabold text-slate-900">Mes événements</h1>
+      <a routerLink="/organisateur/evenements/nouveau" class="flex items-center gap-2 bg-orange-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-orange-700">
+        <app-icon name="rocket" [size]="15"></app-icon>
+        Créer un événement
+      </a>
+    </div>
+
+    <!-- Filtres par statut -->
+    <div class="flex flex-wrap gap-2 mb-6">
+      @for (filtre of filtresStatut; track filtre.valeur) {
+        <button
+          type="button"
+          (click)="statutFiltre.set(filtre.valeur)"
+          class="px-4 py-2 rounded-full text-sm font-semibold transition-colors"
+          [class]="statutFiltre() === filtre.valeur ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'"
+        >
+          {{ filtre.label }}
+        </button>
+      }
+    </div>
+
+    @if (eventStore.loading()) {
+      <p class="text-slate-400">Chargement...</p>
+    } @else if (evenementsFiltres().length === 0) {
+      <div class="bg-white border border-slate-100 rounded-2xl p-12 text-center">
+        <h2 class="font-extrabold text-slate-900 mb-2">Aucun événement {{ statutFiltre() ? 'dans ce statut' : 'pour l\\'instant' }}</h2>
+        <p class="text-slate-500 text-sm mb-6">Créez votre premier événement pour commencer à vendre vos billets.</p>
+        <a routerLink="/organisateur/evenements/nouveau" class="inline-flex items-center gap-2 bg-orange-600 text-white rounded-xl px-6 py-3 font-bold text-sm hover:bg-orange-700">
+          <app-icon name="rocket" [size]="16"></app-icon>
+          Créer un événement
+        </a>
+      </div>
+    } @else {
+      <div class="space-y-3">
+        @for (ligne of evenementsFiltres(); track ligne.event.id) {
+          <div class="bg-white border border-slate-100 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+
+            <img [src]="ligne.event.coverImageUrl" [alt]="ligne.event.title" class="w-full sm:w-24 h-24 rounded-xl object-cover shrink-0" />
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <h2 class="font-bold text-slate-800 truncate">{{ ligne.event.title }}</h2>
+                <app-badge-status [status]="ligne.event.status"></app-badge-status>
+              </div>
+              <p class="text-xs text-slate-400">{{ categoryName(ligne.event.categoryId) }} · {{ ligne.event.venue }}, {{ cityName(ligne.event.cityId) }}</p>
+              <p class="text-xs text-slate-400">{{ dateLabel(ligne.event.startDate) }}</p>
+            </div>
+
+            <div class="flex items-center gap-6 shrink-0">
+              <div class="text-center">
+                <span class="block text-[10px] font-bold text-slate-400 tracking-wide">BILLETS</span>
+                <span class="block font-extrabold text-slate-800 text-sm">{{ ligne.billetsVendus }}/{{ ligne.billetsTotal }}</span>
+              </div>
+              <div class="text-center">
+                <span class="block text-[10px] font-bold text-slate-400 tracking-wide">RECETTES</span>
+                <span class="block font-extrabold text-slate-800 text-sm">{{ ligne.recettes.toLocaleString('fr-FR') }} FCFA</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                (click)="ouvrirTableauDeBord(ligne.event.id)"
+                class="bg-orange-600 text-white rounded-lg px-3.5 py-2 text-xs font-semibold hover:bg-orange-700"
+              >
+                Tableau de bord
+              </button>
+              <a [routerLink]="['/evenements', ligne.event.id]" target="_blank" class="border border-slate-200 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                Voir
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+    }
