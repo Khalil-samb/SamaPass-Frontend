@@ -1,29 +1,37 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, tap } from 'rxjs';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments';
 import { Organizer } from '../models/organizer.model';
+
+
+const BASE_URL_ADMIN = `${environment.apiUrl}/api/auth/admin`;
+const BASE_URL_ORGANIZER = `${environment.apiUrl}/api/auth`;
 
 @Injectable({ providedIn: 'root' })
 export class OrganizersService {
-  
-  private organizersCache = signal<Organizer[] | null>(null);
-
   constructor(private http: HttpClient) {}
 
+  // Admin uniquement : tous les organisateurs
   getAll(): Observable<Organizer[]> {
-    const dejaCharges = this.organizersCache();
-    if (dejaCharges){
-      return of(dejaCharges);
-    }
-    return this.http
-    .get<Organizer[]>('mock-data/organizers.json')
-    .pipe(tap((organizers) => this.organizersCache.set(organizers)));
+    return this.http.get<Organizer[]>(`${BASE_URL_ADMIN}/organizers/`);
   }
 
-  //Enregister un nouvel organisateur (apés validation du formulaire d'inscription).
-  //Comme il y'a pas encore de vrai backend, ca reste en mémoire pour la session.
-  ajouterOrganizer(nouvelOrganizer: Organizer){
-    const actuels =this.organizersCache() ?? [];
-    this.organizersCache.set([...actuels, nouvelOrganizer]);
+  // ⚠️ NOUVEAU — utilisé par SelectedEventStore : l'organisateur connecté
+  // récupère SON PROPRE profil, pas la liste complète.
+  getMonProfil(): Observable<Organizer> {
+    return this.http.get<Organizer>(`${BASE_URL_ORGANIZER}/organizer/me/`);
+  }
+
+  ajouterOrganizer(donnees: Partial<Organizer>): Observable<Organizer> {
+    return this.http.post<Organizer>(`${BASE_URL_ORGANIZER}/organizers/`, donnees);
+  }
+
+  mettreAJourOrganizer(id: string, updates: Partial<Organizer>): Observable<Organizer> {
+    return this.http.patch<Organizer>(`${BASE_URL_ADMIN}/organizers/${id}/`, updates);
+  }
+
+  changerStatut(organizerId: string): Observable<{ id: string; status: string }> {
+    return this.http.patch<{ id: string; status: string }>(`${BASE_URL_ADMIN}/organizers/${organizerId}/status/`, {});
   }
 }

@@ -8,22 +8,33 @@ export interface ResultatPaiement {
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
-  // En mode test : 90% des paiements réussissent, pour pouvoir quand même
-  // tester l'écran d'échec sans devoir tricher à chaque fois.
+  // Le backend est la source de vérité pour le paiement. Ce simulateur
+  // ne doit plus échouer au hasard, sinon l’interface affiche un faux
+  // "solde insuffisant" alors que le vrai appel a réussi.
   async payer(montant: number, methode: PaymentMethod): Promise<ResultatPaiement> {
-    await this.attendre(1200); // simule le temps de traitement réel d'un paiement
+    await this.attendre(1200);
 
-    const succes = Math.random() > 0.1; // 90% de chances de succès
-    const prefixe = methode.toUpperCase(); // pour que la référence de paiement indique le moyen utilisé
-    const numeroAleatoire = Math.floor(Math.random() * 9_000_000 + 1_000_000); // génère un nombre aléatoire à 7 chiffres (entre 1 000 000 et 9 999 999)
+    const forcerEchec = this.shouldForceFailure();
+    const prefixe = methode.toUpperCase();
+    const numeroAleatoire = Math.floor(Math.random() * 9_000_000 + 1_000_000);
 
     return {
-      success: succes,
-      reference: `${prefixe}-SN-${numeroAleatoire}`, // exemple : "WAVE-SN-1234567"
+      success: !forcerEchec,
+      reference: `${prefixe}-SN-${numeroAleatoire}`,
     };
   }
 
   private attendre(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private shouldForceFailure(): boolean {
+    if (typeof window === 'undefined') return false;
+
+    const fromUrl = new URLSearchParams(window.location.search).get('forcePaymentFailure');
+    if (fromUrl === '1' || fromUrl === 'true') return true;
+
+    const fromStorage = window.localStorage.getItem('forcePaymentFailure');
+    return fromStorage === '1' || fromStorage === 'true';
   }
 }
