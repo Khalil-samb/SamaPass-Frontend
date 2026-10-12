@@ -1,123 +1,179 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { firstValueFrom, forkJoin } from 'rxjs';
 
-import { AuthStore } from './auth.store';
 import { OrganizersService } from '../services/organizers.service';
 import { EventsService } from '../services/events.service';
-import { TransactionsService } from '../services/transactions.service';
 import { PayoutsService } from '../services/payouts.service';
-import { TicketTypesService } from '../services/ticket-types.service';
-import { TicketsService } from '../services/tickets.service';
 
-import { EventEntiy } from '../models/event.model';
+import { EventEntity } from '../models/event.model';
 import { Organizer } from '../models/organizer.model';
-import { Transaction } from '../models/transaction.model';
-import { TicketType } from '../models/ticket-type.model';
-import { Ticket } from '../models/ticket.model';
+
+// Toutes les 20 secondes, tant qu'une page de l'espace organisateur qui affiche
+// des chiffres est ouverte ET visible. Mettre 0 pour désactiver ce minuteur
+// (les rafraîchissements « au retour sur l'onglet » et « à l'ouverture d'une
+// page » continuent de fonctionner).
+const INTERVALLE_RAFRAICHISSEMENT_MS = 20_000;
+
+// Deux événements de retour au premier plan très rapprochés (changement d'onglet
+// ET focus de la fenêtre arrivent souvent ensemble) ne déclenchent qu'un seul
+// rechargement.
+const DELAI_MIN_ENTRE_RETOURS_MS = 2_000;
 
 @Injectable({ providedIn: 'root' })
 export class SelectedEventStore {
-  // Toutes les données de l'organisateur connecté, chargées une seule fois.
-  // Les pages (Tableau de bord, Ventes, Scanner...) filtrent ensuite localement
-  // par événement sélectionné, sans jamais re-télécharger quoi que ce soit.
-  events = signal<EventEntiy[]>([]);
-  allTransactions = signal<Transaction[]>([]);
-  allTicketTypes = signal<TicketType[]>([]);
-  allTickets = signal<Ticket[]>([]);
-
+  events = signal<EventEntity[]>([]);
   selectedEventId = signal<string | null>(null);
   organizer = signal<Organizer | null>(null);
   loading = signal(true);
-
-  // Reste global, tous événements confondus — voir SPEC_Organisateur_SamaPass.md
   soldeAReverser = signal(0);
+
+  // Augmente chaque fois que les données ont VRAIMENT changé (jamais pour un
+  // rechargement qui ramène exactement les mêmes chiffres). Les pages qui
+  // chargent leurs propres données (billets, transactions...) lisent ce compteur
+  // dans un effect() : elles se rechargent toutes seules, et seulement si utile.
+  versionDonnees = signal(0);
 
   selectedEvent = computed(() => this.events().find((e) => e.id === this.selectedEventId()) ?? null);
 
-  // Les 3 filtres les plus utiles, prêts à être réutilisés par n'importe quelle page organisateur
-  ticketTypesEvenementSelectionne = computed(() =>
-    this.allTicketTypes().filter((t) => t.eventId === this.selectedEventId())
-  );
-  transactionsEvenementSelectionne = computed(() =>
-    this.allTransactions().filter((t) => t.eventId === this.selectedEventId() && t.type === 'ticket_purchase')
-  );
-  ticketsEvenementSelectionne = computed(() =>
-    this.allTickets().filter((t) => t.eventId === this.selectedEventId())
-  );
+  //  Les catégories de billets sont maintenant DIRECTEMENT imbriquées
+  // dans chaque événement (grâce à EventDetailSerializer côté Django) —
+  // plus besoin d'un signal séparé ni d'un appel réseau en plus.
+  ticketTypesEvenementSelectionne = computed(() => this.selectedEvent()?.ticketTypes ?? []);
+
+  private signatureActuelle = '';
+  private rafraichissementEnCours: Promise<void> | null = null;
+  private rafraichissementRedemande = false;
+  private dernierRetourAuPremierPlan = 0;
+  private nbEcransActifs = 0;
+  private minuteur: ReturnType<typeof setInterval> | null = null;
 
   constructor(
-    private authStore: AuthStore,
     private organizersService: OrganizersService,
     private eventsService: EventsService,
-    private transactionsService: TransactionsService,
-    private payoutsService: PayoutsService,
-    private ticketTypesService: TicketTypesService,
-    private ticketsService: TicketsService
+    private payoutsService: PayoutsService
   ) {}
 
+  // Chargement COMPLET (profil + événements + solde), avec l'indicateur
+  // « Chargement... ». Appelé à l'ouverture de l'espace organisateur.
   charger() {
-    const utilisateur = this.authStore.currentUser();
-    if (!utilisateur) {
-      this.loading.set(false);
-      return;
+    this.loading.set(true);
+
+    this.organizersService.getMonProfil().subscribe({
+      next: (organizer) => {
+        this.organizer.set(organizer);
+
+        forkJoin({
+          events: this.eventsService.getMesEvenements(),
+          solde: this.payoutsService.getSolde(),
+        }).subscribe({
+          next: ({ events, solde }) => {
+            this.appliquer(events, solde.soldeDisponible);
+            this.loading.set(false);
+          },
+          error: () => this.loading.set(false),
+        });
+      },
+      error: () => this.loading.set(false),
+    });
+  }
+
+  // Rechargement SILENCIEUX : pas d'indicateur « Chargement... », l'écran ne
+  // clignote pas. En cas d'erreur réseau, on garde les chiffres actuels.
+  //
+  // Si un rechargement est déjà en route quand on en redemande un (ex. : juste
+  // après l'enregistrement d'une modification), le premier a peut-être été lancé
+  // AVANT la modification et ramènerait de vieux chiffres : on en enchaîne donc
+  // un second, et la promesse rendue ne se termine qu'après lui.
+  rafraichir(): Promise<void> {
+    if (this.rafraichissementEnCours) {
+      this.rafraichissementRedemande = true;
+      return this.rafraichissementEnCours;
     }
 
-    this.organizersService.getAll().subscribe((organizers) => {
-      const monOrganizer = organizers.find((o) => o.userId === utilisateur.id) ?? null;
-      this.organizer.set(monOrganizer);
-
-      if (!monOrganizer) {
-        this.loading.set(false);
-        return;
+    this.rafraichissementEnCours = (async () => {
+      try {
+        do {
+          this.rafraichissementRedemande = false;
+          try {
+            const { events, solde } = await firstValueFrom(
+              forkJoin({
+                events: this.eventsService.getMesEvenements(),
+                solde: this.payoutsService.getSolde(),
+              })
+            );
+            this.appliquer(events, solde.soldeDisponible);
+          } catch {
+            // réseau coupé, serveur indisponible... : on garde ce qu'on a
+          }
+        } while (this.rafraichissementRedemande);
+      } finally {
+        this.rafraichissementEnCours = null;
       }
+    })();
 
-      forkJoin({
-        events: this.eventsService.getAll(),
-        transactions: this.transactionsService.getAll(),
-        payouts: this.payoutsService.getAll(),
-        ticketTypes: this.ticketTypesService.getAll(),
-        tickets: this.ticketsService.getAll(),
-      }).subscribe(({ events, transactions, payouts, ticketTypes, tickets }) => {
-        const mesEvenements = (events ?? []).filter((e) => e.organizerId === monOrganizer.id);
-        this.events.set(mesEvenements);
-        this.allTransactions.set(transactions ?? []);
-        this.allTicketTypes.set(ticketTypes ?? []);
-        this.allTickets.set(tickets ?? []);
+    return this.rafraichissementEnCours;
+  }
 
-        this.calculerSolde(monOrganizer.id, mesEvenements, transactions ?? [], payouts ?? []);
+  // Une page qui affiche des chiffres déclare qu'elle est ouverte (utiliser) puis
+  // qu'elle se ferme (liberer). Tant qu'au moins une est ouverte, les chiffres se
+  // rafraîchissent d'eux-mêmes ; quand il n'y en a plus, tout s'arrête.
+  utiliser() {
+    this.nbEcransActifs++;
+    if (this.nbEcransActifs > 1 || typeof document === 'undefined') return;
 
-        if (!this.selectedEventId() && mesEvenements.length > 0) {
-          const enCours = mesEvenements.find((e) => e.status === 'published') ?? mesEvenements[0];
-          this.selectedEventId.set(enCours.id);
-        }
+    if (INTERVALLE_RAFRAICHISSEMENT_MS > 0) {
+      this.minuteur = setInterval(() => {
+        if (document.visibilityState === 'visible') void this.rafraichir();
+      }, INTERVALLE_RAFRAICHISSEMENT_MS);
+    }
+    document.addEventListener('visibilitychange', this.auRetourAuPremierPlan);
+    window.addEventListener('focus', this.auRetourAuPremierPlan);
+  }
 
-        this.loading.set(false);
-      });
-    });
+  liberer() {
+    this.nbEcransActifs = Math.max(0, this.nbEcransActifs - 1);
+    if (this.nbEcransActifs > 0) return;
+
+    if (this.minuteur) {
+      clearInterval(this.minuteur);
+      this.minuteur = null;
+    }
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', this.auRetourAuPremierPlan);
+      window.removeEventListener('focus', this.auRetourAuPremierPlan);
+    }
   }
 
   selectionner(eventId: string) {
     this.selectedEventId.set(eventId);
   }
 
-  private calculerSolde(
-    organizerId: string,
-    mesEvenements: EventEntiy[],
-    transactions: Transaction[],
-    payouts: { organizerId: string; status: string; amount: number }[]
-  ) {
-    const idsEvenements = new Set(mesEvenements.map((e) => e.id));
+  // Quelqu'un revient sur l'onglet (ex. après avoir acheté un billet de test dans
+  // un autre onglet) : les chiffres sont mis à jour sans qu'il ait rien à faire.
+  private auRetourAuPremierPlan = () => {
+    if (document.visibilityState !== 'visible') return;
+    const maintenant = Date.now();
+    if (maintenant - this.dernierRetourAuPremierPlan < DELAI_MIN_ENTRE_RETOURS_MS) return;
+    this.dernierRetourAuPremierPlan = maintenant;
+    void this.rafraichir();
+  };
 
-    const recettesBrutes = transactions
-      .filter((t) => t.type === 'ticket_purchase' && t.status === 'success' && idsEvenements.has(t.eventId))
-      .reduce((somme, t) => somme + t.amount, 0);
+  // Met à jour les signaux, mais SEULEMENT si les données ont changé : un
+  // rechargement qui ramène exactement les mêmes chiffres ne relance rien.
+  private appliquer(events: EventEntity[], solde: number) {
+    const signature = JSON.stringify(events) + '#' + solde;
+    if (signature !== this.signatureActuelle) {
+      this.signatureActuelle = signature;
+      this.events.set(events);
+      this.soldeAReverser.set(solde);
+      this.versionDonnees.update((v) => v + 1);
+    }
 
-    const netDu = recettesBrutes * 0.95;
-
-    const dejaVerse = payouts
-      .filter((p) => p.organizerId === organizerId && p.status !== 'failed')
-      .reduce((somme, p) => somme + p.amount, 0);
-
-    this.soldeAReverser.set(Math.max(0, Math.round(netDu - dejaVerse)));
+    // Événement sélectionné : à la première arrivée, ou s'il n'existe plus
+    const actuel = this.selectedEventId();
+    if ((!actuel || !events.some((e) => e.id === actuel)) && events.length > 0) {
+      const enCours = events.find((e) => e.status === 'published') ?? events[0];
+      this.selectedEventId.set(enCours.id);
+    }
   }
 }
