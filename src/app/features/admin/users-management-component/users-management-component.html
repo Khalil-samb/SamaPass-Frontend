@@ -1,1 +1,201 @@
-<p>users-management-component works!</p>
+<!-- Fil d'ariane & En-tête -->
+<div class="mb-5 flex items-center justify-between">
+  <div>
+    <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400 tracking-wider uppercase mb-1">
+      <span>KCROWD</span>
+      <span>/</span>
+      <span>SUPERVISION</span>
+      <span>/</span>
+      <span class="text-[#0042D8]">UTILISATEURS</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <h1 class="text-xl font-black text-slate-900 tracking-tight">Gestion des Utilisateurs</h1>
+      <span class="bg-blue-50 text-[#0042D8] border border-blue-100 px-2.5 py-0.5 rounded-full text-xs font-bold">
+        {{ tousLesUtilisateurs().length }} inscrit(s)
+      </span>
+    </div>
+  </div>
+
+  <!-- Les données sont chargées à l'ouverture : ce bouton les recharge
+       (remplace l'ancien "Sync live 2s", qui n'existait pas) -->
+  <button
+    type="button"
+    (click)="adminStore.charger()"
+    class="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 hover:text-[#0042D8] bg-white border border-slate-200/80 px-3 py-1.5 rounded-xl  transition-colors"
+  >
+    <app-icon name="rotate-cw" [size]="12"></app-icon>
+    <span>Actualiser</span>
+  </button>
+</div>
+
+<!-- Barre de Recherche + Filtres Onglets -->
+<div class="bg-white border border-slate-200/80 rounded-2xl p-2 mb-4 flex flex-col sm:flex-row items-center justify-between gap-3 ">
+  <div class="relative flex-1 w-full">
+    <app-icon name="search" [size]="16" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></app-icon>
+    <input
+      type="text"
+      [(ngModel)]="recherche"
+      placeholder="Rechercher par nom, téléphone ou email..."
+      class="w-full pl-10 pr-4 py-2 bg-slate-50/60 border border-slate-100 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#0042D8] transition-all"
+    />
+  </div>
+
+  <div class="flex items-center bg-slate-100/80 p-1 rounded-xl text-xs font-bold text-slate-500 w-full sm:w-auto">
+    <button
+      type="button"
+      (click)="filtreStatut.set('all')"
+      class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5"
+      [class]="filtreStatut() === 'all' ? 'bg-white text-slate-900 ' : 'hover:text-slate-900'"
+    >
+      <span>Tous</span>
+      <span class="text-[10px] opacity-70">{{ tousLesUtilisateurs().length }}</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="filtreStatut.set('active')"
+      class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5"
+      [class]="filtreStatut() === 'active' ? 'bg-white text-slate-900 ' : 'hover:text-slate-900'"
+    >
+      <span>Actifs</span>
+      <span class="text-[10px] text-emerald-600 font-extrabold">{{ nombreActifs() }}</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="filtreStatut.set('suspended')"
+      class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5"
+      [class]="filtreStatut() === 'suspended' ? 'bg-white text-slate-900 ' : 'hover:text-slate-900'"
+    >
+      <span>Suspendus</span>
+      <span class="text-[10px] text-red-600 font-extrabold">{{ nombreSuspendus() }}</span>
+    </button>
+  </div>
+</div>
+
+<!-- Bandeau de confirmation -->
+@if (utilisateurCible(); as u) {
+  <div class="bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ">
+    <div class="flex items-start gap-3">
+      <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+        <app-icon name="alert-triangle" [size]="18"></app-icon>
+      </div>
+      <div>
+        <h4 class="text-xs font-black text-amber-950">
+          {{ estSuspendu(u) ? 'Confirmer la réactivation du compte de ' : 'Confirmer la suspension du compte de ' }}{{ nomComplet(u) }} ?
+        </h4>
+        <p class="text-[11px] font-medium text-amber-800/80 mt-0.5">
+          {{ estSuspendu(u) ? 'Le compte repassera au statut « Actif ».' : 'Le compte passera au statut « Suspendu ». Cette mesure est réversible à tout moment.' }}
+        </p>
+        @if (erreurAction()) {
+          <p class="text-[11px] font-bold text-red-700 mt-1">{{ erreurAction() }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+      <button
+        type="button"
+        (click)="annulerAction()"
+        class="bg-white border border-amber-200 text-amber-900 rounded-xl px-4 py-2 text-xs font-bold hover:bg-amber-100/50 transition-all "
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        [disabled]="actionEnCours()"
+        (click)="confirmerAction()"
+        class="rounded-xl px-4 py-2 text-xs font-bold text-white transition-all  disabled:opacity-60"
+        [class]="estSuspendu(u) ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-[#C84113] hover:bg-[#b0370f]'"
+      >
+        {{ actionEnCours() ? 'En cours...' : (estSuspendu(u) ? 'Confirmer la réactivation' : 'Confirmer la suspension') }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Tableau des utilisateurs -->
+<div class="bg-white border border-slate-200/80 rounded-2xl overflow-hidden ">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-slate-50/60 border-b border-slate-100 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+          <th class="px-5 py-3.5">NOM COMPLET & EMAIL</th>
+          <th class="px-5 py-3.5">TÉLÉPHONE</th>
+          <th class="px-5 py-3.5">DATE D'INSCRIPTION</th>
+          <th class="px-5 py-3.5">BILLETS ACHETÉS</th>
+          <th class="px-5 py-3.5">STATUT</th>
+          <th class="px-5 py-3.5 text-right">ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 text-xs">
+        @for (u of utilisateursAffiches(); track u.id) {
+          <tr class="hover:bg-slate-50/50 transition-colors">
+            <td class="px-5 py-3.5">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-xl bg-blue-50 text-[#0042D8] font-black text-xs flex items-center justify-center shrink-0 border border-blue-100/50">
+                  {{ u.firstName.charAt(0) }}{{ u.lastName?.charAt(0) ?? '' }}
+                </span>
+                <div>
+                  <span class="block font-black text-slate-900 leading-snug">{{ nomComplet(u) }}</span>
+                  <span class="block text-[10px] font-medium text-slate-400">{{ u.email || 'Email non renseigné' }}</span>
+                </div>
+              </div>
+            </td>
+
+            <td class="px-5 py-3.5 font-mono text-slate-600 font-semibold text-[11px]">
+              {{ u.phone }}
+            </td>
+
+            <td class="px-5 py-3.5 text-slate-500 font-medium">
+              {{ formaterDate(u.createdAt) }}
+            </td>
+
+            <td class="px-5 py-3.5">
+              <span class="inline-flex items-center gap-1.5 text-[#0042D8] font-bold text-xs">
+                <app-icon name="ticket" [size]="13" class="text-[#0042D8]"></app-icon>
+                {{ adminStore.billetsAchetesPar(u.id) }} billet(s)
+              </span>
+            </td>
+
+            <td class="px-5 py-3.5">
+              @if (estActif(u)) {
+                <span class="inline-flex items-center gap-1 text-[11px] font-extrabold text-emerald-600">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Actif
+                </span>
+              } @else {
+                <span class="inline-flex items-center gap-1 text-[11px] font-extrabold text-red-600">
+                  <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Suspendu
+                </span>
+              }
+            </td>
+
+            <td class="px-5 py-3.5 text-right">
+              <button
+                type="button"
+                (click)="utilisateurCible.set(u)"
+                class="px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all inline-flex items-center gap-1"
+                [class]="estSuspendu(u) ? 'bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100' : 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100'"
+              >
+                <app-icon [name]="estSuspendu(u) ? 'rotate-ccw' : 'ban'" [size]="12"></app-icon>
+                <span>{{ estSuspendu(u) ? 'Réactiver' : 'Suspendre' }}</span>
+              </button>
+            </td>
+          </tr>
+        }
+
+        @if (utilisateursAffiches().length === 0) {
+          <tr>
+            <td colspan="6" class="text-center py-12 text-slate-400 font-medium text-xs">
+              Aucun utilisateur ne correspond à votre recherche.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="px-5 py-3.5 bg-slate-50/40 border-t border-slate-100 text-xs text-slate-400 font-medium">
+    Affichage de {{ utilisateursAffiches().length }} sur {{ tousLesUtilisateurs().length }} utilisateur(s)
+  </div>
+</div>
