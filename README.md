@@ -1,59 +1,57 @@
-# SamaPassFrontend
+# SamaPass : Frontend (Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.0.
+Interface web de **SamaPass / Kcrowd**, plateforme de billetterie en ligne pour le Sénégal : achat de billets avec Wave et Orange Money, QR Codes d'accès, espace organisateur, vidéos d'événements et assistant virtuel.
 
-## Development server
+## Technologies
 
-To start a local development server, run:
+- Angular 22 (composants autonomes, signaux, contrôle de flux `@if` / `@for`)
+- Tailwind CSS 4 et un système de design maison (`src/app/glass.css`)
+- `qrcode` (génération des QR Codes) et `jsqr` (lecture par caméra)
+- Vitest et jsdom pour les tests
+- Docker + Nginx pour la mise en production
 
-```bash
-ng serve
+## Les espaces de l'application
+
+| Espace | Contenu |
+| --- | --- |
+| Public | accueil, recherche, détail d'un événement, achat de billets, fil de vidéos |
+| Utilisateur | mes billets, favoris, notifications, profil |
+| Organisateur | tableau de bord, création et modification d'événements, ventes, reversements, scanner, campagnes sponsorisées, paramètres |
+| Administrateur | utilisateurs, organisateurs, réglages de la plateforme, journal d'activité |
+
+## Structure du code
+
+```
+src/app/
+  core/       modèles, services HTTP, stores d'état, intercepteurs, gardes
+  features/   pages par espace (public, user, organizer, admin, auth, entry, become-organizer)
+  layout/     mises en page des trois espaces
+  shared/     composants, directives et utilitaires partagés
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Lancer en développement
 
 ```bash
-ng generate component component-name
+npm install
+npm start          # http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+L'adresse de l'API se règle dans `src/environments.ts` (backend Django sur le port 8001 en local).
+
+## Tests
 
 ```bash
-ng generate --help
+npm test
 ```
 
-## Building
-
-To build the project run:
+## Docker
 
 ```bash
-ng build
+docker build -t samapass-frontend .
+docker run -p 4200:80 samapass-frontend
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Projets liés
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- **SamaPass_Backend** : API Django / Django REST Framework
+- **chatbot-service** : service FastAPI de l'assistant virtuel
