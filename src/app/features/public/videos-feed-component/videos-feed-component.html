@@ -1,0 +1,220 @@
+<!-- ═══════════ Calque affiché par-dessus chaque vidéo (titre en haut, organisateur en bas, actions à droite) ═══════════ -->
+<ng-template #surimpression let-v>
+  <!-- Haut : titre de l'événement → page d'achat -->
+  <div class="absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-black/75 to-transparent px-4 pt-4 pb-10" [class.pl-16]="!estBureau()">
+    <div class="flex items-start gap-2">
+      <div class="min-w-0 flex-1">
+        @if (v.isSponsored) {
+          <span class="inline-flex items-center gap-1 bg-amber-400 text-amber-950 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full mb-1.5">
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg> Sponsorisé
+          </span>
+        }
+        <a [routerLink]="['/evenements', v.event.id]" class="block font-black text-white text-lg sm:text-xl leading-tight line-clamp-2 hover:underline">{{ v.event.title }}</a>
+        <p class="text-xs text-white/70 mt-1 truncate">
+          {{ formaterDate(v.event.startDate) }}@if (v.event.venue) { · {{ v.event.venue }} }
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Droite : j'aime, vues, son (et plein écran sur grand écran) -->
+  <div class="absolute right-3 bottom-36 z-10 flex flex-col items-center gap-5">
+    <button type="button" (click)="basculerJaime(v)" [attr.aria-label]="v.likedByMe ? 'Je n\'aime plus' : 'J\'aime'" [attr.aria-pressed]="v.likedByMe" class="flex flex-col items-center gap-1 group">
+      <span class="w-12 h-12 rounded-full bg-black/40 backdrop-blur flex items-center justify-center transition-transform group-active:scale-90"
+        [class]="v.likedByMe ? 'text-rose-500' : 'text-white'">
+        <svg class="w-7 h-7" viewBox="0 0 24 24" [attr.fill]="v.likedByMe ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-9.5-9.2C1.1 8.5 3 5 6.4 5c2 0 3.4 1.1 4.1 2.3h3C14.2 6.1 15.6 5 17.6 5 21 5 22.9 8.5 21.5 11.8 19.5 16.4 12 21 12 21Z"/></svg>
+      </span>
+      <span class="text-xs font-bold text-white drop-shadow">{{ formaterCompteur(v.likesCount) }}</span>
+    </button>
+
+    <div class="flex flex-col items-center gap-1" aria-label="Nombre de vues">
+      <span class="w-12 h-12 rounded-full bg-black/40 backdrop-blur flex items-center justify-center text-white">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+      </span>
+      <span class="text-xs font-bold text-white drop-shadow">{{ formaterCompteur(v.viewsCount) }}</span>
+    </div>
+
+    <button type="button" data-son (click)="basculerSon()" [attr.aria-label]="muet() ? 'Activer le son' : 'Couper le son'" class="flex flex-col items-center gap-1">
+      <span class="w-12 h-12 rounded-full backdrop-blur flex items-center justify-center text-white" [class]="muet() ? 'bg-blue-600 animate-pulse' : 'bg-black/40'">
+        @if (muet()) {
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>
+        } @else {
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>
+        }
+      </span>
+      @if (muet()) { <span class="text-[10px] font-bold text-white drop-shadow">Son</span> }
+    </button>
+
+    @if (estBureau()) {
+      <button type="button" (click)="pleinEcran()" aria-label="Plein écran" class="flex flex-col items-center gap-1">
+        <span class="w-12 h-12 rounded-full bg-black/40 backdrop-blur flex items-center justify-center text-white hover:bg-black/60">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        </span>
+      </button>
+    }
+  </div>
+
+  <!-- Bas : organisateur (logo + nom → page d'achat) à gauche, bouton « billets » en verre à droite, puis titre de la vidéo -->
+  <div class="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-4 pb-6 pt-16">
+    <div class="flex items-center justify-between gap-3">
+      <a [routerLink]="['/evenements', v.event.id]" class="inline-flex items-center gap-2.5 min-w-0">
+        @if (v.organizer.logoUrl) {
+          <img [src]="v.organizer.logoUrl" [alt]="v.organizer.name" class="w-11 h-11 rounded-full object-cover bg-white border-2 border-white shrink-0" />
+        } @else {
+          <span class="w-11 h-11 rounded-full bg-blue-600 border-2 border-white text-white font-black text-sm flex items-center justify-center shrink-0">{{ initiales(v.organizer.name) }}</span>
+        }
+        <span class="font-bold text-white text-sm truncate">{{ v.organizer.name }}</span>
+      </a>
+      <!-- Effet « verre dépoli » : fond blanc très transparent + flou de ce qu'il y a derrière + fin liseré clair -->
+      <a [routerLink]="['/evenements', v.event.id]"
+        class="shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-extrabold text-white bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 shadow-lg shadow-black/20 transition-colors">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+        <span class="sm:hidden">Billets</span><span class="hidden sm:inline">Prendre mon billet</span>
+      </a>
+    </div>
+    @if (v.title) { <p class="text-sm text-white/90 mt-3 line-clamp-2">{{ v.title }}</p> }
+  </div>
+</ng-template>
+
+<div class="fixed inset-0 z-50 bg-neutral-950 text-white overflow-hidden">
+
+  <!-- Retour (toujours visible) -->
+  <button type="button" (click)="retour()" aria-label="Retour"
+    class="absolute left-3 z-30 w-10 h-10 rounded-full bg-black/50 backdrop-blur flex items-center justify-center hover:bg-black/70"
+    [class]="estBureau() ? 'top-3' : 'top-4'">
+    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+  </button>
+
+  <!-- Le navigateur a bloqué le son : un toucher n'importe où le rétablit -->
+  @if (sonBloque()) {
+    <div class="absolute inset-x-0 top-4 z-30 flex justify-center pointer-events-none px-14" role="status">
+      <span class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-slate-900">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>
+        Touchez l'écran pour activer le son
+      </span>
+    </div>
+  }
+
+  @if (chargement()) {
+    <div class="h-full flex items-center justify-center" aria-busy="true">
+      <div class="w-10 h-10 rounded-full border-4 border-white/20 border-t-white animate-spin"></div>
+      <span class="sr-only">Chargement des vidéos…</span>
+    </div>
+  } @else if (erreur()) {
+    <div class="h-full flex flex-col items-center justify-center text-center px-6 gap-4">
+      <p class="font-semibold">{{ erreur() }}</p>
+      <button type="button" (click)="charger()" class="bg-white text-slate-900 rounded-full px-6 py-2.5 text-sm font-bold">Réessayer</button>
+    </div>
+  } @else if (videos().length === 0) {
+    <div class="h-full flex flex-col items-center justify-center text-center px-6 gap-3">
+      <div class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center">
+        <svg class="w-8 h-8 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2"/></svg>
+      </div>
+      <h1 class="text-xl font-black">Aucune vidéo pour l'instant</h1>
+      <p class="text-sm text-white/60 max-w-xs">Les organisateurs publient leurs teasers ici. Revenez bientôt, ou parcourez les événements.</p>
+      <a routerLink="/evenements" class="mt-2 bg-blue-600 hover:bg-blue-700 rounded-full px-6 py-2.5 text-sm font-bold">Voir les événements</a>
+    </div>
+  } @else if (estBureau()) {
+
+    <!-- ═══════════ GRAND ÉCRAN : lecteur 3/4 + liste 1/4 ═══════════ -->
+    <div class="h-full grid grid-cols-4 gap-4 p-4 pt-16">
+      <div class="col-span-3 min-h-0">
+        @if (courant(); as v) {
+          <div data-lecteur-principal class="relative h-full rounded-2xl overflow-hidden bg-black">
+            <video data-video [attr.data-id]="v.id" [src]="v.videoUrl" [poster]="v.event.coverImageUrl" loop playsinline preload="auto"
+              (click)="basculerLecture(lecteurPrincipal)" (play)="surLecture(v.id)" (pause)="surPause(v.id)"
+              (timeupdate)="surProgression(lecteurPrincipal, v.id)" (loadedmetadata)="cadrer(lecteurPrincipal)" #lecteurPrincipal
+              class="absolute inset-0 w-full h-full object-contain cursor-pointer"></video>
+
+            @if (enPause()) {
+              <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-[5]">
+                <span class="w-20 h-20 rounded-full bg-black/50 flex items-center justify-center">
+                  <svg class="w-9 h-9 ml-1" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8L7 4Z"/></svg>
+                </span>
+              </div>
+            }
+
+            <ng-container *ngTemplateOutlet="surimpression; context: { $implicit: v }"></ng-container>
+
+            <!-- Barre de progression cliquable -->
+            <div #barre (click)="chercher($event, barre)" class="absolute inset-x-0 bottom-0 z-20 h-2 bg-white/20 cursor-pointer hover:h-3 transition-all" role="progressbar" [attr.aria-valuenow]="progression()" aria-valuemin="0" aria-valuemax="100">
+              <div class="h-full bg-blue-500" [style.width.%]="progression()"></div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <aside class="col-span-1 min-h-0 overflow-y-auto pr-1" aria-label="Autres vidéos">
+        <h2 class="text-xs font-extrabold uppercase tracking-widest text-white/50 mb-3">À suivre</h2>
+        @if (autres().length === 0) {
+          <p class="text-sm text-white/50">C'est la seule vidéo pour l'instant.</p>
+        }
+        <ul class="space-y-3">
+          @for (x of autres(); track x.video.id) {
+            <li>
+              <button type="button" (click)="aller(x.index)" class="w-full text-left flex gap-3 rounded-xl p-2 hover:bg-white/10 transition-colors">
+                <span class="relative w-32 shrink-0 aspect-video rounded-lg overflow-hidden bg-neutral-800">
+                  @if (x.video.event.coverImageUrl) { <img [src]="x.video.event.coverImageUrl" alt="" class="w-full h-full object-cover" /> }
+                  <span class="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8L7 4Z"/></svg>
+                  </span>
+                </span>
+                <span class="min-w-0">
+                  @if (x.video.isSponsored) { <span class="inline-block bg-amber-400 text-amber-950 text-[9px] font-black uppercase px-1.5 py-0.5 rounded mb-1">Sponsorisé</span> }
+                  <span class="block text-sm font-bold leading-snug line-clamp-2">{{ x.video.event.title }}</span>
+                  <span class="block text-xs text-white/60 truncate mt-0.5">{{ x.video.organizer.name }}</span>
+                  <span class="block text-[11px] text-white/40 mt-0.5">{{ formaterCompteur(x.video.viewsCount) }} vue{{ x.video.viewsCount > 1 ? 's' : '' }}</span>
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+      </aside>
+    </div>
+
+  } @else {
+
+    <!-- ═══════════ MOBILE : défilement plein écran, une vidéo par page ═══════════ -->
+    <div class="overflow-y-scroll snap-y snap-mandatory overscroll-contain" style="height: 100dvh; scrollbar-width: none">
+      @for (v of videos(); track v.id; let i = $index) {
+        <section data-slide [attr.data-index]="i" class="relative snap-start snap-always bg-black" style="height: 100dvh">
+          <video data-video [attr.data-id]="v.id" [attr.src]="proche(i) ? v.videoUrl : null" [poster]="v.event.coverImageUrl" loop playsinline preload="metadata" #lecteur
+            (click)="basculerLecture(lecteur)" (play)="surLecture(v.id)" (pause)="surPause(v.id)"
+            (timeupdate)="surProgression(lecteur, v.id)" (loadedmetadata)="cadrer(lecteur)"
+            class="absolute inset-0 w-full h-full object-contain"></video>
+
+          @if (enPause() && i === indexCourant()) {
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-[5]">
+              <span class="w-20 h-20 rounded-full bg-black/50 flex items-center justify-center">
+                <svg class="w-9 h-9 ml-1" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8L7 4Z"/></svg>
+              </span>
+            </div>
+          }
+
+          <ng-container *ngTemplateOutlet="surimpression; context: { $implicit: v }"></ng-container>
+
+          @if (i === indexCourant()) {
+            <div class="absolute inset-x-0 bottom-0 z-20 h-1 bg-white/20"><div class="h-full bg-white" [style.width.%]="progression()"></div></div>
+          }
+        </section>
+      }
+    </div>
+  }
+
+  <!-- Invitation à se connecter pour aimer -->
+  @if (invitationConnexion()) {
+    <div class="absolute inset-0 z-40 bg-black/70 flex items-end sm:items-center justify-center p-4" (click)="fermerInvitation()">
+      <div class="w-full max-w-sm bg-white text-slate-900 rounded-3xl p-6 text-center" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Connexion requise">
+        <div class="mx-auto w-14 h-14 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mb-3">
+          <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-9.5-9.2C1.1 8.5 3 5 6.4 5c2 0 3.4 1.1 4.1 2.3h3C14.2 6.1 15.6 5 17.6 5 21 5 22.9 8.5 21.5 11.8 19.5 16.4 12 21 12 21Z"/></svg>
+        </div>
+        <h2 class="font-black text-lg">Connectez-vous pour aimer</h2>
+        <p class="text-sm text-slate-500 mt-1">Identifiez-vous avec votre numéro de téléphone pour aimer les vidéos et retrouver vos billets.</p>
+        <div class="mt-5 flex flex-col gap-2">
+          <button type="button" (click)="allerSeConnecter()" class="bg-blue-700 hover:bg-blue-800 text-white rounded-xl px-5 py-3 text-sm font-bold">Se connecter</button>
+          <button type="button" (click)="fermerInvitation()" class="text-sm font-semibold text-slate-500 hover:text-slate-700 py-2">Plus tard</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
