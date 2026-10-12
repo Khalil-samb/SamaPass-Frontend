@@ -1,1 +1,103 @@
-<p>my-tickets-component works!</p>
+<div class="org-bg min-h-screen">
+  <div class="mx-auto w-full max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+
+    <!-- Bandeau -->
+    <div appReveal class="banner-hero p-6 sm:p-8">
+      <div class="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+        <div>
+          <p class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Mon espace</p>
+          <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">Mes billets</h1>
+          <p class="mt-1.5 text-sm text-slate-300">Présente le QR Code de chaque billet à l'entrée.</p>
+        </div>
+        @if (!loading() && tousLesBillets().length > 0) {
+          <div class="flex gap-3">
+            <div class="stat-tile px-4 py-3">
+              <p class="text-2xl font-black leading-none">{{ nbAVenir() }}</p>
+              <p class="mt-1 text-[11px] font-medium text-slate-300">À venir</p>
+            </div>
+            <div class="stat-tile px-4 py-3">
+              <p class="text-2xl font-black leading-none">{{ nbPasses() }}</p>
+              <p class="mt-1 text-[11px] font-medium text-slate-300">Passés</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (loading()) {
+      <p class="py-16 text-center text-sm text-slate-400">Chargement...</p>
+    } @else if (tousLesBillets().length === 0) {
+      <div appReveal class="glass-card flex flex-col items-center px-6 py-14 text-center">
+        <span class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white"><app-icon name="ticket" [size]="24"></app-icon></span>
+        <p class="text-base font-extrabold text-slate-900">Aucun billet pour l'instant</p>
+        <p class="mt-1 text-sm text-slate-500">Tes billets achetés apparaîtront ici, prêts à être scannés.</p>
+        <a routerLink="/evenements" class="btn-glow mt-5 px-5 py-2.5 text-sm">Découvrir des événements</a>
+      </div>
+    } @else {
+
+      <!-- Filtres -->
+      <div appReveal class="flex flex-wrap gap-2">
+        <button type="button" (click)="choisir('tous')" class="rounded-xl px-4 py-2 text-xs font-bold transition-colors"
+          [class]="filtre() === 'tous' ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'">
+          Tous · {{ tousLesBillets().length }}
+        </button>
+        <button type="button" (click)="choisir('avenir')" class="rounded-xl px-4 py-2 text-xs font-bold transition-colors"
+          [class]="filtre() === 'avenir' ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'">
+          À venir
+        </button>
+        <button type="button" (click)="choisir('passes')" class="rounded-xl px-4 py-2 text-xs font-bold transition-colors"
+          [class]="filtre() === 'passes' ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'">
+          Passés
+        </button>
+      </div>
+
+      @if (mesBillets().length === 0) {
+        <p class="py-10 text-center text-sm text-slate-500">Aucun billet dans cette catégorie.</p>
+      }
+
+      <!-- Billets en forme de ticket -->
+      <div class="space-y-4">
+        @for (ligne of mesBillets(); track ligne.ticket.id; let i = $index) {
+          <a
+            [appReveal]="(i % 4) * 70"
+            [routerLink]="['/billet', ligne.ticket.id, 'confirmation']"
+            class="group relative flex overflow-hidden rounded-3xl border border-slate-200 bg-white transition-colors hover:border-slate-400"
+          >
+            <!-- Affiche -->
+            <div class="relative w-28 shrink-0 bg-slate-200 sm:w-40">
+              @if (ligne.event?.coverImageUrl) {
+                <img [src]="ligne.event?.coverImageUrl" [alt]="ligne.event?.title" class="absolute inset-0 h-full w-full object-cover" [class]="ligne.aVenir && ligne.ticket.status === 'valid' ? '' : 'grayscale'" />
+              }
+              @if (ligne.event?.startDate) {
+                <span class="absolute left-2.5 top-2.5 rounded-lg bg-white px-2 py-1 text-center leading-none">
+                  <span class="block text-base font-black text-slate-900">{{ jour(ligne.event!.startDate) }}</span>
+                  <span class="block text-[10px] font-bold uppercase text-slate-500">{{ mois(ligne.event!.startDate) }}</span>
+                </span>
+              }
+            </div>
+
+            <!-- Infos -->
+            <div class="flex min-w-0 flex-1 flex-col justify-center gap-1 px-4 py-4 sm:px-5">
+              <span class="text-[10px] font-bold uppercase tracking-wider"
+                [class]="ligne.ticket.status === 'valid' && ligne.aVenir ? 'text-orange-700' : 'text-slate-400'">
+                {{ libelleStatut(ligne) }}
+              </span>
+              <span class="truncate text-base font-extrabold text-slate-900">{{ ligne.event?.title ?? 'Événement' }}</span>
+              <span class="truncate text-xs text-slate-500">
+                @if (ligne.categorieNom) { {{ ligne.categorieNom }} · }Acheté le {{ formaterDate(ligne.ticket.purchaseDate) }}
+              </span>
+            </div>
+
+            <!-- Talon -->
+            <div class="relative flex w-20 shrink-0 flex-col items-center justify-center gap-1.5 border-l-2 border-dashed border-slate-200 text-slate-500 transition-colors group-hover:text-slate-900 sm:w-28">
+              <span class="absolute -top-3 left-0 h-6 w-6 -translate-x-1/2 rounded-full border border-slate-200 bg-slate-100"></span>
+              <span class="absolute -bottom-3 left-0 h-6 w-6 -translate-x-1/2 rounded-full border border-slate-200 bg-slate-100"></span>
+              <app-icon name="qr-code" [size]="26"></app-icon>
+              <span class="text-[11px] font-bold">Voir le billet</span>
+            </div>
+          </a>
+        }
+      </div>
+    }
+  </div>
+</div>
