@@ -1,0 +1,100 @@
+<div class="space-y-6">
+
+  <div appReveal class="glass-card !rounded-2xl p-4 flex items-center gap-3">
+    <span class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+      <app-icon name="shield-check" [size]="20"></app-icon>
+    </span>
+    <p class="text-sm text-slate-700">
+      Vos guichets électroniques Wave et Orange Money seront immédiatement approvisionnés
+      dès la validation ci-dessous.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Résumé de l'événement -->
+      <div appReveal class="glass-card p-6">
+        <div class="flex gap-4">
+          @if (brouillon.coverImageUrl) {
+            <img [src]="brouillon.coverImageUrl" class="w-24 h-24 rounded-2xl object-cover shrink-0" alt="" />
+          } @else {
+            <div class="w-24 h-24 rounded-2xl bg-slate-200/70 shrink-0"></div>
+          }
+          <div class="min-w-0">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Votre événement</p>
+            <h2 class="section-title text-xl mt-0.5">{{ brouillon.title }}</h2>
+            <p class="text-sm text-slate-500 mt-1">{{ brouillon.venue }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grille tarifaire -->
+      <div appReveal class="glass-card p-6">
+        <h2 class="section-title text-lg mb-4">Grille tarifaire</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <th class="pb-2 font-bold">Catégorie</th>
+                <th class="pb-2 font-bold">Prix</th>
+                <th class="pb-2 font-bold text-right">Recette potentielle</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (type of ticketTypesDraft; track type.name) {
+                <tr class="border-t border-slate-200/70">
+                  <td class="py-3 font-bold text-slate-800">{{ type.name }}</td>
+                  <td class="py-3 text-slate-600">{{ type.price.toLocaleString('fr-FR') }} FCFA</td>
+                  <td class="py-3 text-right font-extrabold text-slate-900">{{ (type.price * type.quantityTotal).toLocaleString('fr-FR') }} FCFA</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Engagements légaux -->
+      <div appReveal class="glass-card p-6">
+        <h2 class="section-title text-lg mb-4">Engagements légaux</h2>
+        <label class="flex items-start gap-3 mb-3 cursor-pointer">
+          <input type="checkbox" [(ngModel)]="engagementPrefectoralModel" class="mt-0.5 w-4 h-4 accent-orange-600" />
+          <span class="text-sm text-slate-700">Je certifie détenir les autorisations administratives et de sécurité civile requises.</span>
+        </label>
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" [(ngModel)]="engagementReversementModel" class="mt-0.5 w-4 h-4 accent-orange-600" />
+          <span class="text-sm text-slate-700">J'accepte les conditions de reversement direct sur mes comptes agréés.</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Mise en ligne -->
+    <div appReveal class="banner-hero p-6">
+      <h2 class="font-black text-lg">Mise en ligne immédiate</h2>
+      <p class="mt-4 text-[11px] font-bold uppercase tracking-wider text-white/60">Net estimé</p>
+      <p class="mt-1 text-3xl font-black tracking-tight">{{ netEstime().toLocaleString('fr-FR') }} <span class="text-sm font-bold text-white/60">FCFA</span></p>
+
+      @if (erreur()) {
+        <p class="mt-4 rounded-xl bg-red-500/20 border border-red-300/40 text-red-100 text-xs font-semibold p-3">{{ erreur() }}</p>
+      }
+
+      <button
+        type="button"
+        [disabled]="!peutPublier() || publicationEnCours()"
+        (click)="publier()"
+        class="btn-glow w-full mt-5 py-3.5 text-sm"
+      >
+        {{ publicationEnCours() ? 'Publication en cours...' : "Publier l'événement" }}
+      </button>
+      @if (!peutPublier()) {
+        <p class="mt-2.5 text-center text-[11px] text-white/60">Cochez les deux engagements pour publier.</p>
+      }
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between pt-1">
+    <button type="button" (click)="retour.emit()" class="btn-glass px-4 py-2.5 text-xs">
+      ← Retour vers l'Étape 3
+    </button>
+  </div>
+</div>

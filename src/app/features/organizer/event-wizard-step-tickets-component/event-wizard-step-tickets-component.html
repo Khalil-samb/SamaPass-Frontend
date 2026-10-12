@@ -1,1 +1,231 @@
-<p>event-wizard-step-tickets-component works!</p>
+<div class="space-y-6 font-sans text-slate-800">
+
+  <!-- ═══════════ GRILLE DES BILLETS ═══════════ -->
+  <div appReveal class="glass-card p-6">
+    <h2 class="section-title text-lg mb-1">Grille des billets &amp; catégories</h2>
+    <p class="text-xs text-slate-400 mb-5">Configurez les types d'accès, tarifs, jauges et avantages inclus pour vos participants.</p>
+
+    <div class="space-y-3 mb-4">
+      @for (type of ticketTypes(); track $index) {
+        <div class="border border-slate-200 hover:border-slate-300 rounded-xl p-4 flex items-center justify-between gap-4 transition-all bg-white/60">
+          <div class="flex items-start gap-3.5 flex-1 min-w-0">
+            <!-- Icône représentative du billet -->
+            <div class="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0 mt-0.5">
+              <app-icon name="ticket" [size]="20"></app-icon>
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-bold text-slate-900 text-sm">{{ type.name }}</span>
+                <span class="bg-emerald-100 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase">Actif</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 font-medium">
+                <span>Jauge : <strong class="text-slate-700">{{ type.quantityTotal.toLocaleString('fr-FR') }}</strong> places</span>
+
+                @if (type.perks.length > 0) {
+                  <span class="text-slate-300">•</span>
+                  <div class="flex flex-wrap gap-1.5 items-center">
+                    @for (perk of type.perks; track perk) {
+                      <span class="bg-amber-50 text-amber-800 border border-amber-200/60 text-[11px] font-semibold px-2 py-0.5 rounded-md">
+                        {{ perk }}
+                      </span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4 shrink-0">
+            <span class="font-extrabold text-slate-900 text-base tracking-tight">{{ type.price.toLocaleString('fr-FR') }} <span class="text-xs font-bold text-slate-500">FCFA</span></span>
+            <div class="flex items-center gap-1 border-l border-slate-200 pl-3">
+              <button type="button" (click)="ouvrirEdition($index)" class="p-1.5 text-slate-400 hover:text-orange-600 rounded-md hover:bg-slate-50 transition-colors">
+                <app-icon name="pencil" [size]="16"></app-icon>
+              </button>
+              <button type="button" (click)="supprimerCategorie($index)" class="p-1.5 text-slate-400 hover:text-red-600 rounded-md hover:bg-slate-50 transition-colors">
+                <app-icon name="trash" [size]="16"></app-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (ticketTypes().length === 0) {
+        <div class="border border-dashed border-slate-200 rounded-xl p-6 text-center bg-white/40">
+          <p class="text-xs font-semibold text-slate-400">Aucune catégorie de billet pour l'instant — ajoutez-en au moins une pour ouvrir la billetterie.</p>
+        </div>
+      }
+    </div>
+
+    @if (!formulaireOuvert()) {
+      <button
+        type="button"
+        (click)="ouvrirAjout()"
+        class="w-full border-2 border-dashed border-slate-300 hover:border-orange-400 rounded-xl py-3.5 text-xs font-bold text-slate-600 hover:text-orange-600 hover:bg-orange-50/20 transition-all flex items-center justify-center gap-2"
+      >
+        <app-icon name="plus" [size]="15"></app-icon>
+        Ajouter une nouvelle catégorie de billet (Tarif de groupe, Early Bird, etc.)
+      </button>
+    } @else {
+      <!-- ═══════════ FORMULAIRE D'AJOUT / ÉDITION ═══════════ -->
+      <div class="border border-orange-200 bg-orange-50/30 rounded-xl p-5 ">
+        <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-3">Configuration de la catégorie</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+          <label class="block sm:col-span-1">
+            <span class="text-xs font-bold text-slate-700 block mb-1">NOM DE LA CATÉGORIE <span class="text-orange-600">*</span></span>
+            <input type="text" [(ngModel)]="nomFormModel" placeholder="Ex. Pass VIP / Espace Teranga" class="glass-input font-medium" />
+          </label>
+          <label class="block">
+            <span class="text-xs font-bold text-slate-700 block mb-1">PRIX (FCFA) <span class="text-orange-600">*</span></span>
+            <input type="number" min="0" [(ngModel)]="prixFormModel" placeholder="10000" class="glass-input font-bold text-slate-900" />
+          </label>
+          <label class="block">
+            <span class="text-xs font-bold text-slate-700 block mb-1">QUOTA (PLACES) <span class="text-orange-600">*</span></span>
+            <input type="number" min="1" [(ngModel)]="quotaFormModel" placeholder="500" class="glass-input font-bold text-slate-900" />
+          </label>
+        </div>
+
+        <label class="block mb-4">
+          <span class="text-xs font-bold text-slate-700 block mb-1.5">AVANTAGES INCLUS (FACULTATIF)</span>
+          <div class="flex flex-wrap gap-1.5 mb-2">
+            @for (perk of perksForm(); track perk) {
+              <span class="inline-flex items-center gap-1.5 bg-white border border-slate-200 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-md ">
+                {{ perk }}
+                <button type="button" (click)="retirerPerk(perk)" class="text-slate-400 hover:text-slate-600"><app-icon name="x" [size]="12"></app-icon></button>
+              </span>
+            }
+          </div>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              [(ngModel)]="nouveauPerkModel"
+              (keydown.enter)="ajouterPerk(); $event.preventDefault()"
+              placeholder="Ex. Coupe-file dédié & 1 boisson offerte, puis Entrée"
+              class="glass-input flex-1 font-medium"
+            />
+            <button type="button" (click)="ajouterPerk()" class="border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs px-3 py-2 rounded-lg ">
+              Ajouter
+            </button>
+          </div>
+        </label>
+
+        <div class="flex items-center gap-3 border-t border-orange-200/60 pt-3">
+          <button type="button" (click)="enregistrerCategorie()" class="btn-glow px-4 py-2 text-xs">
+            Enregistrer cette catégorie
+          </button>
+          <button type="button" (click)="formulaireOuvert.set(false)" class="text-xs font-bold text-slate-500 hover:text-slate-800 px-2 py-2">
+            Annuler
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ═══════════ CONDITIONS DE VENTE ═══════════ -->
+  <div appReveal class="glass-card p-6">
+    <h2 class="section-title text-lg mb-1">Conditions de vente &amp; paramètres de paiement</h2>
+    <p class="text-xs text-slate-400 mb-5">Définissez les restrictions de commande, les dates de validité et les canaux de paiement sécurisés.</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <label class="block bg-white/60 border border-slate-200 p-4 rounded-xl">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-xs font-bold text-slate-700">LIMITE D'ACHAT PAR COMMANDE</span>
+          <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2 py-0.5 rounded">Par commande</span>
+        </div>
+        <select [(ngModel)]="maxParAchatModel" class="glass-input font-semibold text-slate-800">
+          <option [ngValue]="2">Max 2 billets par transaction</option>
+          <option [ngValue]="4">Max 4 billets par transaction</option>
+          <option [ngValue]="6">Max 6 billets par transaction</option>
+          <option [ngValue]="10">Max 10 billets par transaction</option>
+        </select>
+        <span class="text-[11px] text-slate-400 block mt-2">Nombre maximum de billets qu'un acheteur peut prendre en une seule commande. Le serveur refuse toute commande au-dessus.</span>
+      </label>
+
+      <label class="block bg-white/60 border border-slate-200 p-4 rounded-xl">
+        <span class="text-xs font-bold text-slate-700 block mb-1.5">DATE ET HEURE DE CLÔTURE DES VENTES</span>
+        <input type="datetime-local" [(ngModel)]="dateClotureVentesModel" class="glass-input font-medium text-slate-800" />
+        <span class="text-[11px] text-slate-400 block mt-2">Vide = les ventes restent ouvertes jusqu'à la fin de l'événement. Après cette date, le serveur refuse tout achat.</span>
+      </label>
+    </div>
+
+    <!-- Commission Kcrowd : une INFORMATION, plus un choix — le client paie toujours le prix affiché -->
+    <div class="mb-6">
+      <span class="text-xs font-bold text-slate-700 block uppercase tracking-wider mb-2">COMMISSION KCROWD</span>
+      <div class="flex items-start gap-3 border border-emerald-200 bg-emerald-50/40 rounded-xl p-4">
+        <app-icon name="shield-check" [size]="18" class="text-emerald-700 shrink-0 mt-0.5"></app-icon>
+        <div class="min-w-0">
+          <span class="text-sm font-bold text-slate-900 block">Commission Kcrowd : {{ tauxCommission().toLocaleString('fr-FR') }} % par billet vendu</span>
+          <span class="text-xs text-slate-500 block mt-1 leading-normal">
+            Le client paie exactement le prix affiché (ex : {{ exemple().prix.toLocaleString('fr-FR') }} FCFA). La commission est prélevée sur chaque vente
+            et déduite automatiquement lors du reversement de votre solde : pour un billet à {{ exemple().prix.toLocaleString('fr-FR') }} FCFA,
+            Kcrowd garde {{ exemple().commission.toLocaleString('fr-FR') }} FCFA et vous recevez {{ exemple().net.toLocaleString('fr-FR') }} FCFA.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modes de paiement -->
+    <div>
+      <span class="text-xs font-bold text-slate-700 block mb-1 uppercase tracking-wider">MODES DE PAIEMENT ACCEPTÉS AU SÉNÉGAL</span>
+      <p class="text-xs text-slate-400 mb-3">Activez les canaux de paiement locaux supportés pour l'encaissement direct.</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <label
+          class="flex items-center gap-3 border rounded-xl p-3.5 cursor-pointer transition-all"
+          [class]="paiementWaveModel ? 'border-orange-400 bg-orange-50/70' : 'border-slate-200 bg-white/60'"
+        >
+          <input type="checkbox" [(ngModel)]="paiementWaveModel" class="rounded accent-orange-600" />
+          <div>
+            <span class="text-xs font-extrabold text-slate-900 block">Wave Mobile Money</span>
+            <span class="text-[10px] text-emerald-600 font-semibold block">Paiement par mobile money</span>
+          </div>
+        </label>
+
+        <label
+          class="flex items-center gap-3 border rounded-xl p-3.5 cursor-pointer transition-all"
+          [class]="paiementOMModel ? 'border-orange-400 bg-orange-50/70' : 'border-slate-200 bg-white/60'"
+        >
+          <input type="checkbox" [(ngModel)]="paiementOMModel" class="rounded accent-orange-600" />
+          <div>
+            <span class="text-xs font-extrabold text-slate-900 block">Orange Money</span>
+            <span class="text-[10px] text-slate-400 font-medium block">OM Sénégal &amp; Sous-région</span>
+          </div>
+        </label>
+
+        <label
+          class="flex items-center gap-3 border rounded-xl p-3.5 cursor-pointer transition-all"
+          [class]="paiementCarteModel ? 'border-orange-400 bg-orange-50/70' : 'border-slate-200 bg-white/60'"
+        >
+          <input type="checkbox" [(ngModel)]="paiementCarteModel" class="rounded accent-orange-600" />
+          <div>
+            <span class="text-xs font-extrabold text-slate-900 block">Cartes bancaires</span>
+            <span class="text-[10px] text-slate-400 font-medium block">Visa &amp; Mastercard</span>
+          </div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ FOOTER BOUTONS FIXES ═══════════ -->
+  <div class="flex items-center justify-between border-t border-slate-200/70 pt-5 mt-8">
+    <button type="button" (click)="retour.emit()" class="btn-glass px-4 py-2.5 text-xs">
+      ← Retour vers l'Étape 1 : Infos &amp; Lieu
+    </button>
+
+    <div class="flex items-center gap-4">
+      @if (erreurValidation()) {
+        <p class="text-red-600 text-xs font-semibold">{{ erreurValidation() }}</p>
+      }
+
+      <button
+        type="button"
+        (click)="continuer()"
+        class="btn-glow px-6 py-3 text-sm"
+      >
+        Continuer vers l'Étape 3 : Contrôle &amp; Accès →
+      </button>
+    </div>
+  </div>
+
+</div>
+

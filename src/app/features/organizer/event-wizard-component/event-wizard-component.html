@@ -1,1 +1,71 @@
-<p>event-wizard-component works!</p>
+<div class="max-w-7xl mx-auto">
+
+  <!-- Fil d'Ariane -->
+  <nav class="flex items-center gap-2 text-xs text-slate-500 mb-4" aria-label="Fil d'Ariane">
+    <a routerLink="/organisateur/evenements" class="font-semibold hover:text-slate-900 transition-colors">Mes événements</a>
+    <span aria-hidden="true">/</span>
+    <span class="text-slate-800 font-bold">Créer un nouvel événement</span>
+  </nav>
+
+  <!-- ═══════════ BANDEAU + ÉTAPES ═══════════ -->
+  <section appReveal class="banner-hero p-6 sm:p-7 mb-6" aria-label="Progression de la création">
+    <p class="text-[11px] font-bold uppercase tracking-widest text-white/60">Nouvel événement</p>
+    <h1 class="mt-1 text-2xl sm:text-3xl font-black tracking-tight">Créer un nouvel événement</h1>
+
+    <ol class="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
+      @for (etape of etapes; track etape.numero) {
+        <li
+          class="stat-tile p-3.5 flex items-center gap-3 transition-colors"
+          [class]="statutEtape(etape.numero) === 'actuelle' ? '!bg-white !border-white' : statutEtape(etape.numero) === 'avenir' ? 'opacity-60' : ''"
+          [attr.aria-current]="statutEtape(etape.numero) === 'actuelle' ? 'step' : null"
+        >
+          <span
+            class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
+            [class]="statutEtape(etape.numero) === 'actuelle' ? 'bg-slate-900 text-white' : statutEtape(etape.numero) === 'faite' ? 'bg-emerald-400/90 text-slate-900' : 'bg-white/15 text-white'"
+          >
+            @if (statutEtape(etape.numero) === 'faite') {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" /></svg>
+            } @else {
+              {{ etape.numero }}
+            }
+          </span>
+          <span class="min-w-0">
+            <span class="block text-[10px] font-bold uppercase tracking-wider" [class]="statutEtape(etape.numero) === 'actuelle' ? 'text-slate-500' : 'text-white/60'">
+              {{ statutEtape(etape.numero) === 'faite' ? 'Validée' : statutEtape(etape.numero) === 'actuelle' ? 'En cours' : 'À venir' }}
+            </span>
+            <span class="block text-sm font-extrabold leading-tight" [class]="statutEtape(etape.numero) === 'actuelle' ? 'text-slate-900' : 'text-white'">{{ etape.titre }}</span>
+          </span>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <!-- ═══════════ CONTENU DE L'ÉTAPE ═══════════ -->
+  @if (etapeActuelle() === 1) {
+    <app-event-wizard-step-info-component
+      [valeursInitiales]="brouillon()"
+      (etapeCompletee)="onEtape1Terminee($event)"
+    />
+  } @else if (etapeActuelle() === 2) {
+    <app-event-wizard-step-tickets-component
+      [valeursInitiales]="ticketTypesDraft()"
+      (etapeCompletee)="onEtape2Terminee($event)"
+      (retour)="etapeActuelle.set(1)"
+    />
+  } @else if (etapeActuelle() === 3) {
+    <app-event-wizad-step-access-component
+      [valeursInitiales]="etape3Draft()"
+      [ticketTypesDisponibles]="ticketTypesDraft()"
+      (etapeCompletee)="onEtape3Terminee($event)"
+      (retour)="etapeActuelle.set(2)"
+    />
+  } @else {
+    <app-event-wizard-step-review-component
+      [brouillon]="brouillon()"
+      [ticketTypesDraft]="ticketTypesDraft()"
+      [etape3Draft]="etape3Draft()"
+      (retour)="etapeActuelle.set(3)"
+    />
+  }
+
+</div>

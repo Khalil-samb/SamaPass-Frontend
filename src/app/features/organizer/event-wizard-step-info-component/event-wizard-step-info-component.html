@@ -1,1 +1,297 @@
-<p>event-wizard-step-info-component works!</p>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 font-sans text-slate-800">
+
+  <!-- ═══════════ COLONNE PRINCIPALE ═══════════ -->
+  <div class="lg:col-span-2 space-y-6">
+
+    <!-- 1. Informations générales -->
+    <div appReveal class="glass-card p-6">
+      <div class="flex items-center gap-3 mb-5">
+        <span class="w-1.5 h-6 rounded-full bg-orange-500 shrink-0"></span>
+        <h2 class="section-title text-lg">Informations générales</h2>
+      </div>
+
+      <label class="block mb-4">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-xs font-bold text-slate-700">TITRE OFFICIEL DE L'ÉVÉNEMENT <span class="text-orange-600">*</span></span>
+          <span class="text-[11px] text-slate-400">{{ titre().length }}/80 caractères</span>
+        </div>
+        <input
+          type="text"
+          [(ngModel)]="titreModel"
+          maxlength="80"
+          placeholder="Ex. Dakar Urban Fest 2026"
+          class="glass-input font-medium text-slate-900 placeholder-slate-400"
+        />
+      </label>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <label class="block">
+          <span class="text-xs font-bold text-slate-700 block mb-1.5">CATÉGORIE / STYLE <span class="text-orange-600">*</span></span>
+          <select [(ngModel)]="categoryIdModel" class="glass-input font-medium text-slate-800">
+            <option value="">Sélectionner...</option>
+            @for (cat of categories(); track cat.id) {
+              <option [value]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="block">
+          <span class="text-xs font-bold text-slate-700 block mb-1.5">FORMAT DE L'EXPÉRIENCE</span>
+          <select [(ngModel)]="experienceFormatModel" class="glass-input font-medium text-slate-800">
+            <option value="">Sélectionner...</option>
+            @for (f of formatsExperience; track f) {
+              <option [value]="f">{{ f }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <label class="block mb-4">
+        <span class="text-xs font-bold text-slate-700 block mb-1.5">ARTISTES &amp; TÊTES D'AFFICHE</span>
+        <div class="flex flex-wrap gap-2 mb-2">
+          @for (artiste of lineup(); track artiste) {
+            <span class="flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-md">
+              {{ artiste }}
+              <button type="button" (click)="retirerArtiste(artiste)" class="text-slate-400 hover:text-slate-600">
+                <app-icon name="x" [size]="12"></app-icon>
+              </button>
+            </span>
+          }
+        </div>
+        <div class="flex gap-2">
+          <input
+            type="text"
+            [(ngModel)]="nouvelArtisteModel"
+            (keydown.enter)="ajouterArtiste(); $event.preventDefault()"
+            placeholder="Nom de l'artiste, puis Entrée"
+            class="glass-input flex-1"
+          />
+          <button type="button" (click)="ajouterArtiste()" class="border border-slate-200 rounded-lg px-3 hover:bg-slate-50 text-slate-600">
+            <app-icon name="plus" [size]="15"></app-icon>
+          </button>
+        </div>
+      </label>
+
+      <label class="block">
+        <span class="text-xs font-bold text-slate-700 block mb-1.5">DESCRIPTION DÉTAILLÉE &amp; PROGRAMMATION <span class="text-orange-600">*</span></span>
+        <textarea
+          [(ngModel)]="descriptionModel"
+          rows="4"
+          placeholder="Présentez votre événement : ambiance, déroulé, ce qui attend le public..."
+          class="glass-input resize-none font-normal text-slate-800"
+        ></textarea>
+      </label>
+    </div>
+
+    <!-- 2. Date, Heures & Agenda -->
+    <div appReveal class="glass-card p-6">
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-3">
+          <span class="w-1.5 h-6 rounded-full bg-orange-500 shrink-0"></span>
+          <h2 class="section-title text-lg">Date, Heures &amp; Agenda</h2>
+        </div>
+        <span class="text-[11px] font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">Fuseau : Dakar (GMT+00:00)</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <label class="block">
+          <span class="text-xs font-bold text-slate-700 block mb-1.5">DATE DE DÉBUT <span class="text-orange-600">*</span></span>
+          <input type="date" [(ngModel)]="dateDebutModel" [min]="dateMinDebut" class="glass-input font-medium text-slate-800" />
+        </label>
+        <label class="block">
+          <span class="text-xs font-bold text-slate-700 block mb-1.5">DATE DE FIN <span class="text-orange-600">*</span></span>
+          <input type="date" [(ngModel)]="dateFinModel" [min]="dateMinFin" class="glass-input font-medium text-slate-800" />
+        </label>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <label class="block bg-white/60 border border-slate-200 p-3 rounded-xl">
+          <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block mb-1">OUVERTURE DES PORTES</span>
+          <input type="time" [(ngModel)]="heureOuvertureModel" class="glass-input !py-1.5 font-bold" />
+        </label>
+        <label class="block bg-orange-50/80 border border-orange-200 p-3 rounded-xl">
+          <span class="text-[10px] font-extrabold text-orange-700 uppercase tracking-wider block mb-1">DÉBUT DU SPECTACLE <span class="text-orange-600">*</span></span>
+          <input type="time" [(ngModel)]="heureDebutModel" class="glass-input !py-1.5 font-bold" />
+        </label>
+        <label class="block bg-white/60 border border-slate-200 p-3 rounded-xl">
+          <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block mb-1">CLÔTURE ESTIMÉE</span>
+          <input type="time" [(ngModel)]="heureClotureModel" class="glass-input !py-1.5 font-bold" />
+        </label>
+      </div>
+    </div>
+
+    <!-- 3. Lieu & Géolocalisation -->
+    <div appReveal class="glass-card p-6">
+      <div class="flex items-center gap-3 mb-1">
+        <span class="w-1.5 h-6 rounded-full bg-orange-500 shrink-0"></span>
+        <h2 class="section-title text-lg">Lieu &amp; Géolocalisation</h2>
+      </div>
+      <p class="text-xs text-slate-400 mb-4 ml-10">Repères GPS précis pour le public et les services de transport (Yango/VTC).</p>
+
+      <div class="flex flex-wrap gap-2 mb-4">
+        @for (site of sitesConnus; track site.label) {
+          <button
+            type="button"
+            (click)="choisirSiteConnu(site)"
+            class="btn-glass px-3 py-1.5 text-xs "
+          >
+            {{ site.label }}
+          </button>
+        }
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <label class="block">
+          <span class="text-xs font-bold text-slate-700 block mb-1.5">NOM EXACT DU SITE OU DE LA SALLE <span class="text-orange-600">*</span></span>
+          <input type="text" [(ngModel)]="venueModel" placeholder="Ex. Esplanade du Monument..." class="glass-input font-medium" />
+        </label>
+        <label class="block">
+          <span class="text-xs font-bold text-slate-700 block mb-1.5">CAPACITÉ MAXIMALE DE LA JAUGE <span class="text-orange-600">*</span></span>
+          <input type="number" min="1" [(ngModel)]="maxCapaciteModel" placeholder="Ex. 5000" class="glass-input font-medium" />
+        </label>
+      </div>
+
+      <label class="block mb-4">
+        <span class="text-xs font-bold text-slate-700 block mb-1.5">VILLE <span class="text-orange-600">*</span></span>
+        <select [(ngModel)]="cityIdModel" class="glass-input font-medium text-slate-800">
+          <option value="">Sélectionner...</option>
+          @for (ville of cities(); track ville.id) {
+            <option [value]="ville.id">{{ ville.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="block mb-4">
+        <span class="text-xs font-bold text-slate-700 block mb-1.5">ADRESSE PRÉCISE &amp; REPÈRE TRANSPORT</span>
+        <input type="text" [(ngModel)]="addressModel" placeholder="Ex. Boulevard de l'Émergence, Ouakam, Dakar" class="glass-input text-slate-800 font-medium" />
+      </label>
+
+      @if (urlApercuCarte()) {
+        <iframe [src]="urlApercuCarte()" class="w-full h-48 rounded-xl border border-slate-200 " loading="lazy"></iframe>
+      }
+    </div>
+
+    <!-- 4. Affiche & Médias -->
+    <div appReveal class="glass-card p-6">
+      <div class="flex items-center gap-3 mb-1">
+        <span class="w-1.5 h-6 rounded-full bg-orange-500 shrink-0"></span>
+        <h2 class="section-title text-lg">Affiche &amp; Médias promotionnels</h2>
+      </div>
+      <p class="text-xs text-slate-400 mb-4 ml-10">Formats acceptés : JPG, PNG, WEBP.</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <span class="text-xs font-bold text-slate-700 block mb-1.5">AFFICHE OFFICIELLE (PORTRAIT 9:16) <span class="text-orange-600">*</span></span>
+          @if (coverImageUrl()) {
+            <div class="relative rounded-xl overflow-hidden border border-slate-200 h-40 group">
+              <img [src]="coverImageUrl()" class="w-full h-full object-cover" alt="Affiche" />
+              <button type="button" (click)="inputAffiche.click()" class="absolute bottom-2 right-2 bg-white/90 text-slate-800 hover:bg-white font-semibold text-xs px-2.5 py-1 rounded-lg ">Remplacer</button>
+            </div>
+          } @else {
+            <button
+              type="button"
+              (click)="inputAffiche.click()"
+              class="w-full h-40 border-2 border-dashed border-slate-300 hover:border-orange-400 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-400 hover:bg-orange-50/60 transition-all"
+            >
+              <app-icon name="image" [size]="22"></app-icon>
+              <span class="text-xs font-semibold text-slate-600">Choisir un fichier</span>
+            </button>
+          }
+          <input #inputAffiche type="file" accept="image/*" (change)="onAfficheSelectionnee($event)" class="hidden" />
+        </div>
+
+        <div>
+          <span class="text-xs font-bold text-slate-700 block mb-1.5">BANNIÈRE WEB HERO (16:9)</span>
+          @if (bannerImageUrl()) {
+            <div class="relative rounded-xl overflow-hidden border border-slate-200 h-40 group">
+              <img [src]="bannerImageUrl()" class="w-full h-full object-cover" alt="Bannière" />
+              <button type="button" (click)="inputBanniere.click()" class="absolute bottom-2 right-2 bg-white/90 text-slate-800 hover:bg-white font-semibold text-xs px-2.5 py-1 rounded-lg ">Remplacer</button>
+            </div>
+          } @else {
+            <button
+              type="button"
+              (click)="inputBanniere.click()"
+              class="w-full h-40 border-2 border-dashed border-slate-300 hover:border-orange-400 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-400 hover:bg-orange-50/60 transition-all"
+            >
+              <app-icon name="image" [size]="22"></app-icon>
+              <span class="text-xs font-semibold text-slate-600">Glisser ou choisir un fichier</span>
+            </button>
+          }
+          <input #inputBanniere type="file" accept="image/*" (change)="onBanniereSelectionnee($event)" class="hidden" />
+        </div>
+      </div>
+
+      <label class="block">
+        <span class="text-xs font-bold text-slate-700 block mb-1.5">LIEN VIDÉO TEASER (YouTube, Instagram Reel ou TikTok)</span>
+        <input type="text" [(ngModel)]="teaserVideoUrlModel" placeholder="https://youtube.com/watch?v=..." class="glass-input font-medium text-slate-800" />
+      </label>
+    </div>
+  </div>
+
+  <!-- ═══════════ SIDEBAR : APERÇU + CHECKLIST ═══════════ -->
+  <div class="space-y-4">
+    <!-- Aperçu carte festivalier -->
+    <div appReveal class="glass-card p-4 lg:sticky lg:top-6">
+      <span class="flex items-center gap-1.5 text-xs font-bold text-orange-700 mb-3">
+        <app-icon name="zap" [size]="13"></app-icon>
+        Aperçu carte festivalier
+      </span>
+
+      <div class="rounded-xl overflow-hidden border border-slate-200 ">
+        <div class="relative h-32 bg-slate-100">
+          @if (coverImageUrl()) {
+            <img [src]="coverImageUrl()" class="w-full h-full object-cover" alt="" />
+          } @else {
+            <div class="w-full h-full flex items-center justify-center text-slate-300">
+              <app-icon name="image" [size]="28"></app-icon>
+            </div>
+          }
+        </div>
+        <div class="p-3 bg-white">
+          <h3 class="font-bold text-slate-800 text-sm mb-1 leading-snug">{{ titre() || 'Titre de votre événement' }}</h3>
+          <p class="text-xs text-slate-400 font-medium">{{ venueModel || 'Lieu' }}{{ villeAffichee() ? ', ' + villeAffichee() : '' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist de conformité -->
+    <div appReveal class="glass-card p-4">
+      <h3 class="font-bold text-slate-800 text-sm mb-3">Checklist de conformité</h3>
+      <ul class="space-y-2.5 text-xs">
+        <li class="flex items-center gap-2" [class]="coverImageUrl() ? 'text-emerald-600 font-medium' : 'text-slate-400'">
+          <app-icon name="check-circle-2" [size]="14"></app-icon>
+          Affiche officielle ajoutée
+        </li>
+        <li class="flex items-center gap-2" [class]="maxCapaciteModel > 0 ? 'text-emerald-600 font-medium' : 'text-slate-400'">
+          <app-icon name="check-circle-2" [size]="14"></app-icon>
+          Jauge déclarée
+        </li>
+        <li>
+          <label class="flex items-start gap-2 cursor-pointer" [class]="autorisationSiteConfirmee() ? 'text-emerald-600 font-medium' : 'text-amber-600'">
+            <input type="checkbox" [(ngModel)]="autorisationSiteModel" class="mt-0.5 rounded accent-orange-600" />
+            <span>Autorisation d'occupation du site confirmée (à joindre avant mise en vente)</span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ FOOTER BOUTONS FIXES ═══════════ -->
+<div class="flex items-center justify-between border-t border-slate-200/70 pt-5 mt-8">
+  @if (erreurValidation()) {
+    <p class="text-red-600 text-xs font-semibold max-w-xl pr-4">{{ erreurValidation() }}</p>
+  } @else {
+    <span></span>
+  }
+  <button
+    type="button"
+    (click)="continuer()"
+    [disabled]="uploadEnCours()"
+    class="btn-glow px-6 py-3 text-sm"
+  >
+    Continuer vers l'Étape 2 : Billetterie &amp; Tarifs →
+  </button>
+</div>
+

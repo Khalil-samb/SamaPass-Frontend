@@ -1,0 +1,245 @@
+@if (chargement()) {
+  <div class="space-y-6 animate-pulse max-w-6xl mx-auto" aria-busy="true">
+    <div class="h-44 rounded-3xl bg-slate-200/70"></div>
+    <div class="h-72 rounded-3xl bg-slate-200/70"></div>
+  </div>
+
+} @else if (introuvable()) {
+  <p class="glass-card max-w-xl mx-auto text-center text-slate-600 p-10">Cet événement n'existe pas, ou ne vous appartient pas.</p>
+
+} @else if (erreurChargement()) {
+  <p class="glass-card max-w-xl mx-auto text-center text-red-700 p-10" role="alert">{{ erreurChargement() }}</p>
+
+} @else if (enregistre()) {
+  <!-- ═══════════ APRÈS ENREGISTREMENT : les VRAIS codes PIN des nouveaux agents ═══════════ -->
+  <div class="max-w-2xl mx-auto py-6">
+    <div appReveal class="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 mb-6">
+      <h1 class="text-lg font-black text-emerald-900 mb-1">Modifications enregistrées</h1>
+      <p class="text-sm text-emerald-800">
+        {{ nouveauxAgents().length > 1 ? 'Vos nouveaux agents ont chacun un code PIN' : 'Votre nouvel agent a un code PIN' }}.
+        Envoyez-le-leur maintenant : c'est le vrai code, celui que l'application de scan acceptera.
+      </p>
+    </div>
+
+    <div class="space-y-3 mb-6">
+      @for (agent of nouveauxAgents(); track agent.name + agent.gateName) {
+        <div appReveal class="glass-card !rounded-2xl p-4 flex items-center justify-between gap-4">
+          <div class="min-w-0">
+            <span class="block font-extrabold text-slate-900 truncate">{{ agent.name }}</span>
+            <span class="block text-xs text-slate-500">Porte {{ agent.gateName }}</span>
+          </div>
+          <span class="text-2xl font-black tracking-[0.3em] text-slate-900 shrink-0">{{ agent.pinCode }}</span>
+          <button type="button" (click)="envoyerCodeParWhatsApp(agent)" class="shrink-0 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 text-xs font-bold transition-colors">
+            Envoyer par WhatsApp
+          </button>
+        </div>
+      }
+    </div>
+
+    <p class="text-xs text-slate-500 mb-6">
+      Vous pourrez renvoyer ces codes plus tard : ouvrez de nouveau l'événement en modification, étape 3.
+    </p>
+
+    <button type="button" (click)="terminer()" class="btn-glow w-full py-3.5 text-sm">Terminer</button>
+  </div>
+
+} @else {
+  <div class="max-w-7xl mx-auto">
+
+    <!-- Fil d'Ariane -->
+    <nav class="flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-4" aria-label="Fil d'Ariane">
+      <a routerLink="/organisateur/evenements" class="font-semibold hover:text-slate-900 transition-colors">Mes événements</a>
+      <span aria-hidden="true">/</span>
+      <span class="text-slate-800 font-bold truncate">Modifier « {{ brouillon().title }} »</span>
+      <span class="text-[10px] font-bold rounded-md px-2 py-0.5" [class]="classesStatut()">{{ libelleStatut() }}</span>
+    </nav>
+
+    @if (erreur()) {
+      <div class="rounded-2xl border border-red-200 bg-red-50 text-red-800 text-sm p-4 mb-4" role="alert">{{ erreur() }}</div>
+    }
+    @if (messageStatut(); as ms) {
+      <div class="rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-sm p-4 mb-4" role="status">{{ ms }}</div>
+    }
+
+    <!-- ═══════════ BANDEAU + ÉTAPES ═══════════ -->
+    <section appReveal class="banner-hero p-6 sm:p-7 mb-6" aria-label="Progression de la modification">
+      <p class="text-[11px] font-bold uppercase tracking-widest text-white/60">Modification</p>
+      <h1 class="mt-1 text-2xl sm:text-3xl font-black tracking-tight truncate">{{ brouillon().title }}</h1>
+
+      <ol class="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        @for (etape of etapes; track etape.numero) {
+          <li
+            class="stat-tile p-3.5 flex items-center gap-3"
+            [class]="statutEtape(etape.numero) === 'actuelle' ? '!bg-white !border-white' : statutEtape(etape.numero) === 'avenir' ? 'opacity-60' : ''"
+            [attr.aria-current]="statutEtape(etape.numero) === 'actuelle' ? 'step' : null"
+          >
+            <span
+              class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
+              [class]="statutEtape(etape.numero) === 'actuelle' ? 'bg-slate-900 text-white' : statutEtape(etape.numero) === 'faite' ? 'bg-emerald-400 text-slate-900' : 'bg-white/15 text-white'"
+            >
+              @if (statutEtape(etape.numero) === 'faite') {
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" /></svg>
+              } @else {
+                {{ etape.numero }}
+              }
+            </span>
+            <span class="min-w-0">
+              <span class="block text-[10px] font-bold uppercase tracking-wider" [class]="statutEtape(etape.numero) === 'actuelle' ? 'text-slate-500' : 'text-white/60'">
+                {{ statutEtape(etape.numero) === 'faite' ? 'Vue' : statutEtape(etape.numero) === 'actuelle' ? 'En cours' : 'À venir' }}
+              </span>
+              <span class="block text-sm font-extrabold leading-tight" [class]="statutEtape(etape.numero) === 'actuelle' ? 'text-slate-900' : 'text-white'">{{ etape.titre }}</span>
+            </span>
+          </li>
+        }
+      </ol>
+    </section>
+
+    @if (etapeActuelle() === 1) {
+      <app-event-wizard-step-info-component
+        [valeursInitiales]="brouillon()"
+        (etapeCompletee)="onEtape1Terminee($event)"
+      />
+    } @else if (etapeActuelle() === 2) {
+      <app-event-wizard-step-tickets-component
+        [valeursInitiales]="ticketTypesDraft()"
+        [reglagesInitiaux]="brouillon()"
+        (etapeCompletee)="onEtape2Terminee($event)"
+        (retour)="etapeActuelle.set(1)"
+      />
+    } @else if (etapeActuelle() === 3) {
+      <app-event-wizad-step-access-component
+        [valeursInitiales]="etape3Draft()"
+        [ticketTypesDisponibles]="ticketTypesDraft()"
+        (etapeCompletee)="onEtape3Terminee($event)"
+        (retour)="etapeActuelle.set(2)"
+      />
+    } @else {
+      <!-- ═══════════ ÉTAPE 4 : RÉCAPITULATIF ═══════════ -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div class="lg:col-span-2 space-y-6">
+
+          <div appReveal class="glass-card p-6">
+            <div class="flex gap-4">
+              @if (brouillon().coverImageUrl) {
+                <img [src]="brouillon().coverImageUrl" class="w-24 h-24 rounded-2xl object-cover shrink-0" alt="" />
+              }
+              <div class="min-w-0">
+                <h2 class="section-title text-xl">{{ brouillon().title }}</h2>
+                <p class="text-sm text-slate-500 mt-1">{{ brouillon().venue }}</p>
+                <p class="text-xs text-slate-500 mt-0.5">Capacité : {{ (brouillon().maxCapacity ?? 0).toLocaleString('fr-FR') }} personnes</p>
+              </div>
+            </div>
+          </div>
+
+          <div appReveal class="glass-card p-6">
+            <h2 class="section-title text-lg mb-4">Catégories de billets</h2>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <tbody>
+                  @for (type of ticketTypesDraft(); track $index) {
+                    <tr class="border-t border-slate-200/70 first:border-0">
+                      <td class="py-3 font-bold text-slate-800">
+                        {{ type.name }}
+                        @if (!type.id) {
+                          <span class="ml-1.5 text-[10px] font-bold bg-emerald-100 text-emerald-800 rounded px-1.5 py-0.5">NOUVEAU</span>
+                        }
+                      </td>
+                      <td class="py-3 text-slate-600">{{ type.price.toLocaleString('fr-FR') }} FCFA</td>
+                      <td class="py-3 text-right text-slate-500">{{ type.quantitySold ?? 0 }} vendu(s) / {{ type.quantityTotal }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div appReveal class="glass-card p-6">
+            <h2 class="section-title text-lg mb-4">Portes &amp; agents de scan</h2>
+            @if (etape3Draft().gates.length === 0) {
+              <p class="text-sm text-slate-500">Aucune porte définie.</p>
+            } @else {
+              <div class="space-y-3">
+                @for (porte of etape3Draft().gates; track $index) {
+                  <div>
+                    <span class="font-bold text-sm text-slate-800">
+                      {{ porte.name }} — {{ porte.label }}
+                      @if (!porte.id) {
+                        <span class="ml-1.5 text-[10px] font-bold bg-emerald-100 text-emerald-800 rounded px-1.5 py-0.5">NOUVELLE</span>
+                      }
+                    </span>
+                    <ul class="mt-1 ml-4 text-xs text-slate-500 list-disc">
+                      @for (agent of etape3Draft().agents; track $index) {
+                        @if (agent.gateName === porte.name) {
+                          <li>
+                            {{ agent.name }} · {{ libelleRole(agent.role) }}
+                            @if (!agent.id) {
+                              <span class="ml-1 text-[10px] font-bold text-emerald-700">(nouveau — code généré à l'enregistrement)</span>
+                            }
+                          </li>
+                        }
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- ═══════════ COLONNE DROITE : CE QUI VA CHANGER + ENREGISTRER ═══════════ -->
+        <div appReveal class="banner-hero p-6">
+          <h2 class="font-black text-lg mb-4">Ce qui va être enregistré</h2>
+
+          <ul class="text-sm text-white/85 space-y-1.5 mb-5">
+            <li>✓ Informations de l'événement (toujours mises à jour)</li>
+            @if (resume(); as r) {
+              @if (r.typesNouveaux) { <li>+ {{ r.typesNouveaux }} catégorie(s) de billet ajoutée(s)</li> }
+              @if (r.typesModifies) { <li>~ {{ r.typesModifies }} catégorie(s) de billet modifiée(s)</li> }
+              @if (r.typesSupprimes) { <li>− {{ r.typesSupprimes }} catégorie(s) de billet supprimée(s)</li> }
+              @if (r.portesNouvelles) { <li>+ {{ r.portesNouvelles }} porte(s) ajoutée(s)</li> }
+              @if (r.portesSupprimees) { <li>− {{ r.portesSupprimees }} porte(s) supprimée(s)</li> }
+              @if (r.agentsNouveaux) { <li>+ {{ r.agentsNouveaux }} agent(s) ajouté(s)</li> }
+              @if (r.agentsSupprimes) { <li>− {{ r.agentsSupprimes }} agent(s) retiré(s)</li> }
+              @if (!aDesChangementsStructure()) { <li class="text-white/50">Aucun changement de billets, portes ou agents.</li> }
+            }
+          </ul>
+
+          @if (estBrouillon()) {
+            <p class="text-xs text-white/70 mb-3 leading-relaxed">
+              Cet événement est un <strong class="text-white">brouillon</strong> : il n'est pas visible du public tant que vous ne l'avez pas publié.
+            </p>
+            <div class="rounded-2xl bg-white p-3.5 mb-4 space-y-3 text-slate-700">
+              <label class="flex items-start gap-2.5 cursor-pointer">
+                <input type="checkbox" [checked]="engagementPrefectoral()" (change)="engagementPrefectoral.set($any($event.target).checked)" class="mt-0.5 w-4 h-4 accent-orange-600" />
+                <span class="text-xs">Je certifie détenir les autorisations administratives et de sécurité civile requises.</span>
+              </label>
+              <label class="flex items-start gap-2.5 cursor-pointer">
+                <input type="checkbox" [checked]="engagementReversement()" (change)="engagementReversement.set($any($event.target).checked)" class="mt-0.5 w-4 h-4 accent-orange-600" />
+                <span class="text-xs">J'accepte les conditions de reversement direct sur mes comptes agréés.</span>
+              </label>
+            </div>
+            <button type="button" [disabled]="!peutPublier() || enregistrementEnCours()" (click)="enregistrer(true)" class="btn-glow w-full py-3.5 text-sm">
+              {{ enregistrementEnCours() ? 'Enregistrement en cours...' : 'Enregistrer et publier' }}
+            </button>
+            <button type="button" [disabled]="enregistrementEnCours()" (click)="enregistrer()" class="w-full mt-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-white py-3 font-bold text-sm disabled:opacity-50 transition-colors">
+              Enregistrer comme brouillon
+            </button>
+          } @else {
+            <button type="button" [disabled]="enregistrementEnCours()" (click)="enregistrer()" class="btn-glow w-full py-3.5 text-sm">
+              {{ enregistrementEnCours() ? 'Enregistrement en cours...' : 'Enregistrer les modifications' }}
+            </button>
+            @if (peutRepasserEnBrouillon()) {
+              <button type="button" [disabled]="enregistrementEnCours()" (click)="repasserEnBrouillon()" class="w-full mt-2 text-white/70 hover:text-white rounded-xl py-2 font-semibold text-xs disabled:opacity-50 transition-colors">
+                Repasser en brouillon
+              </button>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mt-6">
+        <button type="button" (click)="etapeActuelle.set(3)" class="btn-glass px-4 py-2.5 text-xs">← Retour vers l'Étape 3</button>
+      </div>
+    }
+  </div>
+}
