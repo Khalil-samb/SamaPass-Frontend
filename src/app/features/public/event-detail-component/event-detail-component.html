@@ -10,8 +10,15 @@
     <span>›</span>
     <a routerLink="/evenements" [queryParams]="{ categorie: event()!.categoryId }" class="hover:text-blue-600">{{ categoryName() }}</a>
     <span>›</span>
-    <span class="text-slate-600 font-medium">{{ event()!.title }}</span>
+    <div class="flex items-center justify-between mb-3">
+      <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900">{{ event()!.title }}</h1>
+      <button type="button" (click)="toggleFavori()" class="text-slate-400 hover:text-red-600 shrink-0" aria-label="Ajouter aux favoris">
+        <app-icon name="heart" [size]="22" [filled]="estFavori()" [class.text-red-600]="estFavori()"></app-icon>
+      </button>
+    </div>
   </div>
+
+
 
   <!-- ═══════════ BARRE DE CONFIANCE ═══════════ -->
   <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 flex items-center justify-end gap-3">
@@ -28,7 +35,7 @@
     <div class="lg:col-span-7 space-y-5">
 
       <!-- Banner principal -->
-      <div class="relative rounded-2xl overflow-hidden shadow-sm">
+      <div class="relative rounded-2xl overflow-hidden ">
         <img [src]="event()!.coverImageUrl" [alt]="event()!.title" class="w-full h-64 sm:h-80 object-cover" />
 
         <div class="absolute top-4 left-4">
@@ -48,7 +55,7 @@
 
       <!-- 3 cartes d'information -->
       <div class="grid grid-cols-3 gap-3">
-        <div class="bg-white border border-slate-100 rounded-xl p-3 flex items-start gap-2.5 shadow-sm">
+        <div class="bg-white border border-slate-100 rounded-xl p-3 flex items-start gap-2.5 ">
           <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
             <app-icon name="calendar" [size]="16"></app-icon>
           </div>
@@ -59,7 +66,7 @@
           </div>
         </div>
 
-        <div class="bg-white border border-slate-100 rounded-xl p-3 flex items-start gap-2.5 shadow-sm">
+        <div class="bg-white border border-slate-100 rounded-xl p-3 flex items-start gap-2.5 ">
           <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
             <app-icon name="map-pin" [size]="16"></app-icon>
           </div>
@@ -70,21 +77,21 @@
           </div>
         </div>
 
-        <div class="bg-white border border-slate-100 rounded-xl p-3 flex items-start gap-2.5 shadow-sm">
+        <div class="bg-white border border-slate-100 rounded-xl p-3 flex items-start gap-2.5 ">
           <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
             <app-icon name="shield-check" [size]="16"></app-icon>
           </div>
           <div>
             <span class="block text-[9px] font-bold text-slate-400 tracking-wider">CONTRÔLE ACCÈS</span>
-            <span class="block font-bold text-slate-800 text-xs leading-snug">QR Dynamique</span>
-            <span class="block text-[10px] text-emerald-600 font-medium leading-tight">Anti-fraude certifié</span>
+            <span class="block font-bold text-slate-800 text-xs leading-snug">QR unique</span>
+            <span class="block text-[10px] text-emerald-600 font-medium leading-tight">Un billet = une entrée</span>
           </div>
         </div>
       </div>
 
       <!-- Programmation -->
       @if (scheduleItems().length > 0) {
-        <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+        <div class="bg-white border border-slate-100 rounded-2xl p-4 ">
           <div class="flex items-center justify-between mb-3">
             <div>
               <h2 class="text-sm font-bold text-slate-900">Programmation Officielle</h2>
@@ -98,6 +105,11 @@
             @for (item of scheduleItems(); track item.id) {
               <div class="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden text-center p-2">
                 <div class="h-24 bg-slate-200 rounded-lg overflow-hidden mb-2">
+                  @if (publiciteActive()) {
+                    <div class="w-full h-72 md:h-96 bg-slate-900 rounded-2xl mb-6 flex items-center justify-center">
+                      <p class="text-white text-sm">🎬 Vidéo sponsorisée (fichier vidéo à héberger avec le backend)</p>
+                    </div>
+                  }
                   @if (item.imageUrl) {
                     <img [src]="item.imageUrl" [alt]="item.title" class="w-full h-full object-cover" />
                   } @else {
@@ -120,11 +132,11 @@
       }
 
       <!-- Lieu & Accès -->
-      <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+      <div class="bg-white border border-slate-100 rounded-2xl p-4 ">
         <div class="flex items-center justify-between mb-2">
           <h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
             <app-icon name="map-pin" [size]="16" class="text-blue-600"></app-icon>
-            Lieu &amp; Accès Sécurisé
+            Lieu &amp; accès
           </h2>
           <a [href]="urlItineraire()" target="_blank" rel="noopener" class="text-[11px] font-semibold text-blue-600 hover:underline flex items-center gap-1 border border-blue-200 px-2.5 py-1 rounded-lg">
             <app-icon name="map-pin" [size]="11"></app-icon>
@@ -133,31 +145,24 @@
         </div>
         <p class="text-xs text-slate-500 mb-3">{{ event()!.venue }} — {{ event()!.address }}</p>
         <iframe [src]="urlDeLaCarte()" class="w-full h-44 rounded-xl border border-slate-200 mb-2" loading="lazy"></iframe>
-        <div class="bg-slate-50 border border-slate-100 rounded-lg p-2 flex items-center gap-2 text-[11px] text-slate-600">
-          <span class="w-5 h-5 rounded bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">P</span>
-          <div>
-            <span class="font-bold">Parking Sécurisé &amp; Gardé</span>
-            <span class="text-slate-400 ml-1">· Accès direct Voie de Dégagement Ouest</span>
-          </div>
-        </div>
       </div>
 
       <!-- Garantie -->
-      <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-        <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Garantie SamaPass</h2>
+      <div class="bg-white border border-slate-100 rounded-2xl p-4 ">
+        <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Kcrowd en bref</h2>
         <div class="grid grid-cols-2 gap-3">
           <div class="bg-slate-50 rounded-xl p-3 flex items-start gap-2.5">
             <app-icon name="qr-code" [size]="16" class="text-blue-600 shrink-0 mt-0.5"></app-icon>
             <div>
-              <h3 class="font-bold text-slate-800 text-xs mb-0.5">QR Code Dynamique</h3>
-              <p class="text-[10px] text-slate-400 leading-snug">Protection anti-capture d'écran et authentification unique à l'entrée.</p>
+              <h3 class="font-bold text-slate-800 text-xs mb-0.5">QR Code unique</h3>
+              <p class="text-[10px] text-slate-400 leading-snug">Chaque billet n'est accepté qu'une seule fois à l'entrée.</p>
             </div>
           </div>
           <div class="bg-slate-50 rounded-xl p-3 flex items-start gap-2.5">
             <app-icon name="lock" [size]="16" class="text-emerald-600 shrink-0 mt-0.5"></app-icon>
             <div>
-              <h3 class="font-bold text-slate-800 text-xs mb-0.5">Paiement Mobile Direct</h3>
-              <p class="text-[10px] text-slate-400 leading-snug">Connexion directe Wave &amp; Orange Money sans intermédiaire.</p>
+              <h3 class="font-bold text-slate-800 text-xs mb-0.5">Paiement mobile</h3>
+              <p class="text-[10px] text-slate-400 leading-snug">Payez avec Wave ou Orange Money.</p>
             </div>
           </div>
         </div>
@@ -167,13 +172,17 @@
 
     <!-- ═══════════ BARRE LATÉRALE D'ACHAT ═══════════ -->
     <div class="lg:col-span-5 lg:sticky lg:top-6">
-      <div class="bg-white border border-slate-200 rounded-2xl shadow-lg p-5">
+      <div class="bg-white border border-slate-200 rounded-2xl  p-5">
 
         <!-- En-tête de la carte -->
         <div class="mb-4">
           <h2 class="font-black text-slate-900 text-xl">Acheter en 3 clics</h2>
-          <p class="text-[11px] text-slate-400">Recevez instantanément vos billets certifiés sur WhatsApp &amp; SMS.</p>
+          <p class="text-[11px] text-slate-400">Vos billets sont disponibles dans « Mes billets » dès le paiement confirmé.</p>
         </div>
+
+        @if (!venteOuverte()) {
+          <p class="text-slate-700 text-xs mb-4 text-center font-semibold bg-slate-100 py-2 px-3 rounded-lg border border-slate-200">{{ messageVentes() }}</p>
+        }
 
         <!-- Étape 1 : Choix des billets -->
         <div class="mb-4">
@@ -216,12 +225,14 @@
                   <div class="flex items-center justify-end gap-2 mt-2">
                     <button
                       type="button"
+                      [disabled]="!venteOuverte()"
                       (click)="diminuerQuantite(type.id)"
                       class="w-6 h-6 rounded-md bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 flex items-center justify-center text-xs transition-colors"
                     >−</button>
                     <span class="w-4 text-center font-bold text-xs text-slate-800">{{ quantiteDuType(type.id) }}</span>
                     <button
                       type="button"
+                      [disabled]="!venteOuverte()"
                       (click)="augmenterQuantite(type)"
                       class="w-6 h-6 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center justify-center text-xs transition-colors"
                     >+</button>
@@ -239,7 +250,7 @@
               <span class="w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center font-bold">2</span>
               Moyen de paiement direct
             </span>
-            <span class="text-[9px] font-bold text-emerald-600">Instantannée &amp; Sécurisé</span>
+            <span class="text-[9px] font-bold text-emerald-600">Instantané &amp; Sécurisé</span>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
@@ -250,9 +261,7 @@
               class="relative border-2 rounded-xl p-2.5 text-left transition-all flex items-center gap-2.5"
               [class]="methodePaiement() === 'wave' ? 'border-sky-500 bg-sky-50/50' : 'border-slate-100 bg-slate-50 hover:bg-slate-100/60'"
             >
-              <div class="w-7 h-7 rounded-lg bg-sky-400 text-white flex items-center justify-center shrink-0">
-                <app-icon name="wave" [size]="14"></app-icon>
-              </div>
+              <img src="/images/logoWave.png" alt="Wave" class="w-7 h-7 rounded-lg bg-sky-50 object-contain p-1.5 shrink-0" />
               <div class="flex-1 min-w-0">
                 <span class="block font-black text-slate-800 text-xs leading-none">Wave</span>
                 <span class="block text-[8px] font-bold text-sky-600 mt-0.5">Recommandé</span>
@@ -269,9 +278,7 @@
               class="relative border-2 rounded-xl p-2.5 text-left transition-all flex items-center gap-2.5"
               [class]="methodePaiement() === 'orange_money' ? 'border-orange-500 bg-orange-50/50' : 'border-slate-100 bg-slate-50 hover:bg-slate-100/60'"
             >
-              <div class="w-7 h-7 rounded-lg bg-orange-500 text-white font-black text-[9px] flex items-center justify-center shrink-0">
-                OM
-              </div>
+              <img src="/images/logo%20OrangeMoney.png" alt="Orange Money" class="w-7 h-7 rounded-lg bg-orange-50 object-contain p-1.5 shrink-0" />
               <div class="flex-1 min-w-0">
                 <span class="block font-black text-slate-800 text-xs leading-none">Orange</span>
                 <span class="block text-[8px] font-bold text-slate-400 mt-0.5">Code QR / SMS</span>
@@ -288,9 +295,7 @@
               class="relative border-2 rounded-xl p-2.5 text-left transition-all flex items-center gap-2.5"
               [class]="methodePaiement() === 'free_money' ? 'border-red-500 bg-red-50/50' : 'border-slate-100 bg-slate-50 hover:bg-slate-100/60'"
             >
-              <div class="w-7 h-7 rounded-lg bg-red-600 text-white font-bold text-[8px] flex items-center justify-center shrink-0">
-                Free
-              </div>
+              <img src="/images/logo%20FreeMoney.png" alt="Free Money" class="w-7 h-7 rounded-lg bg-red-50 object-contain p-1.5 shrink-0" />
               <div class="flex-1 min-w-0">
                 <span class="block font-black text-slate-800 text-xs leading-none">Free Money</span>
                 <span class="block text-[8px] font-bold text-slate-400 mt-0.5">Validation PIN</span>
@@ -307,9 +312,7 @@
               class="relative border-2 rounded-xl p-2.5 text-left transition-all flex items-center gap-2.5"
               [class]="methodePaiement() === 'card' ? 'border-slate-800 bg-slate-100' : 'border-slate-100 bg-slate-50 hover:bg-slate-100/60'"
             >
-              <div class="w-7 h-7 rounded-lg bg-slate-800 text-white flex items-center justify-center shrink-0">
-                <app-icon name="credit-card" [size]="14"></app-icon>
-              </div>
+              <img src="/images/logo%20CarteBanquaire.png" alt="Carte Bancaire" class="w-7 h-7 rounded-lg bg-slate-100 object-contain p-1.5 shrink-0" />
               <div class="flex-1 min-w-0">
                 <span class="block font-black text-slate-800 text-xs leading-none">Carte</span>
                 <span class="block text-[8px] font-bold text-slate-400 mt-0.5">Visa / Mastercard</span>
@@ -353,7 +356,7 @@
               </div>
             }
             <div class="flex items-center justify-between text-[10px] text-emerald-600 font-semibold pt-1">
-              <span>Frais d'émission SamaPass Wave</span>
+              <span>Frais d'émission Kcrowd Wave</span>
               <span>0 FCFA (Offerts)</span>
             </div>
             <div class="flex items-center justify-between pt-2 mt-1 border-t border-blue-100">
@@ -372,13 +375,17 @@
           type="button"
           [disabled]="!peutPayer() || paiementEnCours()"
           (click)="payerMaintenant()"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 font-bold text-sm shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 font-bold text-sm   disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
         >
           @if (paiementEnCours()) {
             Paiement en cours...
           } @else {
-            <span>Payer {{ montantTotal().toLocaleString('fr-FR') }} FCFA avec Wave</span>
-            <app-icon name="arrow-right" [size]="15"></app-icon>
+            @if (venteOuverte()) {
+              <span>Payer {{ montantTotal().toLocaleString('fr-FR') }} FCFA avec Wave</span>
+              <app-icon name="arrow-right" [size]="15"></app-icon>
+            } @else {
+              <span>Achat indisponible</span>
+            }
           }
         </button>
 

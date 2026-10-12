@@ -1,21 +1,44 @@
-<!-- ═══════════ HERO ═══════════ -->
-    <section class="bg-gradient-to-b from-blue-50/60 to-white px-6 md:px-12 py-16 text-center">
-      <h1 class="text-3xl md:text-5xl font-extrabold text-slate-900 leading-tight mb-5">
+<!-- ═══════════ HERO ═══════════
+     Le carrousel d'affiches défile DERRIÈRE ce bloc. Tant qu'aucune image n'est
+     disponible (chargement, aucun événement publié), l'ancien fond clair reste :
+     la page est identique à avant. Dès que des images existent, le fond clair
+     disparaît et le texte passe en blanc. -->
+<app-hero-carousel-component [diapositives]="diapositivesHero()">
+    <section
+      class="px-6 md:px-12 py-16 text-center"
+      [class]="heroSurImages() ? '' : 'bg-gradient-to-b from-blue-50/60 to-white'"
+    >
+      <h1
+        class="text-3xl md:text-5xl font-extrabold leading-tight mb-5 transition-colors duration-500"
+        [class]="heroSurImages() ? 'text-white' : 'text-slate-900'"
+      >
         Vivez le meilleur de la culture<br class="hidden md:block" />
         et des événements au
         <br>
-        <span class="text-blue-700 relative inline-block">
+        <span
+          class="relative inline-block transition-colors duration-500"
+          [class]="heroSurImages() ? 'text-blue-300' : 'text-blue-700'"
+        >
           Sénégal
           <span class="block h-1 bg-blue-200 rounded-full mt-1"></span>
         </span>
       </h1>
 
-      <p class="text-slate-500 max-w-2xl mx-auto mb-10 text-[15px] leading-relaxed">
-        Réservez vos places en 3 clics en toute sécurité via Wave et Orange Money.
+      <p
+        class="max-w-2xl mx-auto mb-10 text-[15px] leading-relaxed transition-colors duration-500"
+        [class]="heroSurImages() ? 'text-white/85' : 'text-slate-500'"
+      >
+        Réservez vos places en 3 clics en toute sécurité via
+        <span class="inline-flex items-center gap-1.5 align-middle mx-1">
+            Wave
+          <span>et</span>
+            OrangeMoney
+
+        </span>.
         Pas de création de compte obligatoire, e-billet QR sécurisé immédiat.
       </p>
 
-      <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg shadow-slate-900/5 border border-slate-100 p-3 flex flex-col md:flex-row gap-3">
+      <div class="max-w-3xl mx-auto bg-white rounded-2xl   border border-slate-100 p-3 flex flex-col md:flex-row gap-3">
 
         <label class="flex-1 flex items-center gap-3 px-4 py-2.5 rounded-xl border border-slate-200 text-left">
           <app-icon name="calendar" [size]="18" class="text-blue-700 shrink-0"></app-icon>
@@ -54,21 +77,43 @@
         </button>
       </div>
 
-      <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mt-8 text-sm text-slate-500">
+      <div
+        class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mt-8 text-sm transition-colors duration-500"
+        [class]="heroSurImages() ? 'text-white/90' : 'text-slate-500'"
+      >
         <span class="flex items-center gap-1.5">
-          <app-icon name="check-circle-2" [size]="16" class="text-green-600"></app-icon>
+          <app-icon
+            name="check-circle-2"
+            [size]="16"
+            [class]="heroSurImages() ? 'text-green-400' : 'text-green-600'"
+          ></app-icon>
           100% Billets Officiels
         </span>
         <span class="flex items-center gap-1.5">
-          <app-icon name="zap" [size]="16" class="text-blue-600"></app-icon>
-          Paiement Wave &amp; OM sécurisé
+          <app-icon
+            name="zap"
+            [size]="16"
+            [class]="heroSurImages() ? 'text-blue-300' : 'text-blue-600'"
+          ></app-icon>
+          Paiement
+          <span class="inline-flex items-center gap-1">
+            Wave
+            <span>&amp;</span>
+            OrangeMoney
+          </span>
+          sécurisé
         </span>
         <span class="flex items-center gap-1.5">
-          <app-icon name="qr-code" [size]="16" class="text-slate-500"></app-icon>
-          E-Billet avec QR Code anti-fraude
+          <app-icon
+            name="qr-code"
+            [size]="16"
+            [class]="heroSurImages() ? 'text-white/70' : 'text-slate-500'"
+          ></app-icon>
+          E-Billet avec QR Code unique
         </span>
       </div>
     </section>
+</app-hero-carousel-component>
 
     <!-- ═══════════ ÉVÉNEMENTS À LA UNE ═══════════ -->
     <section class="px-6 md:px-12 py-14 w-full">
@@ -138,8 +183,11 @@
     <p
       class="max-w-4xl mx-auto text-lg md:text-xl text-slate-600 leading-relaxed"
     >
-      Achetez vos billets en 3 clics par Wave ou Orange Money, sans création
-      de compte obligatoire ni mot de passe à mémoriser.
+      Achetez vos billets en 3 clics par
+      Wave
+        <span>ou</span>
+      OrangeMoney
+      sans création de compte obligatoire ni mot de passe à mémoriser.
     </p>
 
   </div>
@@ -157,7 +205,7 @@
       class="bg-white
              rounded-xl
              border border-slate-300
-             shadow-sm
+
              p-8 md:p-10
              flex flex-col
              min-h-[410px]"
@@ -238,7 +286,7 @@
       class="bg-white
              rounded-xl
              border border-slate-300
-             shadow-sm
+
              p-8 md:p-10
              flex flex-col
              min-h-[410px]"
@@ -267,7 +315,8 @@
                mb-4
                leading-tight"
       >
-        Payez en 1 clic par Wave ou OM
+        Payez en 1 clic par Wave ou OrangeMoney
+
       </h3>
 
 
@@ -282,7 +331,8 @@
       </p>
 
 
-      <!-- FOOTER -->
+      <!-- FOOTER : vos trois logos, désormais via le composant partagé
+           (même chemins que vos <img> d'origine) -->
       <div
         class="mt-auto
                pt-6
@@ -292,43 +342,16 @@
                gap-3"
       >
 
-        <!-- WAVE -->
-        <span
-          class="px-3 py-2
-                 rounded-md
-                 border border-blue-200
-                 bg-blue-50/40
-                 text-blue-700
-                 text-sm
-                 font-semibold"
-        >
-          Wave
+        <span class="inline-flex items-center rounded-md border border-blue-200 bg-blue-50/40 p-1.5">
+          <app-payment-logo-component method="wave" [height]="24"></app-payment-logo-component>
         </span>
 
-        <!-- ORANGE MONEY -->
-        <span
-          class="px-3 py-2
-                 rounded-md
-                 border border-orange-200
-                 bg-orange-50/40
-                 text-orange-600
-                 text-sm
-                 font-semibold"
-        >
-          Orange Money
+        <span class="inline-flex items-center rounded-md border border-orange-200 bg-orange-50/40 p-1.5">
+          <app-payment-logo-component method="orange_money" [height]="24"></app-payment-logo-component>
         </span>
 
-        <!-- FREE MONEY -->
-        <span
-          class="px-3 py-2
-                 rounded-md
-                 border border-green-200
-                 bg-green-50/40
-                 text-green-700
-                 text-sm
-                 font-semibold"
-        >
-          Free Money
+        <span class="inline-flex items-center rounded-md border border-green-200 bg-green-50/40 p-1.5">
+          <app-payment-logo-component method="free_money" [height]="24"></app-payment-logo-component>
         </span>
 
       </div>
@@ -341,7 +364,7 @@
       class="bg-white
              rounded-xl
              border border-slate-300
-             shadow-sm
+
              p-8 md:p-10
              flex flex-col
              min-h-[410px]"
@@ -370,7 +393,7 @@
                mb-4
                leading-tight"
       >
-        Recevez votre QR Code infalsifiable
+        Recevez votre QR Code unique
       </h3>
 
 
@@ -380,8 +403,7 @@
                text-slate-600
                leading-relaxed"
       >
-        Votre e-billet sécurisé avec QR code dynamique vous est envoyé par
-        WhatsApp et SMS. Présentez-le simplement à l'entrée.
+        Votre e-billet avec QR code unique est disponible dans « Mes billets » dès le paiement confirmé. Présentez-le simplement à l'entrée, sur votre téléphone ou imprimé.
       </p>
 
 
@@ -426,9 +448,14 @@
           </h2>
           <p class="text-slate-300 leading-relaxed">
             Profitez de la billetterie la plus rapide du Sénégal : encaissez vos
-            ventes directement sur votre compte Wave ou Orange Money, contrôlez
-            les entrées avec notre application de scan QR rapide et suivez vos
-            statistiques en direct.
+            ventes directement sur votre compte
+            <span class="inline-flex items-center gap-1.5 align-middle mx-1">
+              Wave
+              <span>ou</span>
+                OrangeMoney
+              </span>
+            contrôlez les entrées avec notre application de scan QR rapide et
+            suivez vos statistiques en direct.
           </p>
         </div>
 

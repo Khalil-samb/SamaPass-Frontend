@@ -1,27 +1,23 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
-import { PaymentMethod, Transaction } from '../../../core/models/transaction.model';
-import { Ticket } from '../../../core/models/ticket.model';
-import { PaymentService } from '../../../core/services/payment.service';
-import { TicketsService } from '../../../core/services/tickets.service';
-import { TransactionsService } from '../../../core/services/transactions.service';
-import { AuthStore } from '../../../core/state/auth.store';
+import { firstValueFrom } from 'rxjs';
 
+import { PaymentMethod } from '../../../core/models/transaction.model';
+import { TicketsService } from '../../../core/services/tickets.service';
+import { AuthStore } from '../../../core/state/auth.store';
 
 interface OptionPaiement {
   valeur: PaymentMethod;
   label: string;
 }
 
-
 @Component({
-  standalone:true,
+  standalone: true,
   imports: [],
   selector: 'app-ticket-purchase-panel-component',
   styleUrl: './ticket-purchase-panel-component.css',
   templateUrl: './ticket-purchase-panel-component.html',
 })
 export class TicketPurchasePanelComponent {
-
   @Input({ required: true }) eventId!: string;
   @Input({ required: true }) eventTitle!: string;
   @Input({ required: true }) ticketTypeId!: string;
@@ -31,7 +27,6 @@ export class TicketPurchasePanelComponent {
 
   @Output() closed = new EventEmitter<void>();
   @Output() paymentSuccess = new EventEmitter<{ ticketIds: string[] }>();
-
 
   etape = signal<'choix-paiement' | 'echec'>('choix-paiement');
   methodeChoisie = signal<PaymentMethod | null>(null);
@@ -45,77 +40,71 @@ export class TicketPurchasePanelComponent {
     { valeur: 'card', label: 'Carte bancaire' },
   ];
 
+  // ⚠️ PaymentService et TransactionsService ne sont plus nécessaires
+  // ici : Django s'occupe du paiement (simulé pour l'instant), de la
+  // transaction ET des billets en un seul appel.
   constructor(
-    private paymentService: PaymentService,
-    private transactionsService: TransactionsService,
     private ticketsService: TicketsService,
     private authStore: AuthStore
   ) {}
 
-  get montantTotal(): number{
+  get montantTotal(): number {
     return this.unitPrice * this.quantity;
   }
 
-  async confirmerLePaiement(){
+  // ⚠️ Réécriture complète : un seul appel réel à Django, qui fait le
+  // travail que ce composant faisait à la main avant (simuler le
+  // paiement, fabriquer la transaction, fabriquer chaque billet avec
+  // un id/QR Code inventés).
+  async confirmerLePaiement() {
     const methode = this.methodeChoisie();
-    if(!methode) return;
+    if (!methode) return;
 
-    this.traitementEnCours.set(true);
-    this.erreur.set(null);
-
-    const resultat = await this.paymentService.payer(this.montantTotal, methode);
-
-    this.traitementEnCours.set(false);
-
-    if(!resultat.success){
-      this.etape.set('echec');
-      return;
-    }
-
-    const utilisateur = this.authStore.currentUser();
-    if (!utilisateur) {
+    if (!this.authStore.currentUser()) {
       this.erreur.set('Une erreur est survenue avec votre identification. Veuillez réessayer.');
       return;
     }
 
+    this.traitementEnCours.set(true);
+    this.erreur.set(null);
 
-    // 1. On enregistre la transaction
-    const transactionId = `txn-${Date.now()}`;
-    const transaction: Transaction = {
-      id: transactionId,
-      userId: utilisateur.id,
-      eventId: this.eventId,
-      type: 'ticket_purchase',
-      amount: this.montantTotal,
-      paymentMethod: methode,
-      status: 'success',
-      reference: resultat.reference,
-      createdAt: new Date().toISOString(),
-    };
-    this.transactionsService.ajouterTransaction(transaction);
+    try {
+      const resultat = await firstValueFrom(
+        this.ticketsService.acheterBillet({
+          ticketTypeId: this.ticketTypeId,
+          paymentMethod: methode,
+          quantite: this.quantity,
+        })
+      );
 
-
-   // 2. On génère un billet par unité achetée, chacun avec son propre QR Code
-    const nouveauxBillets: Ticket[] = Array.from({ length: this.quantity }, (_, i) => ({
-      id: `tkt-${Date.now()}-${i}`,
-      ticketTypeId: this.ticketTypeId,
-      eventId: this.eventId,
-      userId: utilisateur.id,
-      transactionId,
-      qrCode: `QR-${this.eventId}-${utilisateur.id}-${Date.now()}-${i}`,
-      status: 'valid',
-      price: this.unitPrice,
-      purchaseDate: new Date().toISOString(),
-      scannedAt: undefined,
-      disputeStatus: 'none',
-    }));
-    this.ticketsService.ajouterBillets(nouveauxBillets);
-
-    this.paymentSuccess.emit({ ticketIds: nouveauxBillets.map((t) => t.id) });
+      this.traitementEnCours.set(false);
+      this.paymentSuccess.emit({ ticketIds: resultat.billets.map((b: any) => b.id) });
+    } catch (err: any) {
+      this.traitementEnCours.set(false);
+      // 402 = le paiement lui-même a échoué : écran « échec ». Toute autre
+      // réponse (400 : billetterie fermée, plus de places, limite par achat...)
+      // porte un message précis du serveur : on l'affiche tel quel.
+      if (err?.status === 402) {
+        this.etape.set('echec');
+      } else {
+        this.erreur.set(this.extraireMessage(err));
+      }
+    }
   }
 
-  fermer(){
+  private extraireMessage(err: any): string {
+    const corps = err?.error;
+    if (corps && typeof corps === 'object') {
+      if (typeof corps.erreur === 'string') return corps.erreur;
+      if (typeof corps.detail === 'string') return corps.detail;
+      const premier: any = Object.values(corps)[0];
+      if (Array.isArray(premier) && typeof premier[0] === 'string') return premier[0];
+      if (typeof premier === 'string') return premier;
+    }
+    return 'Impossible de finaliser l\'achat pour le moment. Veuillez réessayer.';
+  }
+
+  fermer() {
     this.closed.emit();
   }
-
 }

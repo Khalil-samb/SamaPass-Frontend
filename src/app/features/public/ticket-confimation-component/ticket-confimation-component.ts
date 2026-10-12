@@ -1,24 +1,26 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import { TicketsService } from '../../../core/services/tickets.service';
 import { TransactionsService } from '../../../core/services/transactions.service';
 import { EventsService } from '../../../core/services/events.service';
 import { CitiesService } from '../../../core/services/cities.service';
-import { TicketTypesService } from '../../../core/services/ticket-types.service';
 import { AuthStore } from '../../../core/state/auth.store';
+import { environment } from '../../../../environments';
 
 import { Ticket } from '../../../core/models/ticket.model';
 import { Transaction } from '../../../core/models/transaction.model';
-import { EventEntiy } from '../../../core/models/event.model';
+import { EventEntity } from '../../../core/models/event.model';
 import { City } from '../../../core/models/city.model';
 import { TicketType } from '../../../core/models/ticket-type.model';
+import { User } from '../../../core/models/user.model';
 
 import { IconComponent } from '../../../shared/ui/icon-component/icon-component';
 import { CardEventComponent, EventCardVM } from '../../../shared/ui/card-event-component/card-event-component';
+import { RevealDirective } from '../../../shared/directives/reveal.directive';
 import { construireCarteEvenement } from '../../../shared/utils/event-card.util';
-
 
 interface LigneAchat {
   nom: string;
@@ -27,7 +29,7 @@ interface LigneAchat {
 }
 
 @Component({
-  imports: [IconComponent, CardEventComponent],
+  imports: [IconComponent, CardEventComponent, RouterLink, RevealDirective],
   selector: 'app-ticket-confimation-component',
   styleUrl: './ticket-confimation-component.css',
   templateUrl: './ticket-confimation-component.html',
@@ -37,7 +39,7 @@ export class TicketConfirmationComponent implements OnInit {
 
   ticket = signal<Ticket | null>(null);
   transaction = signal<Transaction | null>(null);
-  event = signal<EventEntiy | null>(null);
+  event = signal<EventEntity | null>(null);
   cities = signal<City[]>([]);
   ticketTypesDeLEvenement = signal<TicketType[]>([]);
   ticketsMemeTransaction = signal<Ticket[]>([]);
@@ -57,8 +59,8 @@ export class TicketConfirmationComponent implements OnInit {
   lignesAchat = computed<LigneAchat[]>(() => {
     const types = this.ticketTypesDeLEvenement();
     const parType = new Map<string, number>();
-    this.ticketsMemeTransaction().forEach((t) => {
-      parType.set(t.ticketTypeId, (parType.get(t.ticketTypeId) ?? 0) + 1);
+    this.ticketsMemeTransaction().forEach((t: any) => {
+      parType.set(t.ticketType, (parType.get(t.ticketType) ?? 0) + 1);
     });
     return Array.from(parType.entries()).map(([ticketTypeId, quantite]) => {
       const type = types.find((t) => t.id === ticketTypeId);
@@ -69,6 +71,25 @@ export class TicketConfirmationComponent implements OnInit {
   montantTotalLabel = computed(() => `${(this.transaction()?.amount ?? 0).toLocaleString('fr-FR')} FCFA`);
 
   idBilletFormate = computed(() => (this.ticket()?.id ?? '').toUpperCase().slice(0, 16));
+
+  // Ce que la page imprime, c'est CE billet — pas toute la commande : sa catégorie et SON prix.
+  // (Avant, elle affichait le total de la commande et « x2 billets » à côté d'un seul QR Code.)
+  private typeDuBillet = computed(() => {
+    const billet: any = this.ticket();
+    return this.ticketTypesDeLEvenement().find((t) => t.id === billet?.ticketType);
+  });
+  categorieDuBillet = computed(() => this.typeDuBillet()?.name ?? 'Billet');
+  prixDuBilletLabel = computed(() => {
+    const billet: any = this.ticket();
+    const prix = Number(billet?.price ?? this.typeDuBillet()?.price ?? 0);
+    return `${prix.toLocaleString('fr-FR')} FCFA`;
+  });
+  nombreBilletsCommande = computed(() => this.ticketsMemeTransaction().length);
+
+  // Le code à dicter si le QR est abîmé : les 8 derniers caractères de l'identifiant du billet — exactement ce que
+  // cherche la « saisie manuelle de secours » de Django (ScannerBilletView). L'ancien « S/N » affiché montrait les
+  // 16 PREMIERS caractères : impossible de s'en servir pour cette saisie.
+  codeSecours = computed(() => (this.ticket()?.id ?? '').replace(/-/g, '').slice(-8).toUpperCase());
 
   dateAchatLabel = computed(() => {
     const t = this.transaction();
@@ -94,14 +115,22 @@ export class TicketConfirmationComponent implements OnInit {
     return m ? labels[m] : '';
   });
 
-  urlQrCode = computed(() => {
-    // Le QR reste volontairement FIXE (ticket.qrCode ne change jamais) : la
-    // vraie protection vient du statut du billet (valid → used dès le premier
-    // scan)
-    const billet = this.ticket();
-    if (!billet) return '';
-    return `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(billet.qrCode)}`;
-  });
+  // QR Code généré ICI, dans le navigateur (bibliothèque « qrcode ») : plus aucun service externe, donc il s'affiche
+  // et s'imprime même sans internet. Le contenu est inchangé (le texte « QR-… » que le scanner cherche en base).
+  urlQrCode = signal('');
+  qrEnErreur = signal(false);
+
+  private async genererQrCode(texte: string) {
+    try {
+      const module: any = await import('qrcode');
+      const toDataURL = module.toDataURL ?? module.default?.toDataURL;
+      const image: string = await toDataURL(texte, { width: 280, margin: 1, errorCorrectionLevel: 'M' });
+      this.urlQrCode.set(image);
+    } catch (erreur) {
+      console.error('Impossible de générer le QR Code :', erreur);
+      this.qrEnErreur.set(true);
+    }
+  }
 
   urlItineraire = computed(() => {
     const ev = this.event();
@@ -121,12 +150,16 @@ export class TicketConfirmationComponent implements OnInit {
     private transactionsService: TransactionsService,
     private eventsService: EventsService,
     private citiesService: CitiesService,
-    private ticketTypesService: TicketTypesService,
-    private authStore: AuthStore
+    private authStore: AuthStore,
+    private http: HttpClient
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     const ticketId = this.route.snapshot.paramMap.get('ticketId');
+    if (!ticketId) {
+      this.loading.set(false);
+      return;
+    }
 
     const utilisateur = this.authStore.currentUser();
     if (utilisateur) {
@@ -134,48 +167,52 @@ export class TicketConfirmationComponent implements OnInit {
       this.telephoneProfil.set(utilisateur.phone);
     }
 
-    forkJoin({
-      tickets: this.ticketsService.getAll(),
-      transactions: this.transactionsService.getAll(),
-      events: this.eventsService.getAll(),
-      cities: this.citiesService.getAll(),
-      ticketTypes: this.ticketTypesService.getAll(),
-    }).subscribe({
-      next: ({ tickets, transactions, events, cities, ticketTypes }) => {
-        const billet = tickets.find((t) => t.id === ticketId) ?? null;
-        this.ticket.set(billet);
-        this.cities.set(cities ?? []);
+    try {
+      const billet: any = await firstValueFrom(this.ticketsService.getById(ticketId));
+      this.ticket.set(billet);
+      void this.genererQrCode(billet.qrCode);
 
-        if (billet) {
-          const trans = transactions.find((t) => t.id === billet.transactionId) ?? null;
-          this.transaction.set(trans);
+      const [transaction, event] = await Promise.all([
+        firstValueFrom(this.transactionsService.getById(billet.transaction)),
+        firstValueFrom(this.eventsService.getById(billet.event)),
+      ]);
+      this.transaction.set(transaction);
+      this.event.set(event);
 
-          const ev = events.find((e) => e.id === billet.eventId) ?? null;
-          this.event.set(ev);
+      this.ticketTypesDeLEvenement.set(event.ticketTypes ?? []);
 
-          this.ticketTypesDeLEvenement.set((ticketTypes ?? []).filter((t) => t.eventId === billet.eventId));
-          this.ticketsMemeTransaction.set(tickets.filter((t) => t.transactionId === billet.transactionId));
+      const tousLesBillets: any[] = await firstValueFrom(this.ticketsService.mesBillets());
+      this.ticketsMemeTransaction.set(tousLesBillets.filter((t) => t.transaction === billet.transaction));
 
-          if (ev) {
-            this.evenementsRecommandes.set(
-              (events ?? [])
-                .filter((e) => e.id !== ev.id && e.cityId === ev.cityId && e.status === 'published')
-                .slice(0, 3)
-                .map((e) => construireCarteEvenement(e, ticketTypes ?? []))
-            );
-          }
-        }
+      this.citiesService.getAll().subscribe((c) => this.cities.set(c ?? []));
 
-        this.loading.set(false);
-      },
-      error: (erreur) => {
-        console.error('Erreur lors du chargement du billet :', erreur);
-        this.loading.set(false);
-      },
-    });
+      this.eventsService.getAll({ ville: event.cityId }).subscribe((autres) => {
+        this.evenementsRecommandes.set(
+          autres
+            // On ne recommande que ce qu'on peut encore acheter : le catalogue contient aussi les événements terminés (grisés)
+            .filter((e) => e.id !== event.id && e.status === 'published' && (e.salesState ?? 'open') === 'open')
+            .slice(0, 3)
+            .map((e: any) => construireCarteEvenement(e))
+        );
+      });
+
+      this.loading.set(false);
+    } catch (erreur) {
+      console.error('Erreur lors du chargement du billet :', erreur);
+      this.loading.set(false);
+    }
   }
 
+  // La mise en page d'impression (styles.css) ne garde que le billet. Le nom du fichier PDF proposé par le
+  // navigateur est le titre de la page : on le rend parlant le temps de l'impression.
   imprimer() {
+    const titreAvant = document.title;
+    const restaurer = () => {
+      document.title = titreAvant;
+      window.removeEventListener('afterprint', restaurer);
+    };
+    document.title = `Billet - ${this.event()?.title ?? 'Kcrowd'} - ${this.idBilletFormate()}`;
+    window.addEventListener('afterprint', restaurer);
     window.print();
   }
 
@@ -183,15 +220,17 @@ export class TicketConfirmationComponent implements OnInit {
     alert('Ajout à Apple / Google Wallet : bientôt disponible.');
   }
 
+  // Le téléphone n'est plus modifiable ici : c'est l'identifiant de
+  // connexion (voir UpdateMeView côté Django, qui n'accepte que le
+  // prénom/nom). Seul le prénom est vraiment envoyé et mis à jour.
   enregistrerProfil() {
-    const utilisateur = this.authStore.currentUser();
-    if (!utilisateur) return;
-    this.authStore.setIdentifiedUser({
-      ...utilisateur,
-      firstName: this.nomProfil(),
-      phone: this.telephoneProfil(),
+    this.http.patch<User>(`${environment.apiUrl}/api/auth/me/`, { firstName: this.nomProfil() }).subscribe({
+      next: (utilisateurMisAJour) => {
+        this.authStore.mettreAJourUtilisateur(utilisateurMisAJour);
+        this.profilEnregistre.set(true);
+        setTimeout(() => this.profilEnregistre.set(false), 2500);
+      },
     });
-    this.profilEnregistre.set(true);
-    setTimeout(() => this.profilEnregistre.set(false), 2500);
   }
 }
+

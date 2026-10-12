@@ -1,30 +1,24 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { forkJoin } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import { EventsService } from '../../../core/services/events.service';
 import { CitiesService } from '../../../core/services/cities.service';
 import { CategoriesService } from '../../../core/services/categories.service';
-import { OrganizersService } from '../../../core/services/organizers.service';
-import { TicketTypesService } from '../../../core/services/ticket-types.service';
-import { EventScheduleItemsService } from '../../../core/services/event-schedule-items.service';
-import { PaymentService } from '../../../core/services/payment.service';
-import { TransactionsService } from '../../../core/services/transactions.service';
 import { TicketsService } from '../../../core/services/tickets.service';
+import { SponsoredAdsService } from '../../../core/services/sponsored-ads.service';
+import { FavoritesService } from '../../../core/services/favorites.service';
 import { AuthStore } from '../../../core/state/auth.store';
 
-import { EventEntiy } from '../../../core/models/event.model';
+import { EventEntity } from '../../../core/models/event.model';
+import { EventScheduleItem } from '../../../core/models/event-schedule-item.model';
 import { City } from '../../../core/models/city.model';
 import { Category } from '../../../core/models/category.model';
-import { Organizer } from '../../../core/models/organizer.model';
 import { TicketType } from '../../../core/models/ticket-type.model';
-import { EventScheduleItem } from '../../../core/models/event-schedule-item.model';
-import { Transaction, PaymentMethod } from '../../../core/models/transaction.model';
-import { Ticket } from '../../../core/models/ticket.model';
+import { PaymentMethod } from '../../../core/models/transaction.model';
+import { SponsoredAd } from '../../../core/models/sponsored-ad.model';
 import { IconComponent } from '../../../shared/ui/icon-component/icon-component';
-import { TicketPurchasePanelComponent } from '../ticket-purchase-panel-component/ticket-purchase-panel-component';
-
 
 interface LignePanier {
   type: TicketType;
@@ -35,23 +29,26 @@ interface OptionPaiement {
   valeur: PaymentMethod;
   label: string;
 }
+
 @Component({
   imports: [IconComponent, RouterLink],
-  standalone:true,
+  standalone: true,
   selector: 'app-event-detail-component',
   styleUrl: './event-detail-component.css',
   templateUrl: './event-detail-component.html',
 })
-
 export class EventDetailComponent implements OnInit {
   private sanitizer = inject(DomSanitizer);
 
   loading = signal(true);
+  estFavori = signal(false);
 
-  event = signal<EventEntiy | null>(null);
+  event = signal<EventEntity | null>(null);
   cities = signal<City[]>([]);
   categories = signal<Category[]>([]);
-  organizers = signal<Organizer[]>([]);
+
+  // ⚠️ Ne vient plus d'un appel séparé : EventDetailSerializer (Django)
+  // renvoie déjà les catégories de billets IMBRIQUÉES dans l'événement.
   ticketTypes = signal<TicketType[]>([]);
   scheduleItems = signal<EventScheduleItem[]>([]);
 
@@ -60,6 +57,8 @@ export class EventDetailComponent implements OnInit {
   telephoneReception = signal('');
   paiementEnCours = signal(false);
   erreurPaiement = signal<string | null>(null);
+
+  publiciteActive = signal<SponsoredAd | null>(null);
 
   optionsPaiement: OptionPaiement[] = [
     { valeur: 'wave', label: 'Wave' },
@@ -78,7 +77,24 @@ export class EventDetailComponent implements OnInit {
     this.lignesPanier().reduce((somme, ligne) => somme + ligne.type.price * ligne.quantity, 0)
   );
 
+  // État des ventes décidé par le serveur (champ « salesState »).
+  // Seul « open » permet d'acheter ; tout le reste désactive l'achat.
+  etatVentes = computed<string>(() => (this.event() as any)?.salesState ?? 'open');
+  venteOuverte = computed(() => this.etatVentes() === 'open');
+
+  messageVentes = computed<string>(() => {
+    switch (this.etatVentes()) {
+      case 'ended': return 'Cet événement est terminé : la billetterie est fermée.';
+      case 'sold_out': return 'Cet événement est complet.';
+      case 'closed': return 'La billetterie est fermée pour cet événement.';
+      case 'not_open': return "La billetterie n'est pas encore ouverte.";
+      case 'unavailable': return "Cet événement n'est pas disponible à la vente.";
+      default: return '';
+    }
+  });
+
   peutPayer = computed(() =>
+    this.venteOuverte() &&
     this.lignesPanier().length > 0 && this.methodePaiement() !== null && this.telephoneReception().trim().length > 0
   );
 
@@ -127,42 +143,29 @@ export class EventDetailComponent implements OnInit {
     private eventsService: EventsService,
     private citiesService: CitiesService,
     private categoriesService: CategoriesService,
-    private organizersService: OrganizersService,
-    private ticketTypesService: TicketTypesService,
-    private eventScheduleItemsService: EventScheduleItemsService,
-    private paymentService: PaymentService,
-    private transactionsService: TransactionsService,
     private ticketsService: TicketsService,
+    private sponsoredAdsService: SponsoredAdsService,
+    private favoritesService: FavoritesService,
     private authStore: AuthStore
   ) {}
 
   ngOnInit() {
     const eventId = this.route.snapshot.paramMap.get('id');
+    if (!eventId) return;
 
-    // Le numéro de téléphone est pré-rempli : l'utilisateur s'est déjà
-    // identifié à la porte d'entrée de l'application.
     const utilisateur = this.authStore.currentUser();
     if (utilisateur) {
       this.telephoneReception.set(utilisateur.phone);
     }
 
-    forkJoin({
-      events: this.eventsService.getAll(),
-      cities: this.citiesService.getAll(),
-      categories: this.categoriesService.getAll(),
-      organizers: this.organizersService.getAll(),
-      ticketTypes: this.ticketTypesService.getAll(),
-      scheduleItems: this.eventScheduleItemsService.getAll(),
-    }).subscribe({
-      next: ({ events, cities, categories, organizers, ticketTypes, scheduleItems }) => {
-        this.event.set(events.find((e) => e.id === eventId) ?? null);
-        this.cities.set(cities ?? []);
-        this.categories.set(categories ?? []);
-        this.organizers.set(organizers ?? []);
-        this.ticketTypes.set((ticketTypes ?? []).filter((t) => t.eventId === eventId));
-        this.scheduleItems.set(
-          (scheduleItems ?? []).filter((s) => s.eventId === eventId).sort((a, b) => a.order - b.order)
-        );
+    // ⚠️ getById (le détail complet d'UN SEUL événement), plus jamais
+    // getAll() + find() — getAll() ne renvoie qu'une version allégée,
+    // sans tous les champs dont cette page a besoin.
+    this.eventsService.getById(eventId).subscribe({
+      next: (ev) => {
+        this.event.set(ev);
+        this.ticketTypes.set(ev.ticketTypes ?? []);
+        this.scheduleItems.set(ev.scheduleItems ?? []);
         this.loading.set(false);
       },
       error: (erreur) => {
@@ -170,13 +173,43 @@ export class EventDetailComponent implements OnInit {
         this.loading.set(false);
       },
     });
+
+    this.citiesService.getAll().subscribe((c) => this.cities.set(c ?? []));
+    this.categoriesService.getAll().subscribe((c) => this.categories.set(c ?? []));
+
+    // ⚠️ Une campagne active renvoie une erreur 404 s'il n'y en a pas —
+    // c'est un cas NORMAL ici, pas une vraie erreur à signaler.
+    this.sponsoredAdsService.getCampagneActive(eventId).subscribe({
+      next: (pub: SponsoredAd) => this.publiciteActive.set(pub),
+      error: () => this.publiciteActive.set(null),
+    });
+
+    // ⚠️ Les favoris viennent maintenant du serveur (un vrai appel HTTP),
+    // plus d'une vérification instantanée en mémoire — d'où le .subscribe().
+    if (utilisateur) {
+      this.favoritesService.getMesFavoris().subscribe((favoris) => {
+        this.estFavori.set(favoris.some((f) => f.event === eventId));
+      });
+    }
   }
 
   quantiteDuType(ticketTypeId: string): number {
     return this.ticketQuantities()[ticketTypeId] ?? 0;
   }
 
+  toggleFavori() {
+    const eventId = this.event()?.id;
+    if (!eventId) return;
+
+    if (this.estFavori()) {
+      this.favoritesService.retirer(eventId).subscribe(() => this.estFavori.set(false));
+    } else {
+      this.favoritesService.ajouter(eventId).subscribe(() => this.estFavori.set(true));
+    }
+  }
+
   augmenterQuantite(type: TicketType) {
+    if (!this.venteOuverte()) return;
     const restant = type.quantityTotal - type.quantitySold;
     const actuelle = this.quantiteDuType(type.id);
     if (actuelle >= restant || actuelle >= 10) return;
@@ -197,6 +230,10 @@ export class EventDetailComponent implements OnInit {
     }
   }
 
+  // ⚠️ Réécriture complète : avant, ce composant simulait le paiement
+  // ET fabriquait lui-même la Transaction et les Ticket à la main.
+  // Maintenant, Django fait TOUT ça — un appel par catégorie de billet
+  // différente dans le panier (l'API n'accepte qu'un seul type à la fois).
   async payerMaintenant() {
     const methode = this.methodePaiement();
     const lignes = this.lignesPanier();
@@ -205,54 +242,30 @@ export class EventDetailComponent implements OnInit {
     this.paiementEnCours.set(true);
     this.erreurPaiement.set(null);
 
-    const resultat = await this.paymentService.payer(this.montantTotal(), methode);
-    this.paiementEnCours.set(false);
+    const tousLesBillets: { id: string }[] = [];
 
-    if (!resultat.success) {
-      this.erreurPaiement.set("Le paiement a échoué. Vérifiez votre solde ou réessayez.");
-      return;
-    }
-
-    const utilisateur = this.authStore.currentUser();
-    if (!utilisateur) {
-      this.erreurPaiement.set('Une erreur est survenue avec votre identification.');
-      return;
-    }
-
-    const transactionId = `txn-${Date.now()}`;
-    const transaction: Transaction = {
-      id: transactionId,
-      userId: utilisateur.id,
-      eventId: this.event()!.id,
-      type: 'ticket_purchase',
-      amount: this.montantTotal(),
-      paymentMethod: methode,
-      status: 'success',
-      reference: resultat.reference,
-      createdAt: new Date().toISOString(),
-    };
-    this.transactionsService.ajouterTransaction(transaction);
-
-    const nouveauxBillets: Ticket[] = [];
-    lignes.forEach((ligne) => {
-      for (let i = 0; i < ligne.quantity; i++) {
-        nouveauxBillets.push({
-          id: `tkt-${Date.now()}-${ligne.type.id}-${i}`,
-          ticketTypeId: ligne.type.id,
-          eventId: this.event()!.id,
-          userId: utilisateur.id,
-          transactionId,
-          qrCode: `QR-${this.event()!.id}-${utilisateur.id}-${Date.now()}-${ligne.type.id}-${i}`,
-          status: 'valid',
-          price: ligne.type.price,
-          purchaseDate: new Date().toISOString(),
-          scannedAt: undefined,
-          disputeStatus: 'none',
-        });
+    try {
+      for (const ligne of lignes) {
+        const resultat = await firstValueFrom(
+          this.ticketsService.acheterBillet({
+            ticketTypeId: ligne.type.id,
+            paymentMethod: methode,
+            quantite: ligne.quantity,
+          })
+        );
+        tousLesBillets.push(...resultat.billets);
       }
-    });
-    this.ticketsService.ajouterBillets(nouveauxBillets);
 
-    this.router.navigate(['/billet', nouveauxBillets[0].id, 'confirmation']);
+      this.paiementEnCours.set(false);
+      this.router.navigate(['/billet', tousLesBillets[0].id, 'confirmation']);
+    } catch (erreur: any) {
+      this.paiementEnCours.set(false);
+      this.erreurPaiement.set(
+        erreur.error?.erreur ??
+          (erreur.status === 402
+            ? 'Le paiement a échoué. Vérifiez votre solde ou réessayez.'
+            : "Impossible de finaliser l'achat pour le moment. Veuillez réessayer.")
+      );
+    }
   }
 }
