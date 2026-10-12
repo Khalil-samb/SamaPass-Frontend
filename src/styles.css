@@ -1,3 +1,87 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+@import './app/glass.css';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   IMPRESSION — « seul le billet »
+   Quand une page contient un élément marqué .zone-impression (le billet), l'impression ne garde QUE lui :
+   tout ce qui n'est ni cette zone, ni dedans, ni un parent de cette zone disparaît (menu, boutons, pied de page,
+   chatbot, autres sections...). Sur les pages SANS .zone-impression, rien ne change.
+   (Le sélecteur :has() est géré par Chrome/Edge 105+, Firefox 121+ et Safari 15.4+ ; sur un navigateur plus
+   ancien, la page s'imprime en entier comme avant — rien ne casse.)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media print {
+  body:has(.zone-impression) :not(.zone-impression):not(.zone-impression *):not(:has(.zone-impression)) {
+    display: none !important;
+  }
+
+  body:has(.zone-impression) {
+    background: #fff !important;
+  }
+
+  /* les parents de la zone gardent leur place mais perdent leurs marges, leurs ombres et leurs limites de taille */
+  body:has(.zone-impression) :has(.zone-impression) {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    background: #fff !important;
+    /* un parent qui a une transformation ou un filtre deviendrait le repère du billet (au lieu de la page) : on les annule */
+    transform: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    perspective: none !important;
+    will-change: auto !important;
+    contain: none !important;
+  }
+
+  /* LE BILLET EST CENTRÉ SUR LA FEUILLE, en hauteur et en largeur.
+     Tout le reste de la page est masqué : le PARENT DIRECT du billet devient la feuille entière (fixe, plein cadre = la
+     page imprimée) et centre son contenu. Aucun décalage, aucun dépassement : le billet reste à l'intérieur de la feuille. */
+  body:has(.zone-impression) :has(> .zone-impression) {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .zone-impression {
+    position: static !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 640px !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Le billet doit tenir sur UNE page, même avec de longs textes : on resserre ses marges à l'impression */
+  .zone-impression .p-6 { padding: 14px 18px !important; }
+  .zone-impression .px-6 { padding-left: 18px !important; padding-right: 18px !important; }
+  .zone-impression .py-4 { padding-top: 10px !important; padding-bottom: 10px !important; }
+  .zone-impression .mb-6 { margin-bottom: 12px !important; }
+  .zone-impression .mt-6 { margin-top: 10px !important; }
+
+  /* le QR Code est ce que l'agent scanne : on l'agrandit à l'impression */
+  .zone-impression img[alt="QR Code du billet"] {
+    width: 210px !important;
+    height: 210px !important;
+  }
+}
+
+/* Marges d'impression connues (le billet est dimensionné pour tenir dans une page A4 avec ces marges) */
+@page {
+  margin: 12mm;
+}

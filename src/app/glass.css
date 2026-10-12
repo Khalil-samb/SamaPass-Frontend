@@ -1,0 +1,99 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   KCROWD — SYSTÈME DE DESIGN « VERRE » (espace organisateur)
+   CSS pur : indépendant de la version de Tailwind. Toutes les pages organisateur
+   réutilisent ces mêmes classes → même look partout.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Fond de l'espace organisateur : gris très clair uni */
+.org-bg {
+  background: #f1f5f9;
+}
+
+/* Carte de verre (le bloc de base) — sans ombre : seul le flou et le fin liseré créent l'effet */
+.glass-card {
+  background: rgba(255, 255, 255, 0.62);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  backdrop-filter: blur(16px) saturate(1.5);
+  border: 1px solid rgba(148, 163, 184, 0.30);
+  border-radius: 1.5rem;
+}
+/* Verre plus opaque : menus déroulants, fenêtres */
+.glass-strong {
+  background: rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  backdrop-filter: blur(22px) saturate(1.6);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+.glass-hover { transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease; }
+.glass-hover:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Bandeau sombre en tête de page — couleur unie, sans dégradé */
+.banner-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  color: #fff;
+  background: #0f172a;
+}
+.banner-hero > * { position: relative; }
+
+/* Petite tuile de chiffre sur fond sombre */
+.stat-tile {
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 1rem;
+}
+
+/* Boutons */
+.btn-glow {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  color: #fff; font-weight: 800; border-radius: 0.875rem;
+  background: #ea580c;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.btn-glow:hover { background: #c2410c; }
+.btn-glow:disabled { opacity: 0.55; cursor: not-allowed; transform: none;  }
+.btn-glass {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-weight: 700; color: #334155; border-radius: 0.875rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.btn-glass:hover { background: rgba(255, 255, 255, 0.95); transform: translateY(-1px); }
+
+/* Champs de formulaire en verre */
+.glass-input {
+  width: 100%; border-radius: 0.875rem; padding: 0.7rem 0.9rem; font-size: 0.875rem; color: #0f172a;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  outline: none; transition: border-color 0.2s ease, background 0.2s ease;
+}
+.glass-input:focus { background: #fff; border-color: #f97316; outline: 2px solid rgba(249, 115, 22, 0.35); outline-offset: 1px; }
+
+/* Titre de section : petit trait orange + texte */
+.section-title { font-weight: 900; color: #0f172a; letter-spacing: -0.01em; }
+
+/* ═══════ APPARITION AU DÉFILEMENT (voir reveal.directive.ts) ═══════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px) scale(0.985);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms),
+              transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal.is-visible { opacity: 1; transform: none; will-change: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .glass-hover:hover { transform: none; }
+}
+@media print {
+  .reveal { opacity: 1 !important; transform: none !important; }
+}
