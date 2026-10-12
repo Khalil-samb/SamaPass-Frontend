@@ -1,257 +1,199 @@
-<div class="w-full bg-slate-50/50 min-h-screen text-slate-800 antialiased font-sans">
+<div class="org-bg min-h-screen text-slate-800 antialiased font-sans">
 
-  <!-- ═══════════ EN-TÊTE SIMPLIFIÉ ═══════════ -->
-  <header class="border-b border-slate-200/80 bg-white/80 backdrop-blur-md sticky top-0 z-50 px-6 lg:px-16 h-16 flex items-center justify-between">
+  <!-- ═══════════ EN-TÊTE ═══════════ -->
+  <header class="border-b border-slate-200 bg-white sticky top-0 z-50 px-4 sm:px-6 lg:px-16 h-16 flex items-center justify-between">
     <a routerLink="/" class="flex items-center gap-2.5">
-      <span class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20">
-        <app-icon name="ticket" [size]="18"></app-icon>
-      </span>
-      <span class="font-black text-xl text-slate-900 tracking-tight">Sama<span class="text-blue-600">Pass</span></span>
+      <img src="/images/logo%20Kcrowd.png" alt="Kcrowd" class="w-9 h-9 object-contain rounded-xl bg-white border border-slate-200" />
+      <span class="font-black text-xl text-slate-900 tracking-tight">Kcrowd</span>
     </a>
-    <a routerLink="/" class="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 border border-slate-200 bg-slate-50 rounded-lg px-3 py-1.5 transition-all">
-      <app-icon name="arrow-right" [size]="14" class="rotate-180 text-slate-400"></app-icon>
+    <a routerLink="/" class="btn-glass px-3.5 py-2 text-xs">
+      <app-icon name="arrow-right" [size]="14" class="rotate-180"></app-icon>
       Quitter
     </a>
   </header>
 
-  <!-- ═══════════ HERO SECTION ═══════════ -->
-  <section class="max-w-7xl mx-auto px-6 lg:px-12 py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+  <!-- ═══════════ HERO ═══════════ -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
 
-    <!-- Colonne Gauche : Copywriting & Call To Action -->
-    <div class="lg:col-span-7 space-y-6">
+    <div appReveal class="lg:col-span-7 space-y-6">
+      <span class="inline-block bg-slate-900 text-white text-[10px] font-black tracking-widest uppercase rounded-md px-3 py-1">Espace organisateur</span>
+
       <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.15]">
-        Faites vibrer le Sénégal.<br />
-        <span class="text-slate-900">Remplissez vos salles avec SamaPass.</span>
+        Faites vibrer le Sénégal. Remplissez vos salles avec Kcrowd.
       </h1>
 
-      <p class="text-slate-500 text-sm sm:text-base leading-relaxed max-w-2xl font-medium">
-        La solution intelligente pensée pour les scènes dakaroises et les tournées nationales. Distribution instantanée sans friction grâce aux paiements directs Wave et Orange Money.
+      <p class="text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl">
+        La billetterie pensée pour les scènes dakaroises et les tournées nationales : vos clients paient directement par Wave ou Orange Money, et vous suivez vos ventes en direct.
       </p>
 
-      <!-- Alerte Transparence Totale -->
-      <div class="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3.5 max-w-2xl">
-        <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 font-bold text-xs">
-          %
-        </div>
-        <p class="text-xs text-slate-600 leading-relaxed">
-          <strong class="text-slate-900 font-extrabold">Transparence totale :</strong> SamaPass prélève uniquement une commission fixe de 5% sur chaque billet vendu. Zéro frais caché, zéro abonnement mensuel.
+      <div class="glass-card !rounded-2xl p-4 flex items-start gap-3.5 max-w-2xl">
+        <div class="w-9 h-9 rounded-xl bg-orange-600 text-white flex items-center justify-center shrink-0 font-black text-sm">%</div>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          <strong class="text-slate-900 font-extrabold">Transparence totale :</strong> Kcrowd prélève uniquement une commission de {{ tauxCommission().toLocaleString('fr-FR') }}% sur chaque billet vendu. Aucun frais caché, aucun abonnement mensuel.
         </p>
       </div>
 
-      <!-- Boutons CTA & Réassurance -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-2">
-        <a
-          routerLink="/devenir-organisateur/inscription"
-          class="inline-flex items-center justify-center gap-2.5 bg-orange-600 text-white rounded-xl px-6 py-3.5 font-bold text-sm hover:bg-orange-700 shadow-lg shadow-orange-600/25 transition-all"
-        >
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-1">
+        <a routerLink="/devenir-organisateur/inscription" class="btn-glow px-6 py-3.5 text-sm">
           <app-icon name="rocket" [size]="16"></app-icon>
           Créer mon compte Organisateur
         </a>
-        <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-          <app-icon name="zap" [size]="14" class="text-slate-400"></app-icon>
-          Configuration en moins de 3 minutes
+        <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+          <app-icon name="zap" [size]="14"></app-icon>
+          Inscription en quelques minutes
         </span>
       </div>
 
-      <!-- Statistiques Clés -->
-      <div class="grid grid-cols-3 gap-6 pt-6 border-t border-slate-200/60 max-w-xl">
+      <div class="grid grid-cols-3 gap-4 sm:gap-6 pt-6 border-t border-slate-200 max-w-xl">
         <div>
-          <span class="block text-2xl font-black text-slate-900">2h max</span>
-          <span class="block text-[11px] font-medium text-slate-400 mt-0.5">Délai de reversement Wave &amp; OM</span>
-        </div>
-        <div>
-          <span class="block text-2xl font-black text-slate-900">99.9%</span>
-          <span class="block text-[11px] font-medium text-slate-400 mt-0.5">Disponibilité plateforme</span>
+          <span class="block text-2xl font-black text-slate-900">{{ tauxCommission().toLocaleString('fr-FR') }}%</span>
+          <span class="block text-xs text-slate-500 mt-0.5">Commission sur les ventes</span>
         </div>
         <div>
           <span class="block text-2xl font-black text-slate-900">0 FCFA</span>
-          <span class="block text-[11px] font-medium text-slate-400 mt-0.5">Frais de mise en ligne</span>
+          <span class="block text-xs text-slate-500 mt-0.5">Frais de mise en ligne</span>
+        </div>
+        <div>
+          <span class="block text-2xl font-black text-slate-900">Wave &amp; OM</span>
+          <span class="block text-xs text-slate-500 mt-0.5">Paiements et reversements</span>
         </div>
       </div>
     </div>
 
-    <!-- Colonne Droite : Démo Espace Producteur -->
-    <div class="lg:col-span-5">
-      <div class="bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-200/50 p-5 space-y-4">
-
-        <!-- Bar Supérieure Widget -->
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-          <span class="flex items-center gap-2 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase">
-            <app-icon name="bar-chart-3" [size]="14" class="text-blue-600"></app-icon>
-            Espace Producteur Live
+    <!-- Aperçu de l'espace producteur (illustration) -->
+    <div [appReveal]="120" class="lg:col-span-5">
+      <div class="banner-hero p-5 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-white/15">
+          <span class="flex items-center gap-2 text-[10px] font-extrabold text-white/70 tracking-wider uppercase">
+            <app-icon name="bar-chart-3" [size]="14"></app-icon>
+            Aperçu de votre tableau de bord
           </span>
-          <span class="bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            En direct
-          </span>
+          <span class="bg-white/10 border border-white/20 text-white/80 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Exemple</span>
         </div>
 
-        <!-- Cover Event Mockup -->
-        <div class="relative rounded-xl overflow-hidden group">
-          <img src="https://th.bing.com/th/id/OIP.yb5pf3BzcqRqMbKk2fjwGgHaDh?w=323&h=166&c=7&r=0&o=7&pid=1.7&rm=3" alt="Exemple d'événement" class="w-full h-40 object-cover" />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent flex items-end p-3.5">
-            <div>
-              <span class="bg-blue-600 text-white text-[9px] font-bold px-2 py-0.5 rounded mb-1 inline-block">LIVE IN DAKAR</span>
-              <h3 class="text-white text-base font-extrabold leading-tight">Dakar Music Festival 2026</h3>
-            </div>
-          </div>
+        <div>
+          <span class="inline-block bg-orange-600 text-white text-[10px] font-bold px-2 py-0.5 rounded mb-1.5">CONCERT</span>
+          <h3 class="text-white text-lg font-extrabold leading-tight">Festival de démonstration</h3>
         </div>
 
-        <!-- Metrics Dashboard Preview -->
         <div class="grid grid-cols-2 gap-3">
-          <div class="bg-slate-50 border border-slate-100 rounded-xl p-3">
-            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">BILLETS ÉCOULÉS</span>
-            <span class="block text-base font-black text-slate-900 mt-0.5">1 420 <span class="text-xs text-slate-400 font-normal">/ 1 500</span></span>
-            <div class="w-full h-1.5 bg-slate-200 rounded-full mt-2 overflow-hidden">
-              <div class="h-full bg-blue-600 rounded-full" style="width: 94%"></div>
+          <div class="stat-tile p-3">
+            <span class="block text-[10px] font-bold text-white/60 uppercase tracking-wider">Billets vendus</span>
+            <span class="block text-lg font-black mt-0.5">1 420 <span class="text-xs text-white/60 font-normal">/ 1 500</span></span>
+            <div class="w-full h-1.5 bg-white/15 rounded-full mt-2 overflow-hidden">
+              <div class="h-full bg-orange-500 rounded-full" style="width: 94%"></div>
             </div>
           </div>
-
-          <div class="bg-slate-50 border border-slate-100 rounded-xl p-3">
-            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">FONDS À VERSER</span>
-            <span class="block text-base font-black text-blue-600 mt-0.5">14 250 000 F</span>
-            <span class="inline-block text-[9px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded mt-1">
-              Prêt pour reversement
-            </span>
+          <div class="stat-tile p-3">
+            <span class="block text-[10px] font-bold text-white/60 uppercase tracking-wider">Solde à reverser</span>
+            <span class="block text-lg font-black mt-0.5">14 250 000 F</span>
+            <span class="inline-block text-[10px] font-bold text-emerald-300 mt-1">Prêt pour reversement</span>
           </div>
         </div>
 
-        <!-- Footer Widget -->
-        <div class="pt-2 flex items-center justify-between text-[10px] text-slate-400 font-medium">
-          <span class="flex items-center gap-1">
-            <app-icon name="lock" [size]="12" class="text-slate-400"></app-icon>
-            Paiements direct Wave &amp; OM
-          </span>
-          <span class="text-blue-600 font-bold">Reversement sous 2h</span>
-        </div>
-
+        <p class="flex items-center gap-1.5 text-[11px] text-white/60">
+          <app-icon name="lock" [size]="12"></app-icon>
+          Chiffres d'illustration — vos vraies ventes s'affichent dans votre espace.
+        </p>
       </div>
     </div>
-
   </section>
 
-  <!-- ═══════════ SIMULATEUR DE GAINS ═══════════ -->
-  <section class="py-16 bg-white border-y border-slate-200/80">
-    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+  <!-- ═══════════ SIMULATEUR ═══════════ -->
+  <section class="py-14 bg-white border-y border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
       <app-gains-simulator-component></app-gains-simulator-component>
     </div>
   </section>
 
   <!-- ═══════════ 4 PILIERS ═══════════ -->
-  <section class="max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-20">
-    <div class="mb-10">
-      <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-1">TECHNOLOGIE &amp; LOGISTIQUE</span>
-      <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">4 Piliers conçus pour les promoteurs sénégalais</h2>
-      <p class="text-slate-500 text-xs sm:text-sm mt-1 max-w-xl">
-        Oubliez le casse-tête de la monnaie physique, les faux billets et les files d'attente interminables aux portes des salles.
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-14 lg:py-20">
+    <div appReveal class="mb-10">
+      <span class="text-[11px] font-black text-orange-600 uppercase tracking-widest block mb-1">Technologie &amp; logistique</span>
+      <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">4 piliers conçus pour les promoteurs sénégalais</h2>
+      <p class="text-slate-600 text-sm mt-1.5 max-w-xl">
+        Fini la monnaie physique, les faux billets et les files d'attente interminables aux portes des salles.
       </p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      @for (pilier of piliers; track pilier.titre) {
-        <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+      @for (pilier of piliers; track pilier.titre; let i = $index) {
+        <div [appReveal]="i * 90" class="glass-card glass-hover !rounded-2xl p-6 flex flex-col justify-between">
           <div>
-            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center mb-4">
               <app-icon [name]="pilier.icon" [size]="20"></app-icon>
             </div>
             <h3 class="font-extrabold text-slate-900 text-sm mb-2">{{ pilier.titre }}</h3>
-            <p class="text-xs text-slate-500 leading-relaxed mb-4">{{ pilier.description }}</p>
+            <p class="text-xs text-slate-600 leading-relaxed mb-4">{{ pilier.description }}</p>
           </div>
-          <span class="text-xs font-bold text-blue-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-            {{ pilier.lien }} →
-          </span>
+          <span class="text-xs font-bold text-orange-600">{{ pilier.lien }}</span>
         </div>
       }
     </div>
   </section>
 
-  <!-- ═══════════ TÉMOIGNAGES ═══════════ -->
-  <section class="py-16 bg-slate-100/60 border-y border-slate-200/80">
-    <div class="max-w-7xl mx-auto px-6 lg:px-12">
-
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+  <!-- ═══════════ TÉMOIGNAGES (exemples) ═══════════ -->
+  <section class="py-14 bg-white border-y border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+      <div appReveal class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
         <div>
-          <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-1">CONFIANCE &amp; RÉPUTATION</span>
-          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Ils remplissent leurs salles avec nous</h2>
+          <span class="text-[11px] font-black text-orange-600 uppercase tracking-widest block mb-1">Confiance &amp; réputation</span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Ce que cherchent les organisateurs</h2>
         </div>
-        <span class="text-xs font-semibold text-slate-400 bg-white border border-slate-200 rounded-full px-3 py-1 self-start sm:self-auto">
-          Plus de 450 événements gérés en 2026 au Sénégal
+        <span class="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 rounded-full px-3 py-1 self-start sm:self-auto">
+          Témoignages d'exemple
         </span>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        @for (temoignage of temoignages; track temoignage.auteur) {
-          <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+        @for (temoignage of temoignages; track temoignage.auteur; let i = $index) {
+          <div [appReveal]="i * 120" class="glass-card !rounded-2xl p-6 flex flex-col justify-between">
             <div>
               <div class="flex gap-1 text-amber-400 mb-4">
                 @for (etoile of [1,2,3,4,5]; track etoile) {
                   <app-icon name="star" [size]="15" [filled]="true"></app-icon>
                 }
               </div>
-              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed italic mb-6">« {{ temoignage.texte }} »</p>
+              <p class="text-sm text-slate-700 leading-relaxed italic mb-6">« {{ temoignage.texte }} »</p>
             </div>
-
-            <div class="flex items-center gap-3 pt-4 border-t border-slate-100">
-              <div class="w-10 h-10 rounded-full bg-slate-200/80 text-slate-600 font-extrabold flex items-center justify-center text-xs shrink-0">
+            <div class="flex items-center gap-3 pt-4 border-t border-slate-200">
+              <div class="w-10 h-10 rounded-full bg-slate-900 text-white font-extrabold flex items-center justify-center text-xs shrink-0">
                 {{ temoignage.auteur.substring(0, 2).toUpperCase() }}
               </div>
               <div>
                 <span class="block text-xs font-extrabold text-slate-900">{{ temoignage.auteur }}</span>
-                <span class="block text-[11px] text-slate-400 font-medium">{{ temoignage.fonction }}</span>
+                <span class="block text-[11px] text-slate-500">{{ temoignage.fonction }}</span>
               </div>
             </div>
           </div>
         }
       </div>
-
     </div>
   </section>
 
-  <!-- ═══════════ BANDEAU CTA NOIR/BLEU NUIT ═══════════ -->
-  <section class="max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-20">
-    <div class="bg-blue-900 rounded-3xl p-8 sm:p-12 text-center text-white relative overflow-hidden shadow-2xl">
-
-      <!-- Overlay Décoratif Glow -->
-      <div class="absolute -top-24 -left-24 w-60 h-60 bg-blue-600/30 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-24 -right-24 w-60 h-60 bg-orange-600/20 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div class="relative z-10 max-w-2xl mx-auto space-y-5">
-        <span class="inline-block bg-white/10 backdrop-blur-md border border-white/15 text-white text-[10px] font-black tracking-widest uppercase rounded-full px-3.5 py-1">
-          ESPACE PARTENAIRE AGRÉÉ
+  <!-- ═══════════ APPEL FINAL ═══════════ -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-14 lg:py-20">
+    <div appReveal class="banner-hero p-8 sm:p-12 text-center">
+      <div class="max-w-2xl mx-auto space-y-5">
+        <span class="inline-block bg-white/10 border border-white/20 text-white text-[10px] font-black tracking-widest uppercase rounded-full px-3.5 py-1">
+          Espace partenaire
         </span>
-
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
-          Prêt à lancer votre prochain grand événement ?
-        </h2>
-
-        <p class="text-blue-100/80 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto">
-          Créez votre compte promoteur dès aujourd'hui. Aucune carte bancaire requise. Commencez à vendre vos billets en quelques minutes.
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">Prêt à lancer votre prochain événement ?</h2>
+        <p class="text-white/70 text-sm leading-relaxed max-w-lg mx-auto">
+          Créez votre compte organisateur dès aujourd'hui. Aucune carte bancaire requise : vous commencez à vendre vos billets en quelques minutes.
         </p>
 
         <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
-          <a
-            routerLink="/devenir-organisateur/inscription"
-            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl px-6 py-3.5 font-bold text-sm shadow-lg shadow-orange-600/30 transition-all"
-          >
+          <a routerLink="/devenir-organisateur/inscription" class="btn-glow w-full sm:w-auto px-6 py-3.5 text-sm">
             <app-icon name="rocket" [size]="16"></app-icon>
             Créer mon compte Organisateur
           </a>
-          <a
-            href="https://wa.me/221338000008"
-            target="_blank"
-            rel="noopener"
-            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-xl px-6 py-3.5 font-bold text-sm backdrop-blur-sm transition-all"
-          >
+          <a href="https://wa.me/221338000008" target="_blank" rel="noopener" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 font-bold text-sm transition-colors">
             <app-icon name="message-circle" [size]="16"></app-icon>
-            Parler à un conseiller à Dakar
+            Parler à un conseiller
           </a>
         </div>
-
-        <p class="text-[10px] text-blue-200/60 font-medium">
-          Configuration rapide en 3 minutes • 0% engagement au-delà de la commission des ventes
-        </p>
       </div>
-
     </div>
   </section>
 

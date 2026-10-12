@@ -1,10 +1,12 @@
 import { Component, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
-const TAUX_COMMISSION_SAMAPASS = 0.05; // les fameux 5%
+import { PlatformRateStore } from '../../../core/state/platform-rate.store';
 
 @Component({
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink, RevealDirective],
   standalone: true,
   selector: 'app-gains-simulator-component',
   styleUrl: './gains-simulator-component.css',
@@ -29,7 +31,15 @@ export class GainsSimulatorComponent {
     this.nombreParticipants.set(Number(valeur));
   }
 
+  // Le taux affiché et utilisé est celui que l'admin a réglé (plus de « 5 % » en dur)
+  constructor(private platformRate: PlatformRateStore) {
+    this.platformRate.charger();
+  }
+
+  tauxCommission = computed(() => this.platformRate.commissionRate());
+
   recettesBrutes = computed(() => this.prixBillet() * this.nombreParticipants());
-  fraisSamaPass = computed(() => Math.round(this.recettesBrutes() * TAUX_COMMISSION_SAMAPASS));
-  reversementNet = computed(() => this.recettesBrutes() - this.fraisSamaPass());
+  fraisKcrowd = computed(() => Math.round((this.recettesBrutes() * this.platformRate.commissionRate()) / 100));
+  reversementNet = computed(() => this.recettesBrutes() - this.fraisKcrowd());
 }
+

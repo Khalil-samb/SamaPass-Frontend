@@ -1,83 +1,58 @@
-<div class="text-center mb-10">
-      <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Calculez exactement vos gains nets</h2>
-      <p class="text-slate-500 max-w-xl mx-auto text-sm">
-        Ajustez le tarif et la jauge de votre événement pour simuler vos recettes
-        directes reversées sur Wave ou Orange Money.
-      </p>
-    </div>
+<div appReveal class="text-center mb-10">
+  <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">Calculez vos gains nets</h2>
+  <p class="text-slate-600 max-w-xl mx-auto text-sm">
+    Ajustez le tarif et la jauge de votre événement pour estimer les recettes reversées sur Wave ou Orange Money.
+  </p>
+</div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto">
 
-      <!-- Curseurs -->
-      <div class="bg-white border border-slate-100 rounded-2xl p-6 space-y-6">
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-semibold text-slate-700">Prix moyen du billet</span>
-            <span class="text-blue-700 font-extrabold">{{ prixBillet().toLocaleString('fr-FR') }} FCFA</span>
-          </div>
-          <input
-            type="range"
-            min="1000"
-            max="50000"
-            step="500"
-            [(ngModel)]="prixBilletModel"
-            class="w-full accent-blue-700"
-          />
-          <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
-            <span>1 000 FCFA</span>
-            <span>20 000 FCFA</span>
-            <span>50 000 FCFA</span>
-          </div>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-semibold text-slate-700">Nombre de participants estimés</span>
-            <span class="text-blue-700 font-extrabold">{{ nombreParticipants().toLocaleString('fr-FR') }} personnes</span>
-          </div>
-          <input
-            type="range"
-            min="50"
-            max="15000"
-            step="50"
-            [(ngModel)]="participantsModel"
-            class="w-full accent-blue-700"
-          />
-          <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
-            <span>50 pers</span>
-            <span>5 000 pers</span>
-            <span>15 000 pers</span>
-          </div>
-        </div>
-
-        <div class="bg-blue-50 rounded-xl p-3 text-xs text-blue-800 leading-relaxed">
-          Renseignez le prix du billet et le nombre de participants attendus pour
-          visualiser vos gains nets estimés.
-        </div>
+  <!-- Curseurs -->
+  <div appReveal class="glass-card p-6 space-y-6">
+    <div>
+      <div class="flex items-center justify-between mb-2 gap-2">
+        <label for="sim-prix" class="text-sm font-semibold text-slate-700">Prix moyen du billet</label>
+        <span class="text-slate-900 font-black">{{ prixBillet().toLocaleString('fr-FR') }} FCFA</span>
       </div>
-
-      <!-- Bilan -->
-      <div class="bg-white border border-slate-100 rounded-2xl p-6 flex flex-col">
-        <h3 class="font-bold text-slate-800 mb-4">Bilan prévisionnel</h3>
-
-        <div class="flex items-center justify-between text-sm mb-2.5">
-          <span class="text-slate-500">Recettes brutes estimées</span>
-          <span class="font-semibold text-slate-800">{{ recettesBrutes().toLocaleString('fr-FR') }} FCFA</span>
-        </div>
-        <div class="flex items-center justify-between text-sm mb-4 pb-4 border-b border-slate-100">
-          <span class="text-slate-500">Frais SamaPass (5%)</span>
-          <span class="font-semibold text-red-500">− {{ fraisSamaPass().toLocaleString('fr-FR') }} FCFA</span>
-        </div>
-
-        <span class="text-xs font-bold text-slate-400 tracking-wide">REVERSEMENT DIRECT ESTIMÉ</span>
-        <span class="text-[11px] text-slate-400 mb-1">Disponible sur compte Wave / Orange Money</span>
-        <span class="text-3xl font-extrabold text-blue-700 mb-5">{{ reversementNet().toLocaleString('fr-FR') }} FCFA</span>
-
-        <button
-          type="button"
-          class="mt-auto w-full bg-orange-600 text-white rounded-xl py-3 font-bold text-sm hover:bg-orange-700 transition-colors"
-        >
-          Activer ce tarif pour mon événement
-        </button>
+      <input id="sim-prix" type="range" min="1000" max="50000" step="500" [(ngModel)]="prixBilletModel" class="w-full accent-orange-600" />
+      <div class="flex items-center justify-between text-[11px] text-slate-500 mt-1">
+        <span>1 000 FCFA</span><span>20 000 FCFA</span><span>50 000 FCFA</span>
       </div>
     </div>
+
+    <div>
+      <div class="flex items-center justify-between mb-2 gap-2">
+        <label for="sim-part" class="text-sm font-semibold text-slate-700">Participants estimés</label>
+        <span class="text-slate-900 font-black">{{ nombreParticipants().toLocaleString('fr-FR') }} personnes</span>
+      </div>
+      <input id="sim-part" type="range" min="50" max="15000" step="50" [(ngModel)]="participantsModel" class="w-full accent-orange-600" />
+      <div class="flex items-center justify-between text-[11px] text-slate-500 mt-1">
+        <span>50</span><span>5 000</span><span>15 000</span>
+      </div>
+    </div>
+
+    <p class="rounded-xl border border-slate-200 bg-white/70 p-3 text-xs text-slate-600 leading-relaxed">
+      Estimation indicative : vos gains réels dépendent de vos ventes.
+    </p>
+  </div>
+
+  <!-- Bilan -->
+  <div [appReveal]="120" class="banner-hero p-6 flex flex-col">
+    <h3 class="font-black mb-4">Bilan prévisionnel</h3>
+
+    <div class="flex items-center justify-between text-sm mb-2.5 gap-2">
+      <span class="text-white/70">Recettes brutes estimées</span>
+      <span class="font-bold">{{ recettesBrutes().toLocaleString('fr-FR') }} FCFA</span>
+    </div>
+    <div class="flex items-center justify-between text-sm mb-4 pb-4 border-b border-white/15 gap-2">
+      <span class="text-white/70">Frais Kcrowd ({{ tauxCommission().toLocaleString('fr-FR') }} %)</span>
+      <span class="font-bold text-red-300">− {{ fraisKcrowd().toLocaleString('fr-FR') }} FCFA</span>
+    </div>
+
+    <span class="text-[11px] font-bold text-white/60 uppercase tracking-wider">Reversement estimé</span>
+    <span class="text-[11px] text-white/50 mb-1">Disponible sur votre compte Wave / Orange Money</span>
+    <span class="text-3xl font-black mb-5">{{ reversementNet().toLocaleString('fr-FR') }} <span class="text-base text-white/60">FCFA</span></span>
+
+    <a routerLink="/devenir-organisateur/inscription" class="btn-glow mt-auto w-full py-3 text-sm">Créer mon compte et vendre</a>
+  </div>
+</div>

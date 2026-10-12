@@ -4,6 +4,8 @@ import { RouterLink } from '@angular/router';
 import { OrganizersService } from '../../../core/services/organizers.service';
 import { AuthStore } from '../../../core/state/auth.store';
 import { Organizer } from '../../../core/models/organizer.model';
+import { RevealDirective } from '../../../shared/directives/reveal.directive';
+import { PlatformRateStore } from '../../../core/state/platform-rate.store';
 import { IconComponent } from '../../../shared/ui/icon-component/icon-component';
 
 interface EtapeGuide {
@@ -14,13 +16,14 @@ interface EtapeGuide {
   lien: string;
 }
 @Component({
-  imports: [IconComponent, RouterLink],
+  imports: [IconComponent, RouterLink, RevealDirective],
   selector: 'app-organizer-welcome-component',
   styleUrl: './organizer-welcome-component.css',
   templateUrl: './organizer-welcome-component.html',
 })
 export class OrganizerWelcomeComponent implements OnInit {
   organizer = signal<Organizer | null>(null);
+  messageKit = signal<string | null>(null);
 
   etapesGuide: EtapeGuide[] = [
     {
@@ -54,19 +57,31 @@ export class OrganizerWelcomeComponent implements OnInit {
 
   constructor(
     private organizersService: OrganizersService,
-    private authStore: AuthStore
+    private authStore: AuthStore,
+    private platformRate: PlatformRateStore
   ) {}
 
+  // Le taux réglé par l'admin (jamais un chiffre écrit en dur)
+  tauxCommission = computed(() => this.platformRate.commissionRate());
+
   ngOnInit() {
+    this.platformRate.charger();
     const utilisateur = this.authStore.currentUser();
     if (!utilisateur) return;
 
-    this.organizersService.getAll().subscribe((organizers) => {
-      this.organizer.set(organizers.find((o) => o.userId === utilisateur.id) ?? null);
+    // ⚠️ getMonProfil() (PAS getAll().find(...)) : même correction que
+    // pour SelectedEventStore — un organisateur ne peut récupérer QUE
+    // son propre profil, pas la liste de tous les organisateurs
+    // (endpoint réservé à l'administrateur, d'où le "403 Accès réservé
+    // aux administrateurs" que vous avez vu).
+    this.organizersService.getMonProfil().subscribe((monOrganizer) => {
+      this.organizer.set(monOrganizer);
     });
   }
 
+
   kitBientotDisponible() {
-    alert('Le kit de communication sera bientôt disponible au téléchargement.');
+    this.messageKit.set('Le kit de communication sera bientôt disponible au téléchargement.');
   }
 }
+

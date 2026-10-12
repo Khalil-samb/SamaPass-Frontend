@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { RevealDirective } from '../../../shared/directives/reveal.directive';
 import { IconComponent } from '../../../shared/ui/icon-component/icon-component';
 import { GainsSimulatorComponent } from './../gains-simulator-component/gains-simulator-component';
+import { PlatformRateStore } from '../../../core/state/platform-rate.store';
 interface Pilier {
   icon: 'wallet' | 'qr-code' | 'trending-up' | 'bar-chart-3';
   titre: string;
@@ -17,37 +19,44 @@ interface Temoignage {
 
 
 @Component({
-  imports: [RouterLink, IconComponent, GainsSimulatorComponent],
+  imports: [RouterLink, IconComponent, GainsSimulatorComponent, RevealDirective],
   standalone: true,
   selector: 'app-become-organizer-landing-component',
   styleUrl: './become-organizer-landing-component.css',
   templateUrl: './become-organizer-landing-component.html',
 })
 export class BecomeOrganizerLandingComponent {
+  // Le taux de commission réglé par l'admin (plus de « 5 % » écrit en dur dans la page)
+  tauxCommission = computed(() => this.platformRate.commissionRate());
+
+  constructor(private platformRate: PlatformRateStore) {
+    this.platformRate.charger();
+  }
+
   piliers: Pilier[] = [
     {
       icon: 'wallet',
       titre: 'Encaissement Mobile Money instantané',
-      description: "Paiements 1-clic via Wave et Orange Money, sans compte bancaire professionnel. Virements automatiques vers votre compte en 2 heures.",
-      lien: 'Liquidité immédiate garantie',
+      description: "Paiements 1-clic via Wave et Orange Money, sans compte bancaire professionnel. Reversement vers votre compte sur simple demande.",
+      lien: 'Reversement à la demande',
     },
     {
       icon: 'qr-code',
-      titre: "Contrôle d'accès QR Code infalsifiable",
-      description: "Application Scanner caméra ultra rapide. Protection anti-doublon et contrôle contre les captures d'écran.",
+      titre: "Contrôle d'accès par QR Code unique",
+      description: "Scan des billets par caméra depuis votre espace organisateur. Un billet déjà scanné est refusé : zéro doublon à l'entrée.",
       lien: "Zéro doublon à l'entrée",
     },
     {
       icon: 'trending-up',
       titre: 'Visibilité maximale au Sénégal',
-      description: "Mise en vitrine prioritaire sur l'accueil de SamaPass, notifications ciblées, intégration de lien d'achat WhatsApp et SMS.",
-      lien: 'Portée renforcée dès la publication',
+      description: "Votre événement est publié dans le catalogue Kcrowd, avec un lien de partage direct et un QR Code prêts pour WhatsApp, Facebook et vos affiches.",
+      lien: 'Prêt à partager dès la publication',
     },
     {
       icon: 'bar-chart-3',
       titre: 'Tableau de bord financier en direct',
-      description: 'Suivi des ventes en temps réel, ventilation par type de billet. Export en un clic pour votre comptabilité.',
-      lien: 'Exports PDF & Excel',
+      description: 'Suivi des ventes mis à jour automatiquement, ventilation par type de billet. Export CSV des participants en un clic.',
+      lien: 'Export CSV en un clic',
     },
   ];
 
@@ -58,9 +67,10 @@ export class BecomeOrganizerLandingComponent {
       fonction: 'Directeur général, Dakar Live Agency',
     },
     {
-      texte: "Pour notre festival, nous avions besoin d'une comptabilité claire. Le tableau de bord de SamaPass nous permet d'exporter nos états certifiés dès la clôture de l'événement.",
+      texte: "Pour notre festival, nous avions besoin d'une comptabilité claire. Le tableau de bord de Kcrowd nous permet d'exporter nos états dès la clôture de l'événement.",
       auteur: 'Aïssatou Ba',
       fonction: 'Coordinatrice billetterie, Collectif Festival Jazz',
     },
   ];
 }
+
