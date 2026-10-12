@@ -1,1 +1,119 @@
-<p>event-supervision-component works!</p>
+ @if (!eventStore.selectedEvent()) {
+      <p class="text-slate-400">Sélectionnez un événement pour voir sa supervision.</p>
+    } @else {
+
+      <div class="flex items-center justify-between mb-6">
+        <span class="flex items-center gap-1.5 bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+          <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+          Réseau Mesh actif (synchro p2p) — décoratif, en attente du backend
+        </span>
+        <a
+          routerLink="/organisateur/scanner/camera"
+          class="flex items-center gap-2 bg-orange-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-orange-700"
+        >
+          <app-icon name="qr-code" [size]="16"></app-icon>
+          Lancer le Scanner Caméra
+        </a>
+      </div>
+
+      <!-- ═══════════ JAUGE GLOBALE ═══════════ -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div class="lg:col-span-2 bg-white border border-slate-100 rounded-2xl p-6">
+          <h2 class="font-extrabold text-slate-900 mb-1">Jauge globale des entrées</h2>
+          <div class="flex items-end gap-2 mb-3">
+            <span class="text-2xl font-extrabold text-slate-900">{{ totalScannes() }}</span>
+            <span class="text-slate-400 text-sm mb-0.5">/ {{ totalVendus() }} billets vendus</span>
+            <span class="ml-auto text-lg font-extrabold text-blue-700">{{ tauxScan() }}%</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden flex">
+            @for (statsPorte of statsParPorte(); track statsPorte.gate.id) {
+              <div class="h-full bg-blue-700 border-r border-white" [style.width.%]="(statsPorte.entreesValidees / (totalVendus() || 1)) * 100"></div>
+            }
+          </div>
+          <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-slate-400">
+            @for (statsPorte of statsParPorte(); track statsPorte.gate.id) {
+              <span>{{ statsPorte.gate.name }} · {{ statsPorte.entreesValidees }} entrées</span>
+            }
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-100 rounded-2xl p-6">
+          <span class="block text-[10px] font-bold text-slate-400 tracking-wide mb-1">TERMINAUX SUR SITE</span>
+          <span class="block text-xl font-extrabold text-slate-900 mb-3">{{ agents().length }} scanners configurés</span>
+          <span class="block text-[10px] font-bold text-slate-400 tracking-wide mb-1">PORTES ACTIVES</span>
+          <span class="block text-xl font-extrabold text-slate-900">{{ gates().length }}</span>
+        </div>
+      </div>
+
+      <!-- ═══════════ POSTES DE CONTRÔLE ═══════════ -->
+      <div class="mb-6">
+        <h2 class="font-extrabold text-slate-900 mb-4">Postes de contrôle déployés ({{ gates().length }} portes)</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (statsPorte of statsParPorte(); track statsPorte.gate.id) {
+            <div class="bg-white border border-slate-100 rounded-2xl p-5">
+              <span class="inline-block bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full mb-2">{{ statsPorte.gate.name }}</span>
+              <h3 class="font-bold text-slate-800 text-sm mb-3">{{ statsPorte.gate.label }}</h3>
+              <div class="grid grid-cols-2 gap-2 text-center">
+                <div>
+                  <span class="block text-[10px] font-bold text-slate-400 tracking-wide">ENTRÉES VALIDÉES</span>
+                  <span class="block font-extrabold text-slate-900">{{ statsPorte.entreesValidees }}</span>
+                </div>
+                <div>
+                  <span class="block text-[10px] font-bold text-slate-400 tracking-wide">AGENTS</span>
+                  <span class="block font-extrabold text-slate-900">{{ statsPorte.agentsAssignes }}</span>
+                </div>
+              </div>
+            </div>
+          }
+          @if (gates().length === 0) {
+            <p class="text-sm text-slate-400 col-span-full">Aucune porte configurée pour cet événement — vous pouvez en ajouter en modifiant l'événement.</p>
+          }
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- ═══════════ CODES AGENTS ═══════════ -->
+        <div class="bg-white border border-slate-100 rounded-2xl p-6">
+          <h2 class="font-extrabold text-slate-900 mb-1">Codes d'accès des agents</h2>
+          <p class="text-xs text-slate-400 mb-4">Chaque agent saisit son code PIN dans l'application Kcrowd Scanner pour s'authentifier.</p>
+
+          <div class="space-y-2.5">
+            @for (agent of agents(); track agent.id) {
+              <div class="border border-slate-100 rounded-xl p-3.5 flex items-center justify-between gap-3">
+                <div>
+                  <span class="block font-semibold text-slate-800 text-sm">{{ agent.name }}</span>
+                  <span class="block text-xs text-slate-400">{{ nomPorte(agent.gateId) }} · {{ labelRole(agent.role) }}</span>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                  <span class="font-mono font-bold text-blue-700 text-sm">{{ agent.pinCode }}</span>
+                  <button type="button" (click)="renvoyerCode(agent)" class="text-xs font-semibold text-green-600 hover:underline">Renvoyer</button>
+                </div>
+              </div>
+            }
+            @if (agents().length === 0) {
+              <p class="text-sm text-slate-400">Aucun agent configuré pour cet événement.</p>
+            }
+          </div>
+        </div>
+
+        <!-- ═══════════ PROTOCOLES ═══════════ -->
+        <div class="bg-white border border-slate-100 rounded-2xl p-6">
+          <h2 class="font-extrabold text-slate-900 mb-4">Protocoles de contrôle</h2>
+          <ul class="space-y-3 text-xs text-slate-500 leading-relaxed">
+            <li class="flex gap-2">
+              <app-icon name="x" [size]="13" class="text-red-500 shrink-0 mt-0.5"></app-icon>
+              <span><strong class="text-slate-700">Billet déjà scanné</strong> — refuser l'accès et orienter le porteur vers le poste litiges. Ne jamais forcer la validation manuelle.</span>
+            </li>
+            <li class="flex gap-2">
+              <app-icon name="shield-check" [size]="13" class="text-blue-700 shrink-0 mt-0.5"></app-icon>
+              <span><strong class="text-slate-700">Coupure réseau</strong> — le mode hors-ligne sera pris en charge par l'application Scanner (à venir) ; en attendant, utilisez la saisie manuelle de secours.</span>
+            </li>
+            <li class="flex gap-2">
+              <app-icon name="phone" [size]="13" class="text-slate-500 shrink-0 mt-0.5"></app-icon>
+              <span><strong class="text-slate-700">Poste central de sécurité</strong> — contactez votre superviseur en cas de doute avant de refuser un accès.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    }
