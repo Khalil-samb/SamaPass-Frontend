@@ -42,3 +42,15 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Scripts d'installation temporaires utilisés pendant le développement
+installer_*.py
+src/installer_*.py
+src/app/installer_*.py
+
+# Secrets et sauvegardes locales
+.env
+.env.*
+!.env.example
+*.avant_*
+*.bak
