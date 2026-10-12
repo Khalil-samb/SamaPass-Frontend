@@ -1,14 +1,18 @@
 
+import { EventScheduleItem } from './event-schedule-item.model';
+import { TicketType } from './ticket-type.model';
+
 export type EventStatus = 'draft' | 'published' | 'sold_out' | 'finished' | 'cancelled';
 export type EventFeesBornBy = 'organizer' | 'buyer';
 
-
-export interface EventEntiy {
-   id: string;
-  organizerId: string;
+export interface EventEntity {
+  id: string;
+  organizer: string;
   title: string;
+  subtitle?: string;
   description: string;
   categoryId: string;
+  experienceFormat?: string;     // "Festival Plein Air", "Salle Couverte"... (liste fixe, pas une catégorie)
   cityId: string;
   venue: string;
   address: string;
@@ -36,6 +40,9 @@ export interface EventEntiy {
   salesOpenAt?: string;          // vide = vente immédiate dès publication
   salesCloseAt?: string;
   feesBornBy: EventFeesBornBy;   // qui paie les 5% de commission
+  acceptedPaymentMethods?: string[]; // moyens de paiement activés pour CET événement précis
+  ticketTypes?: TicketType[];
+  scheduleItems?: EventScheduleItem[];
 
   // Sécurité — ⚠️ enregistrés mais non fonctionnels sans backend + appli Flutter
   offlineModeEnabled: boolean;

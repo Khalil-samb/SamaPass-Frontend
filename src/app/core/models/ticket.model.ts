@@ -1,3 +1,5 @@
+import { TicketType } from "./ticket-type.model";
+
 export type TicketStatus = 'valid' | 'used' | 'cancelled';
 export type TicketDisputeStatus = 'none' | 'flagged';
 
@@ -12,6 +14,7 @@ export interface Ticket {
   price: number;
   purchaseDate: string;
   scannedAt?: string;
+  ticketTypes?: TicketType[];
 
   // Contrôle d'accès
   gateId?: string;              // quelle porte a scanné ce billet
