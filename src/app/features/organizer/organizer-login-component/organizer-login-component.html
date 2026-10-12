@@ -1,1 +1,1331 @@
-<p>organizer-login-component works!</p>
+<div class="min-h-screen w-full flex bg-[#05070b] overflow-hidden">
+
+  <!-- ========================================================= -->
+  <!-- GAUCHE : CARTE DE CONNEXION -->
+  <!-- ========================================================= -->
+
+  <div
+    class="
+      relative z-20
+      w-full lg:w-[46%]
+      min-h-screen
+      flex items-center justify-center
+      px-6 py-10
+      sm:px-10
+      lg:px-14
+      overflow-hidden
+      bg-[#05070b]
+    "
+  >
+
+    <!-- Lumière orange d'ambiance gauche -->
+    <div
+      class="
+        absolute
+        -top-40 -left-40
+        w-[500px] h-[500px]
+        rounded-full
+        bg-orange-500/10
+        blur-[130px]
+        animate-[ambientGlow_8s_ease-in-out_infinite]
+      "
+    ></div>
+
+    <div
+      class="
+        absolute
+        -bottom-40 -right-40
+        w-[450px] h-[450px]
+        rounded-full
+        bg-orange-500/10
+        blur-[120px]
+        animate-[ambientGlow_10s_ease-in-out_infinite_reverse]
+      "
+    ></div>
+
+
+    <!-- ======================================================= -->
+    <!-- CARTE GLASSMORPHISM -->
+    <!-- ======================================================= -->
+
+    <div
+      class="
+        relative
+        w-full
+        max-w-md
+
+        rounded-[30px]
+
+        bg-white/[0.055]
+        backdrop-blur-[24px]
+
+        border
+        border-white/[0.14]
+
+        overflow-hidden
+
+        animate-[cardAppear_0.9s_ease-out]
+      "
+    >
+
+      <!-- Reflet lumineux supérieur -->
+
+      <div
+        class="
+          absolute
+          top-0
+          left-[8%]
+          right-[8%]
+          h-px
+          bg-gradient-to-r
+          from-transparent
+          via-white/60
+          to-transparent
+          opacity-60
+        "
+      ></div>
+
+
+      <!-- Reflet orange intérieur -->
+
+      <div
+        class="
+          pointer-events-none
+          absolute
+          -top-32
+          -right-32
+          w-64
+          h-64
+          rounded-full
+          bg-orange-500/10
+          blur-[80px]
+          animate-[ambientGlow_6s_ease-in-out_infinite]
+        "
+      ></div>
+
+
+      <!-- CONTENU -->
+
+      <div class="relative z-10 p-7 sm:p-9">
+
+        <!-- ===================================================== -->
+        <!-- LOGO -->
+        <!-- ===================================================== -->
+
+        <div class="flex items-center gap-3 mb-9">
+
+          <div class="relative">
+
+            <!-- lumière derrière logo -->
+            <div
+              class="
+                absolute
+                inset-0
+                rounded-2xl
+                bg-orange-500/30
+                blur-xl
+                animate-[logoGlow_4s_ease-in-out_infinite]
+              "
+            ></div>
+
+            <img
+              src="/images/logo Kcrowd.png"
+              alt="Kcrowd"
+              class="
+                relative
+                w-12
+                h-12
+                object-contain
+                rounded-xl
+                bg-white
+                border
+                border-white/20
+                p-1
+                transition-transform
+                duration-500
+                hover:scale-110
+                hover:-rotate-3
+              "
+            />
+
+          </div>
+
+          <div>
+
+            <span
+              class="
+                block
+                font-extrabold
+                text-white
+                text-base
+              "
+            >
+              Kcrowd
+            </span>
+
+            <span
+              class="
+                block
+                text-[11px]
+                font-bold
+                text-orange-500
+                tracking-[0.18em]
+              "
+            >
+              ESPACE ORGANISATEUR
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- TITRE -->
+        <!-- ===================================================== -->
+
+        <div class="mb-8">
+
+          <p
+            class="
+              text-orange-500
+              text-[11px]
+              font-extrabold
+              tracking-[0.25em]
+              uppercase
+              mb-3
+            "
+          >
+            Bienvenue 👋
+          </p>
+
+          <h1
+            class="
+              text-3xl
+              sm:text-[38px]
+              leading-[1.05]
+              font-black
+              tracking-tight
+              text-white
+              mb-4
+            "
+          >
+            Connexion
+
+            <span class="block text-orange-500">
+              Organisateur
+            </span>
+          </h1>
+
+          <p
+            class="
+              text-sm
+              text-slate-400
+              leading-relaxed
+              max-w-sm
+            "
+          >
+            Accédez à votre tableau de bord pour gérer vos événements
+            et suivre vos ventes.
+          </p>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- FORMULAIRE -->
+        <!-- ===================================================== -->
+
+        <form
+          (ngSubmit)="seConnecter()"
+          class="flex flex-col gap-5"
+        >
+
+          <!-- EMAIL -->
+
+          <label class="block group">
+
+            <span
+              class="
+                text-[11px]
+                font-bold
+                text-slate-400
+                tracking-wide
+                transition-colors
+                duration-300
+                group-focus-within:text-orange-500
+              "
+            >
+              EMAIL PROFESSIONNEL
+            </span>
+
+            <div class="relative mt-2">
+
+              <div
+                class="
+                  absolute
+                  left-4
+                  top-1/2
+                  -translate-y-1/2
+                  text-slate-500
+                  group-focus-within:text-orange-500
+                  transition-colors
+                  duration-300
+                  z-10
+                "
+              >
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                >
+                  <rect
+                    width="20"
+                    height="16"
+                    x="2"
+                    y="4"
+                    rx="2"
+                  />
+
+                  <path
+                    d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"
+                  />
+                </svg>
+
+              </div>
+
+              <input
+                type="email"
+                [(ngModel)]="emailModel"
+                name="email"
+                placeholder="billetterie@votrestructure.sn"
+                class="
+                  w-full
+
+                  rounded-xl
+
+                  border
+                  border-white/[0.12]
+
+                  bg-white/[0.045]
+                  backdrop-blur-md
+
+                  text-white
+                  placeholder:text-slate-600
+
+                  pl-11
+                  pr-4
+                  py-3.5
+
+                  text-sm
+                  outline-none
+
+                  transition-all
+                  duration-300
+
+                  focus:border-orange-500/70
+                  focus:bg-white/[0.075]
+                  focus:ring-1
+                  focus:ring-orange-500/40
+                "
+              />
+
+            </div>
+
+          </label>
+
+
+          <!-- MOT DE PASSE -->
+
+          <label class="block group">
+
+            <span
+              class="
+                text-[11px]
+                font-bold
+                text-slate-400
+                tracking-wide
+                transition-colors
+                duration-300
+                group-focus-within:text-orange-500
+              "
+            >
+              MOT DE PASSE
+            </span>
+
+            <div class="relative mt-2">
+
+              <div
+                class="
+                  absolute
+                  left-4
+                  top-1/2
+                  -translate-y-1/2
+                  text-slate-500
+                  group-focus-within:text-orange-500
+                  transition-colors
+                  duration-300
+                  z-10
+                "
+              >
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                >
+                  <rect
+                    width="18"
+                    height="11"
+                    x="3"
+                    y="11"
+                    rx="2"
+                  />
+
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+
+              </div>
+
+              <input
+                type="password"
+                [(ngModel)]="motDePasseModel"
+                name="motDePasse"
+                placeholder="••••••••••"
+                class="
+                  w-full
+
+                  rounded-xl
+
+                  border
+                  border-white/[0.12]
+
+                  bg-white/[0.045]
+                  backdrop-blur-md
+
+                  text-white
+                  placeholder:text-slate-600
+
+                  pl-11
+                  pr-4
+                  py-3.5
+
+                  text-sm
+                  outline-none
+
+                  transition-all
+                  duration-300
+
+                  focus:border-orange-500/70
+                  focus:bg-white/[0.075]
+                  focus:ring-1
+                  focus:ring-orange-500/40
+                "
+              />
+
+            </div>
+
+          </label>
+
+
+          <!-- ===================================================== -->
+          <!-- ERREUR -->
+          <!-- ===================================================== -->
+
+          @if (erreur()) {
+
+            <div
+              class="
+                flex
+                items-center
+                gap-3
+                px-3
+                py-2.5
+
+                rounded-xl
+
+                border
+                border-red-500/20
+
+                bg-red-500/10
+
+                text-red-400
+                text-sm
+
+                animate-[shake_0.4s_ease-in-out]
+              "
+            >
+
+              <span
+                class="
+                  flex
+                  items-center
+                  justify-center
+
+                  w-6
+                  h-6
+
+                  rounded-full
+
+                  bg-red-500/15
+
+                  text-red-400
+                  font-bold
+                "
+              >
+                !
+              </span>
+
+              {{ erreur() }}
+
+            </div>
+
+          }
+
+
+          <!-- ===================================================== -->
+          <!-- BOUTON -->
+          <!-- ===================================================== -->
+
+          <button
+            type="submit"
+            [disabled]="connexionEnCours()"
+            class="
+              group
+              relative
+              overflow-hidden
+
+              mt-1
+
+              w-full
+              rounded-xl
+
+              py-3.5
+
+              bg-orange-500
+              hover:bg-orange-600
+
+              text-white
+              font-bold
+              text-sm
+
+              transition-all
+              duration-300
+
+              hover:-translate-y-[2px]
+
+              disabled:opacity-60
+              disabled:cursor-not-allowed
+            "
+          >
+
+            <!-- BRILLANCE QUI TRAVERSE LE BOUTON -->
+
+            <span
+              class="
+                absolute
+                inset-y-0
+                -left-[80%]
+
+                w-[50%]
+
+                bg-gradient-to-r
+                from-transparent
+                via-white/40
+                to-transparent
+
+                skew-x-[-25deg]
+
+                group-hover:left-[130%]
+
+                transition-all
+                duration-700
+              "
+            ></span>
+
+            <span
+              class="
+                relative
+                flex
+                items-center
+                justify-center
+                gap-2
+              "
+            >
+
+              @if (connexionEnCours()) {
+
+                <span
+                  class="
+                    w-4
+                    h-4
+                    rounded-full
+
+                    border-2
+                    border-white/30
+                    border-t-white
+
+                    animate-spin
+                  "
+                ></span>
+
+                Connexion...
+
+              } @else {
+
+                Se connecter
+
+                <span
+                  class="
+                    text-lg
+                    transition-transform
+                    duration-300
+                    group-hover:translate-x-1
+                  "
+                >
+                  →
+                </span>
+
+              }
+
+            </span>
+
+          </button>
+
+        </form>
+
+
+        <!-- ===================================================== -->
+        <!-- SEPARATEUR -->
+        <!-- ===================================================== -->
+
+        <div class="flex items-center gap-4 my-8">
+
+          <div class="flex-1 h-px bg-white/10"></div>
+
+          <span
+            class="
+              text-[10px]
+              font-bold
+              tracking-[0.2em]
+              text-slate-600
+            "
+          >
+            KCROWD
+          </span>
+
+          <div class="flex-1 h-px bg-white/10"></div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- DEVENIR ORGANISATEUR -->
+        <!-- ===================================================== -->
+
+        <p class="text-center text-sm text-slate-500">
+
+          Pas encore organisateur ?
+
+          <a
+            routerLink="/devenir-organisateur"
+            class="
+              ml-1
+              font-bold
+              text-orange-500
+              hover:text-orange-500
+              transition-colors
+            "
+          >
+            Devenir organisateur
+            <span>→</span>
+          </a>
+
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- DROITE : IMAGE CINÉMATIQUE -->
+  <!-- ========================================================= -->
+
+  <div
+    class="
+      hidden
+      lg:flex
+      lg:w-[54%]
+
+      relative
+      overflow-hidden
+
+      items-center
+      justify-center
+
+      bg-slate-950
+    "
+  >
+
+    <!-- ======================================================= -->
+    <!-- IMAGE -->
+    <!-- ======================================================= -->
+
+    <img
+      src="/images/Organisateur.png"
+      alt="Événement Kcrowd"
+      class="
+        absolute
+        inset-0
+
+        w-full
+        h-full
+
+        object-cover
+
+        scale-[1.08]
+
+        animate-[cinematicZoom_18s_ease-in-out_infinite_alternate]
+      "
+    />
+
+
+    <!-- ======================================================= -->
+    <!-- GRADIENTS -->
+    <!-- ======================================================= -->
+
+    <div
+      class="
+        absolute
+        inset-0
+
+        bg-gradient-to-r
+        from-slate-950/75
+        via-transparent
+        to-transparent
+      "
+    ></div>
+
+    <div
+      class="
+        absolute
+        inset-0
+
+        bg-gradient-to-t
+        from-slate-950/70
+        via-transparent
+        to-slate-950/10
+      "
+    ></div>
+
+
+    <!-- ======================================================= -->
+    <!-- GROSSE LUMIÈRE ORANGE — DROITE -->
+    <!-- ======================================================= -->
+
+    <div
+      class="
+        absolute
+
+        -top-[15%]
+        -right-[5%]
+
+        w-[550px]
+        h-[550px]
+
+        rounded-full
+
+        bg-orange-500/35
+
+        blur-[110px]
+
+        mix-blend-screen
+
+        animate-[bigLight_7s_ease-in-out_infinite]
+      "
+    ></div>
+
+
+    <!-- ======================================================= -->
+    <!-- GROSSE LUMIÈRE ORANGE — BAS -->
+    <!-- ======================================================= -->
+
+    <div
+      class="
+        absolute
+
+        -bottom-[20%]
+        left-[5%]
+
+        w-[600px]
+        h-[500px]
+
+        rounded-full
+
+        bg-orange-500/30
+
+        blur-[120px]
+
+        mix-blend-screen
+
+        animate-[bigLight_9s_ease-in-out_infinite_reverse]
+      "
+    ></div>
+
+
+    <!-- ======================================================= -->
+    <!-- PROJECTEUR LUMINEUX 1 -->
+    <!-- ======================================================= -->
+
+    <div
+      class="
+        absolute
+
+        top-[5%]
+        right-[25%]
+
+        w-[180px]
+        h-[700px]
+
+        bg-gradient-to-b
+        from-orange-500/40
+        via-orange-500/15
+        to-transparent
+
+        blur-[25px]
+
+        rotate-[25deg]
+
+        origin-top
+
+        mix-blend-screen
+
+        animate-[beamMove_6s_ease-in-out_infinite]
+      "
+    ></div>
+
+
+    <!-- ======================================================= -->
+    <!-- PROJECTEUR LUMINEUX 2 -->
+    <!-- ======================================================= -->
+
+    <div
+      class="
+        absolute
+
+        top-[0]
+        right-[45%]
+
+        w-[100px]
+        h-[600px]
+
+        bg-gradient-to-b
+        from-orange-500/30
+        via-orange-500/10
+        to-transparent
+
+        blur-[20px]
+
+        rotate-[-20deg]
+
+        origin-top
+
+        mix-blend-screen
+
+        animate-[beamMoveReverse_8s_ease-in-out_infinite]
+      "
+    ></div>
+
+
+    <!-- ======================================================= -->
+    <!-- CERCLES LUMINEUX -->
+    <!-- ======================================================= -->
+
+    <div
+      class="
+        absolute
+
+        -bottom-[55%]
+        right-[-15%]
+
+        w-[750px]
+        h-[750px]
+
+        rounded-full
+
+        border
+        border-orange-500/35
+
+        animate-[orbit_20s_linear_infinite]
+      "
+    ></div>
+
+    <div
+      class="
+        absolute
+
+        -top-[30%]
+        right-[0%]
+
+        w-[500px]
+        h-[500px]
+
+        rounded-full
+
+        border
+        border-orange-500/20
+
+        animate-[orbitReverse_15s_linear_infinite]
+      "
+    ></div>
+
+
+    <!-- ======================================================= -->
+    <!-- PETITES BRILLANCES -->
+    <!-- ======================================================= -->
+
+    <span
+      class="
+        absolute
+        top-[22%]
+        right-[18%]
+
+        w-2
+        h-2
+
+        rounded-full
+
+        bg-orange-500
+
+        animate-[spark_3s_ease-in-out_infinite]
+
+        blur-[1px]
+      "
+    ></span>
+
+    <span
+      class="
+        absolute
+        top-[38%]
+        right-[32%]
+
+        w-1.5
+        h-1.5
+
+        rounded-full
+
+        bg-white
+
+        animate-[spark_4s_ease-in-out_infinite_1s]
+
+        blur-[1px]
+      "
+    ></span>
+
+    <span
+      class="
+        absolute
+        bottom-[28%]
+        right-[15%]
+
+        w-2
+        h-2
+
+        rounded-full
+
+        bg-orange-500
+
+        animate-[spark_5s_ease-in-out_infinite_2s]
+      "
+    ></span>
+
+    <span
+      class="
+        absolute
+        bottom-[40%]
+        left-[25%]
+
+        w-1.5
+        h-1.5
+
+        rounded-full
+
+        bg-orange-500
+
+        animate-[spark_4s_ease-in-out_infinite_3s]
+      "
+    ></span>
+
+
+    <!-- ======================================================= -->
+    <!-- TEXTE AU CENTRE -->
+    <!-- ======================================================= -->
+
+    <div
+      class="
+        relative
+        z-10
+
+        w-full
+        px-10
+
+        text-center
+
+        animate-[heroAppear_1.2s_ease-out]
+      "
+    >
+
+      <!-- Badge -->
+
+      <div
+        class="
+          inline-flex
+          items-center
+          gap-2
+
+          px-4
+          py-2
+
+          rounded-full
+
+          bg-black/20
+          backdrop-blur-xl
+
+          border
+          border-white/20
+
+          text-white/80
+
+          text-xs
+          font-bold
+          tracking-wide
+
+          mb-7
+        "
+      >
+
+        <span
+          class="
+            w-2
+            h-2
+            rounded-full
+            bg-orange-500
+
+            animate-pulse
+          "
+        ></span>
+
+        ESPACE ORGANISATEUR
+
+      </div>
+
+
+      <!-- TITRE -->
+
+      <h2
+        class="
+          text-4xl
+          xl:text-6xl
+
+          leading-[0.95]
+
+          font-black
+
+          tracking-tight
+
+          text-white
+        "
+      >
+
+        Donnez vie à vos
+
+        <span
+          class="
+            block
+            mt-3
+
+            text-orange-500
+          "
+        >
+          événements.
+        </span>
+
+      </h2>
+
+
+      <p
+        class="
+          mt-7
+          mx-auto
+
+          max-w-xl
+
+          text-base
+          xl:text-lg
+
+          leading-relaxed
+
+          text-white/80
+        "
+      >
+        Gérez vos événements, vos billets et vos ventes
+        depuis une seule plateforme.
+      </p>
+
+    </div>
+
+
+    <!-- ======================================================= -->
+    <!-- LIGNE LUMINEUSE BAS -->
+    <!-- ======================================================= -->
+
+    <div
+      class="
+        absolute
+        bottom-0
+        left-0
+        right-0
+
+        h-[2px]
+
+        bg-gradient-to-r
+        from-transparent
+        via-orange-500
+        to-transparent
+
+        opacity-80
+      "
+    ></div>
+
+  </div>
+
+</div>
+
+
+<!-- ============================================================= -->
+<!-- ANIMATIONS -->
+<!-- ============================================================= -->
+
+<style>
+
+  /* Carte */
+
+  @keyframes cardAppear {
+
+    from {
+      opacity: 0;
+      transform: translateX(-30px) scale(.97);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+
+  }
+
+
+  /* Hero */
+
+  @keyframes heroAppear {
+
+    from {
+      opacity: 0;
+      transform: scale(.96);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+  }
+
+
+  /* Zoom de l'image */
+
+  @keyframes cinematicZoom {
+
+    0% {
+      transform: scale(1.08);
+    }
+
+    100% {
+      transform: scale(1.16);
+    }
+
+  }
+
+
+  /* Grandes lumières */
+
+  @keyframes bigLight {
+
+    0%,
+    100% {
+      transform: scale(.85);
+      opacity: .35;
+    }
+
+    50% {
+      transform: scale(1.15);
+      opacity: .75;
+    }
+
+  }
+
+
+  /* Faisceaux lumineux */
+
+  @keyframes beamMove {
+
+    0%,
+    100% {
+      transform: rotate(25deg) translateX(-40px);
+      opacity: .35;
+    }
+
+    50% {
+      transform: rotate(15deg) translateX(80px);
+      opacity: .75;
+    }
+
+  }
+
+
+  @keyframes beamMoveReverse {
+
+    0%,
+    100% {
+      transform: rotate(-20deg) translateX(40px);
+      opacity: .25;
+    }
+
+    50% {
+      transform: rotate(-8deg) translateX(-80px);
+      opacity: .65;
+    }
+
+  }
+
+
+  /* Lumière ambiante */
+
+  @keyframes ambientGlow {
+
+    0%,
+    100% {
+      transform: scale(.85);
+      opacity: .35;
+    }
+
+    50% {
+      transform: scale(1.15);
+      opacity: .7;
+    }
+
+  }
+
+
+  /* Logo */
+
+  @keyframes logoGlow {
+
+    0%,
+    100% {
+      transform: scale(.8);
+      opacity: .3;
+    }
+
+    50% {
+      transform: scale(1.2);
+      opacity: .65;
+    }
+
+  }
+
+
+  /* Orbites */
+
+  @keyframes orbit {
+
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+
+  }
+
+
+  @keyframes orbitReverse {
+
+    from {
+      transform: rotate(360deg);
+    }
+
+    to {
+      transform: rotate(0deg);
+    }
+
+  }
+
+
+  /* Brillances */
+
+  @keyframes spark {
+
+    0%,
+    100% {
+      opacity: .15;
+      transform: scale(.5) translateY(0);
+    }
+
+    50% {
+      opacity: 1;
+      transform: scale(1.8) translateY(-20px);
+    }
+
+  }
+
+
+  /* Erreur */
+
+  @keyframes shake {
+
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    25% {
+      transform: translateX(-5px);
+    }
+
+    50% {
+      transform: translateX(5px);
+    }
+
+    75% {
+      transform: translateX(-3px);
+    }
+
+  }
+
+</style>
