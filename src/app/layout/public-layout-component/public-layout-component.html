@@ -1,158 +1,267 @@
 <div class="min-h-screen flex flex-col bg-white">
 
-      <!-- ═══════════ NAVBAR ═══════════ -->
-      <header class="border-b border-slate-100 sticky top-0 bg-white z-30">
-        <div class="w-full px-6 md:px-12 h-20 flex items-center gap-6">
+      <!-- ═══════════ NAVBAR ═══════════
+           Pas de flou (backdrop-blur) sur l'en-tête : il casserait le positionnement des fenêtres déroulantes sur téléphone. -->
+      <header data-menu class="sticky top-0 z-30 border-b border-slate-200 bg-white">
+        <div class="flex h-16 w-full items-center gap-3 px-4 sm:px-6 lg:h-[4.5rem] lg:gap-5 lg:px-12">
 
-          <!-- Logo + sous-titre -->
-          <a routerLink="/" class="flex items-center gap-2.5 shrink-0">
-            <span class="w-10 h-10 rounded-xl bg-blue-700 text-white flex items-center justify-center">
-              <app-icon name="ticket" [size]="20"></app-icon>
-            </span>
-            <span class="leading-tight">
-              <span class="block font-extrabold text-slate-900 text-[15px]">SamaPass</span>
-              <span class="block text-[10px] font-semibold text-slate-400 tracking-wider">BILLETTERIE SÉNÉGAL</span>
+          <!-- Logo -->
+          <a routerLink="/" class="flex shrink-0 items-center gap-2.5" aria-label="Kcrowd, accueil">
+            <img src="/images/logo%20Kcrowd.png" alt="" class="h-10 w-10 rounded-xl border border-slate-200 bg-white object-contain" />
+            <span class="hidden leading-tight sm:block">
+              <span class="block text-[15px] font-extrabold text-slate-900">Kcrowd</span>
+              <span class="block text-[10px] font-semibold tracking-wider text-slate-400">BILLETTERIE SÉNÉGAL</span>
             </span>
           </a>
 
-          <!-- Recherche compacte -->
-          <div class="flex-1 max-w-xl">
-            <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5">
-              <app-icon name="search" [size]="18" class="text-slate-400 shrink-0"></app-icon>
-              <input
-                type="text"
-                [(ngModel)]="rechercheRapide"
-                (keydown.enter)="lancerRechercheRapide()"
-                placeholder="Rechercher un concert, festival, artiste, lieu..."
-                class="bg-transparent outline-none text-sm w-full text-slate-600 placeholder:text-slate-400"
-              />
-            </div>
-          </div>
+          <!-- Navigation principale (grand écran) -->
+          <nav data-nav-videos class="ml-2 hidden items-center gap-1 lg:flex" aria-label="Navigation principale">
+            <a routerLink="/evenements" routerLinkActive="!bg-slate-900 !text-white" class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
+              <app-icon name="calendar" [size]="15"></app-icon> Événements
+            </a>
+            <a routerLink="/videos" routerLinkActive="!bg-slate-900 !text-white" class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2"/></svg>
+              Vidéos
+            </a>
+          </nav>
 
-          <!-- Boutons d'action -->
-          <div class="flex items-center gap-3 shrink-0 ml-auto">
+          <!-- Actions -->
+          <div class="ml-auto flex shrink-0 items-center gap-2">
 
-            <!-- "Devenir Organisateur" : caché si la personne est déjà organisateur -->
             @if (authStore.role() !== 'organizer') {
-              <a
-                routerLink="/devenir-organisateur"
-                class="hidden md:flex items-center gap-2 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <app-icon name="calendar" [size]="16"></app-icon>
-                Devenir Organisateur
+              <a routerLink="/devenir-organisateur" class="hidden items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 lg:flex">
+                <app-icon name="briefcase" [size]="16"></app-icon>
+                Devenir organisateur
               </a>
             } @else {
-              <a
-                routerLink="/organisateur"
-                class="hidden md:flex items-center gap-2 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
-              >
+              <a routerLink="/organisateur" class="hidden items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 lg:flex">
                 <app-icon name="bar-chart-3" [size]="16"></app-icon>
                 Mon espace organisateur
               </a>
             }
 
-            <!-- Bouton connexion / profil selon l'état d'identification -->
             @if (authStore.isIdentified()) {
-              <div class="flex items-center gap-2">
-                <a
-                  routerLink="/compte/profil"
-                  class="flex items-center gap-2 bg-blue-700 text-white rounded-xl px-4 py-2.5 text-sm font-semibold hover:bg-blue-800 transition-colors"
-                >
-                  <app-icon name="circle-user-round" [size]="16"></app-icon>
-                  {{ authStore.currentUser()?.firstName }}
-                </a>
-                <button
-                  type="button"
-                  (click)="seDeconnecter()"
-                  class="text-xs font-semibold text-slate-400 hover:text-red-600 transition-colors"
-                >
-                  Déconnexion
-                </button>
-              </div>
+              <!-- FAVORIS -->
+                <div class="sm:relative" data-popover>
+                  <button type="button" (click)="toggleFavorisPopover($event)" aria-label="Mes favoris" [attr.aria-expanded]="favorisPopoverOuvert()"
+                    class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900" [class]="favorisPopoverOuvert() ? '!bg-slate-900 !text-white !border-slate-900' : ''">
+                    <app-icon name="heart" [size]="18"></app-icon>
+                  </button>
+                  @if (favorisPopoverOuvert()) {
+                    <div class="absolute top-full z-40 mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white max-sm:left-4 max-sm:right-4 sm:right-0 sm:w-[22rem]">
+                      <div class="flex items-center justify-between bg-slate-900 px-4 py-3 text-white">
+                        <h3 class="text-sm font-bold">Mes favoris</h3>
+                        @if (favorisTotal() > 0) {
+                          <span class="rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-semibold">{{ favorisTotal() }}</span>
+                        }
+                      </div>
+
+                      @if (favorisChargement()) {
+                        <p class="px-4 py-10 text-center text-xs text-slate-400">Chargement...</p>
+                      } @else if (favorisPopover().length === 0) {
+                        <div class="flex flex-col items-center px-6 py-9 text-center">
+                          <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><app-icon name="heart" [size]="20"></app-icon></span>
+                          <p class="text-sm font-bold text-slate-900">Aucun favori pour l'instant</p>
+                          <p class="mt-1 text-xs text-slate-500">Touche le cœur d'un événement pour le retrouver ici.</p>
+                          <a routerLink="/evenements" (click)="fermerPopovers()" class="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-700">Découvrir les événements</a>
+                        </div>
+                      } @else {
+                        <div class="max-h-80 divide-y divide-slate-100 overflow-y-auto">
+                          @for (fav of favorisPopover(); track fav.id) {
+                            <div class="group flex items-center gap-3 px-4 py-3 hover:bg-slate-50">
+                              <a [routerLink]="['/evenements', fav.eventId]" (click)="fermerPopovers()" class="flex min-w-0 flex-1 items-center gap-3">
+                                @if (fav.image) {
+                                  <img [src]="fav.image" [alt]="fav.titre" class="h-11 w-11 shrink-0 rounded-xl bg-slate-100 object-cover" />
+                                } @else {
+                                  <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400"><app-icon name="calendar" [size]="18"></app-icon></span>
+                                }
+                                <span class="min-w-0">
+                                  <span class="block truncate text-[13px] font-bold text-slate-900">{{ fav.titre }}</span>
+                                  @if (fav.date) {
+                                    <span class="block text-[11px] text-slate-500">{{ formaterDatePopover(fav.date) }}</span>
+                                  }
+                                </span>
+                              </a>
+                              <button type="button" (click)="retirerFavori(fav.eventId)" aria-label="Retirer des favoris"
+                                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-orange-600 transition-colors hover:bg-orange-50">
+                                <app-icon name="heart" [size]="16" [filled]="true"></app-icon>
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      <a routerLink="/compte/favoris" (click)="fermerPopovers()"
+                        class="flex items-center justify-center gap-1.5 border-t border-slate-100 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 hover:bg-slate-100">
+                        Voir tous mes favoris <app-icon name="arrow-right" [size]="14"></app-icon>
+                      </a>
+                    </div>
+                  }
+                </div>
+
+                <!-- MES BILLETS -->
+                <div class="sm:relative" data-popover>
+                  <button type="button" (click)="toggleBilletsPopover($event)" aria-label="Mes billets" [attr.aria-expanded]="billetsPopoverOuvert()"
+                    class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900" [class]="billetsPopoverOuvert() ? '!bg-slate-900 !text-white !border-slate-900' : ''">
+                    <app-icon name="ticket" [size]="18"></app-icon>
+                  </button>
+                  @if (billetsPopoverOuvert()) {
+                    <div class="absolute top-full z-40 mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white max-sm:left-4 max-sm:right-4 sm:right-0 sm:w-[22rem]">
+                      <div class="flex items-center justify-between bg-slate-900 px-4 py-3 text-white">
+                        <h3 class="text-sm font-bold">Mes billets</h3>
+                        @if (billetsTotal() > 0) {
+                          <span class="rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-semibold">{{ billetsTotal() }}</span>
+                        }
+                      </div>
+
+                      @if (billetsChargement()) {
+                        <p class="px-4 py-10 text-center text-xs text-slate-400">Chargement...</p>
+                      } @else if (billetsPopover().length === 0) {
+                        <div class="flex flex-col items-center px-6 py-9 text-center">
+                          <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><app-icon name="ticket" [size]="20"></app-icon></span>
+                          <p class="text-sm font-bold text-slate-900">Aucun billet pour l'instant</p>
+                          <p class="mt-1 text-xs text-slate-500">Tes billets achetés apparaîtront ici.</p>
+                          <a routerLink="/evenements" (click)="fermerPopovers()" class="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-700">Trouver un événement</a>
+                        </div>
+                      } @else {
+                        <div class="max-h-80 divide-y divide-slate-100 overflow-y-auto">
+                          @for (billet of billetsPopover(); track billet.id) {
+                            <a [routerLink]="['/billet', billet.id, 'confirmation']" (click)="fermerPopovers()" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50">
+                              @if (billet.image) {
+                                <img [src]="billet.image" [alt]="billet.titre" class="h-11 w-11 shrink-0 rounded-xl bg-slate-100 object-cover" />
+                              } @else {
+                                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400"><app-icon name="ticket" [size]="18"></app-icon></span>
+                              }
+                              <span class="min-w-0 flex-1">
+                                <span class="block truncate text-[13px] font-bold text-slate-900">{{ billet.titre }}</span>
+                                <span class="block truncate text-[11px] text-slate-500">
+                                  @if (billet.categorie) { {{ billet.categorie }} · }{{ formaterDatePopover(billet.date) }}
+                                </span>
+                              </span>
+                              <app-icon name="arrow-right" [size]="14" class="shrink-0 text-slate-300"></app-icon>
+                            </a>
+                          }
+                        </div>
+                      }
+
+                      <a routerLink="/compte/mes-billets" (click)="fermerPopovers()"
+                        class="flex items-center justify-center gap-1.5 border-t border-slate-100 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-900 hover:bg-slate-100">
+                        Voir tous mes billets <app-icon name="arrow-right" [size]="14"></app-icon>
+                      </a>
+                    </div>
+                  }
+                </div>
+
+                <!-- NOTIFICATIONS -->
+              <app-notification-bell lienVoirTout="/compte/notifications"></app-notification-bell>
+
+              <!-- Profil (grand écran) -->
+              <a routerLink="/compte/profil" routerLinkActive="!bg-slate-700"
+                class="ml-1 hidden items-center gap-2 rounded-xl bg-slate-900 py-1.5 pl-1.5 pr-4 text-sm font-semibold text-white transition-colors hover:bg-slate-700 lg:flex">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-600 text-xs font-bold text-white">{{ initiale() }}</span>
+                {{ authStore.currentUser()?.firstName }}
+              </a>
+              <button type="button" (click)="seDeconnecter()" aria-label="Se déconnecter" title="Se déconnecter"
+                class="relative hidden h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 lg:inline-flex">
+                <app-icon name="log-out" [size]="17"></app-icon>
+              </button>
             } @else {
-              <a
-                routerLink="/bienvenue"
-                class="flex items-center gap-2 bg-blue-700 text-white rounded-xl px-4 py-2.5 text-sm font-semibold hover:bg-blue-800 transition-colors"
-              >
+              <a routerLink="/bienvenue" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-700">
                 <app-icon name="circle-user-round" [size]="16"></app-icon>
                 Se connecter
               </a>
             }
+
+            <!-- Bouton menu (téléphone et tablette) -->
+            <button type="button" (click)="basculerMenu()" [attr.aria-expanded]="menuOuvert()" aria-controls="menu-mobile" aria-label="Menu"
+              class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 lg:hidden" [class]="menuOuvert() ? '!bg-slate-900 !text-white !border-slate-900' : ''">
+              @if (menuOuvert()) {
+                <app-icon name="x" [size]="18"></app-icon>
+              } @else {
+                <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+              }
+            </button>
           </div>
         </div>
+
+        <!-- ═══════════ MENU TÉLÉPHONE / TABLETTE ═══════════ -->
+        @if (menuOuvert()) {
+          <div id="menu-mobile" class="absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-slate-200 bg-white px-4 pb-5 pt-3 sm:px-6 lg:hidden">
+            @if (authStore.isIdentified()) {
+              <div class="mb-3 flex items-center gap-3 rounded-2xl bg-slate-900 p-3 text-white">
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-600 text-base font-bold">{{ initiale() }}</span>
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-bold">{{ authStore.currentUser()?.firstName }} {{ authStore.currentUser()?.lastName }}</p>
+                  <a routerLink="/compte/profil" (click)="fermerMenu()" class="text-xs font-semibold text-slate-300 underline">Voir mon profil</a>
+                </div>
+              </div>
+            }
+
+            <nav class="space-y-0.5" aria-label="Menu principal">
+              <a routerLink="/evenements" routerLinkActive="!bg-slate-100 !text-slate-900" (click)="fermerMenu()" class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100">
+                <app-icon name="calendar" [size]="18" class="text-slate-400"></app-icon> Événements
+              </a>
+              <a routerLink="/videos" routerLinkActive="!bg-slate-100 !text-slate-900" (click)="fermerMenu()" class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100">
+                <svg class="h-[18px] w-[18px] text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2"/></svg>
+                Vidéos
+              </a>
+              @if (authStore.isIdentified()) {
+                <a routerLink="/compte/mes-billets" routerLinkActive="!bg-slate-100 !text-slate-900" (click)="fermerMenu()" class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100">
+                  <app-icon name="ticket" [size]="18" class="text-slate-400"></app-icon> Mes billets
+                </a>
+                <a routerLink="/compte/favoris" routerLinkActive="!bg-slate-100 !text-slate-900" (click)="fermerMenu()" class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100">
+                  <app-icon name="heart" [size]="18" class="text-slate-400"></app-icon> Mes favoris
+                </a>
+                <a routerLink="/compte/notifications" routerLinkActive="!bg-slate-100 !text-slate-900" (click)="fermerMenu()" class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100">
+                  <app-icon name="bell" [size]="18" class="text-slate-400"></app-icon> Notifications
+                </a>
+              }
+            </nav>
+
+            <div class="mt-3 space-y-2 border-t border-slate-100 pt-3">
+              @if (authStore.role() !== 'organizer') {
+                <a routerLink="/devenir-organisateur" (click)="fermerMenu()" class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                  <app-icon name="briefcase" [size]="16"></app-icon> Devenir organisateur
+                </a>
+              } @else {
+                <a routerLink="/organisateur" (click)="fermerMenu()" class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                  <app-icon name="bar-chart-3" [size]="16"></app-icon> Mon espace organisateur
+                </a>
+              }
+              @if (authStore.isIdentified()) {
+                <button type="button" (click)="seDeconnecter()" class="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900">
+                  <app-icon name="log-out" [size]="16"></app-icon> Se déconnecter
+                </button>
+              } @else {
+                <a routerLink="/bienvenue" (click)="fermerMenu()" class="btn-glow w-full px-4 py-3 text-sm">Se connecter</a>
+              }
+            </div>
+          </div>
+        }
       </header>
 
       <main class="flex-1">
         <router-outlet></router-outlet>
       </main>
 
-      <!-- ═══════════ FOOTER (4 colonnes) ═══════════ -->
-      <footer class="bg-[#EEF1FB] border-t border-slate-200 mt-auto">
-        <div class="w-full px-6 md:px-12 py-12 grid grid-cols-2 md:grid-cols-4 gap-10 text-sm">
-
-          <div>
-            <div class="flex items-center gap-2 mb-3">
-              <span class="w-8 h-8 rounded-lg bg-blue-700 text-white flex items-center justify-center">
-                <app-icon name="ticket" [size]="16"></app-icon>
-              </span>
-              <span class="font-extrabold text-slate-900">SamaPass</span>
+      <!-- ═══════════ FOOTER ═══════════ -->
+      <footer class="mt-auto border-t border-slate-200 bg-slate-100 py-8">
+        <div class="flex w-full flex-col items-start justify-between gap-6 px-4 sm:px-6 md:flex-row md:items-center lg:px-6">
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-2">
+              <img src="/images/logo%20Kcrowd.png" alt="" class="h-7 w-7 rounded-lg border border-slate-200 bg-white object-contain" />
+              <span class="text-lg font-extrabold tracking-tight text-slate-900">Kcrowd</span>
             </div>
-            <p class="text-slate-500 leading-relaxed mb-3">
-              La billetterie officielle et sécurisée nouvelle génération dédiée à la
-              valorisation de la culture et des divertissements au Sénégal.
-            </p>
-            <p class="text-slate-400 text-xs">Agréé et certifié Wave & Orange Money</p>
+            <p class="text-xs text-slate-500">© 2026 Kcrowd Sénégal. Tous droits réservés. Agréé Wave &amp; Orange Money.</p>
           </div>
-
-          <div>
-            <h4 class="font-bold text-slate-500 text-xs tracking-wider mb-3">ÉVÉNEMENTS</h4>
-            <ul class="space-y-2 text-slate-600">
-              <li><a routerLink="/evenements" class="hover:text-blue-700">Tous les concerts</a></li>
-              <li><a routerLink="/evenements" class="hover:text-blue-700">Festivals culturels</a></li>
-              <li><a routerLink="/evenements" class="hover:text-blue-700">Lutte sénégalaise &amp; Sports</a></li>
-              <li><a routerLink="/evenements" class="hover:text-blue-700">Soirées &amp; Électro</a></li>
-              <li><a routerLink="/evenements" class="hover:text-blue-700">Théâtre &amp; Humour</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="font-bold text-slate-500 text-xs tracking-wider mb-3">ORGANISATEURS</h4>
-            <ul class="space-y-2 text-slate-600">
-              <li><a routerLink="/devenir-organisateur" class="hover:text-blue-700">Vendre des billets</a></li>
-              <li><a routerLink="/devenir-organisateur" class="hover:text-blue-700">Application Scanner QR</a></li>
-              <li><a routerLink="/devenir-organisateur" class="hover:text-blue-700">Tarification &amp; Commissions</a></li>
-              <li><a routerLink="/devenir-organisateur" class="hover:text-blue-700">Guide organisateur</a></li>
-              <li><a routerLink="/contact" class="hover:text-blue-700">Support organisateur</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="font-bold text-slate-500 text-xs tracking-wider mb-3">MOYENS DE PAIEMENT</h4>
-            <p class="text-slate-500 mb-3 leading-relaxed">
-              Transactions 100% cryptées et instantanées directement sur mobile.
-            </p>
-            <div class="flex flex-wrap gap-2 mb-3">
-              <span class="px-2.5 py-1 rounded-md border border-blue-200 text-blue-700 text-xs font-semibold">Wave</span>
-              <span class="px-2.5 py-1 rounded-md border border-orange-200 text-orange-600 text-xs font-semibold">Orange Money</span>
-              <span class="px-2.5 py-1 rounded-md border border-green-200 text-green-700 text-xs font-semibold">Free Money</span>
-            </div>
-            <p class="flex items-center gap-1.5 text-blue-700 text-xs font-semibold">
-              <app-icon name="lock" [size]="12"></app-icon>
-              Protocole anti-fraude garanti
-            </p>
+          <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-600">
+            <a routerLink="/a-propos" class="transition-colors hover:text-slate-900 hover:underline">À propos</a>
+            <a routerLink="/conditions-generales" class="transition-colors hover:text-slate-900 hover:underline">Conditions générales</a>
+            <a routerLink="/politique-de-confidentialite" class="transition-colors hover:text-slate-900 hover:underline">Politique de confidentialité</a>
+            <a routerLink="/securite-des-billets" class="transition-colors hover:text-slate-900 hover:underline">Sécurité des billets</a>
+            <a routerLink="/contact" class="transition-colors hover:text-slate-900 hover:underline">Contact &amp; assistance</a>
           </div>
         </div>
+        <app-chatbot-widget-component></app-chatbot-widget-component>
+</footer>
 
-        <div class="border-t border-slate-200">
-          <div class="w-full px-6 md:px-12 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-            <span>© 2026 SamaPass Sénégal. Tous droits réservés.</span>
-            <div class="flex flex-wrap gap-5">
-              <a routerLink="/contact" class="hover:text-blue-700">Conditions Générales de Vente</a>
-              <a routerLink="/contact" class="hover:text-blue-700">Politique de Confidentialité</a>
-              <a routerLink="/contact" class="hover:text-blue-700">Mentions Légales</a>
-              <a routerLink="/contact" class="hover:text-blue-700">Contact &amp; Assistance</a>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
