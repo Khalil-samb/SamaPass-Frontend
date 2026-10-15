@@ -1,98 +1,86 @@
 @if (authStore.currentUser()) {
-  <div class="fixed bottom-6 right-6 z-50 font-sans">
+  <div class="kc-racine">
 
-    <!-- Bouton Flottant Épuré (Fermé) -->
     @if (!ouvert()) {
-      <button
-        type="button"
-        (click)="ouvert.set(true)"
-        aria-label="Ouvrir l'assistant Kcrowd IA"
-        class="group relative w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-cyan-500 p-[1.5px] transition-transform duration-200 hover:scale-105 active:scale-95"
-      >
-        <div class="relative w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center overflow-hidden">
-          <!-- Icône IA -->
-          <svg class="w-6 h-6 text-cyan-400 transition-transform group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        </div>
+      <button type="button" class="kc-lanceur" (click)="ouvrir()" aria-label="Ouvrir l'assistant Kcrowd">
+        <span class="kc-lanceur-logo"><img src="/images/logo%20Kcrowd.png" alt="" /></span>
+        <span class="kc-lanceur-texte">Besoin d'aide ?</span>
+        <span class="kc-point-en-ligne"></span>
       </button>
     }
 
-    <!-- Fenêtre du Chatbot (Ouvert) -->
     @if (ouvert()) {
-      <div class="w-80 sm:w-96 h-[32rem] bg-slate-950 rounded-3xl border border-cyan-500/20 flex flex-col overflow-hidden transition-all duration-200">
+      <section class="kc-panneau" role="dialog" aria-label="Assistant Kcrowd">
 
-        <!-- En-tête / Header -->
-        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-cyan-500/20 px-5 py-4 flex items-center justify-between shrink-0 relative">
-
-          <div class="flex items-center gap-3 relative z-10">
-            <!-- 📍 VOTRE LOGO -->
-            <div class="relative w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-600 p-[1px] overflow-hidden">
-              <div class="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center p-1">
-                <img
-                  src="/images/logo%20Kcrowd.png"
-                  alt="Kcrowd Logo"
-                  class="w-full h-full object-contain"
-                />
-              </div>
-            </div>
-
+        <header class="kc-entete">
+          <div class="kc-entete-gauche">
+            <span class="kc-logo"><img src="/images/logo%20Kcrowd.png" alt="Kcrowd" /></span>
             <div>
-              <div class="flex items-center gap-2">
-                <span class="font-extrabold text-sm tracking-wide text-white">Kcrowd</span>
-               
-              </div>
-              <p class="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                Assistant Intelligent
-              </p>
+              <div class="kc-titre">Assistant Kcrowd</div>
+              <div class="kc-statut">En ligne</div>
             </div>
           </div>
+          <div class="kc-actions">
+            @if (messages().length > 0) {
+              <button type="button" class="kc-btn-rond" (click)="effacer()" aria-label="Effacer la conversation" title="Effacer la conversation">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
+              </button>
+            }
+            <button type="button" class="kc-btn-rond" (click)="fermer()" aria-label="Fermer">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+          </div>
+        </header>
 
-          <button
-            type="button"
-            (click)="ouvert.set(false)"
-            aria-label="Fermer"
-            class="relative z-10 w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center text-sm transition-colors border border-white/10"
-          >
-            ✕
-          </button>
-        </div>
-
-        <!-- Zone des Messages -->
-        <div #zoneMessages class="flex-1 overflow-y-auto p-4 space-y-3.5 bg-slate-950 scrollbar-thin scrollbar-thumb-slate-800">
+        <div #zoneMessages class="kc-messages" aria-live="polite">
 
           @if (messages().length === 0) {
-            <div class="h-full flex flex-col items-center justify-center text-center p-4">
-              <div class="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-3 text-cyan-400 text-lg">
-                ⚡
+            <div class="kc-accueil">
+              <div>
+                <p class="kc-accueil-titre">Bonjour {{ authStore.currentUser()?.firstName }}</p>
+                <p class="kc-accueil-texte">
+                  Je peux vous expliquer l'application, vous guider pas à pas ou répondre à vos questions. Par où commencer ?
+                </p>
               </div>
-              <p class="text-xs text-slate-400 max-w-[220px] leading-relaxed">
-                Posez une question — par exemple « où est mon billet ? » ou « comment créer un événement ? »
-              </p>
+              <div class="kc-puces">
+                @for (s of suggestions(); track s) {
+                  <button type="button" class="kc-puce" (click)="envoyerTexte(s)">{{ s }}</button>
+                }
+              </div>
             </div>
           }
 
           @for (m of messages(); track $index) {
-            <div class="flex" [class.justify-end]="m.role === 'user'">
-              <div
-                class="max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed transition-all"
-                [class]="m.role === 'user'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-xs border border-indigo-400/20'
-                  : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-bl-xs'"
-              >
-                <p class="whitespace-pre-wrap">{{ m.texte }}</p>
+            <div class="kc-ligne" [class.kc-moi]="m.role === 'user'">
+              <div class="kc-bulle" [class.kc-bulle-moi]="m.role === 'user'" [class.kc-bulle-bot]="m.role !== 'user'">
+                <p class="kc-texte">{{ m.texte }}</p>
+
+                @if (m.role !== 'user' && m.texte) {
+                  <button
+                    type="button"
+                    class="kc-ecouter"
+                    (click)="ecouter($index)"
+                    [disabled]="chargementVoix() === $index"
+                    [attr.aria-label]="lectureEn() === $index ? 'Arrêter la lecture' : 'Écouter la réponse'"
+                  >
+                    @if (chargementVoix() === $index) {
+                      <span>Préparation de la voix…</span>
+                    } @else if (lectureEn() === $index) {
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                      <span>Arrêter</span>
+                    } @else {
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+                      <span>Écouter</span>
+                    }
+                  </button>
+                }
 
                 @if (m.liens && m.liens.length > 0) {
-                  <div class="mt-3 flex flex-col gap-1.5 border-t border-white/10 pt-2.5">
+                  <div class="kc-liens">
                     @for (lien of m.liens; track lien.path) {
-                      <a
-                        [routerLink]="lien.path"
-                        (click)="ouvert.set(false)"
-                        class="group text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 transition-colors"
-                      >
-                        <span class="text-xs transition-transform group-hover:translate-x-1">→</span>
-                        <span class="underline underline-offset-2">{{ lien.label }}</span>
+                      <a class="kc-lien" [routerLink]="lien.path" (click)="ouvert.set(false)">
+                        {{ lien.label }}
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                       </a>
                     }
                   </div>
@@ -101,45 +89,70 @@
             </div>
           }
 
-          <!-- Indicateur Réflexion -->
           @if (enCours()) {
-            <div class="flex">
-              <div class="bg-slate-900 border border-cyan-500/30 rounded-2xl rounded-bl-xs px-4 py-3 text-xs text-cyan-400 flex items-center gap-2">
-                <span class="font-medium tracking-wide">Kcrowd IA réfléchit...</span>
+            <div class="kc-ligne">
+              <div class="kc-bulle kc-bulle-bot">
+                <span class="kc-points" aria-label="L'assistant rédige sa réponse"><span></span><span></span><span></span></span>
+                @if (attenteLongue()) {
+                  <div class="kc-patience">Un instant, la réponse arrive…</div>
+                }
               </div>
             </div>
           }
 
           @if (erreur()) {
-            <div class="p-2.5 rounded-xl bg-red-950/40 border border-red-500/30 text-center">
-              <p class="text-[11px] text-red-400 font-medium">{{ erreur() }}</p>
+            <div class="kc-erreur" role="alert">
+              {{ erreur() }}
+              @if (reessayable()) {
+                <div><button type="button" class="kc-reessayer" (click)="reessayer()">Réessayer</button></div>
+              }
             </div>
           }
         </div>
 
-        <!-- Formulaire de Saisie -->
-        <form (submit)="envoyer($event)" class="border-t border-slate-800 p-3 bg-slate-900 flex items-center gap-2 shrink-0">
+        @if (enregistrement()) {
+          <div class="kc-enreg" role="status">
+            <span class="kc-enreg-point"></span>
+            <span class="kc-enreg-texte">Je vous écoute… {{ secondesEnregistrees() }} s · touchez ✓ pour envoyer</span>
+            <button type="button" class="kc-enreg-annuler" (click)="annulerEnregistrement()">Annuler</button>
+          </div>
+        }
+
+        <form class="kc-saisie" (submit)="envoyer($event)">
           <input
+            #champ
+            class="kc-champ"
             type="text"
-            [(ngModel)]="saisie"
             name="saisie"
-            [disabled]="enCours()"
-            placeholder="Écrivez votre question..."
-            class="flex-1 text-xs px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-500/50 disabled:opacity-50 transition-all"
+            autocomplete="off"
+            [(ngModel)]="saisie"
+            [disabled]="enCours() || enregistrement()"
+            placeholder="Écrivez votre message…"
+            aria-label="Votre message"
           />
-          <button
-            type="submit"
-            [disabled]="enCours() || saisie.trim().length === 0"
-            class="w-10 h-10 shrink-0 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white flex items-center justify-center disabled:opacity-30 transition-all active:scale-95"
-            aria-label="Envoyer"
-          >
-            <svg class="w-4 h-4 translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
+          @if (microDisponible) {
+            <button
+              type="button"
+              class="kc-micro"
+              [class.kc-micro-actif]="enregistrement()"
+              (click)="basculerMicro()"
+              [disabled]="enCours()"
+              [attr.aria-label]="enregistrement() ? 'Envoyer le message vocal' : 'Parler à l’assistant'"
+              title="Parler (français, wolof ou anglais)"
+            >
+              @if (enregistrement()) {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+              } @else {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+              }
+            </button>
+          }
+          <button type="submit" class="kc-envoi" [disabled]="enCours() || saisie.trim().length === 0" aria-label="Envoyer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
           </button>
         </form>
 
-      </div>
+      </section>
     }
   </div>
 }
