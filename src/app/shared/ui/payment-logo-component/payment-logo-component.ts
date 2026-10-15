@@ -6,7 +6,7 @@ const LOGOS: Record<string, { src: string; libelle: string }> = {
   wave: { src: '/images/logoWave.png', libelle: 'Wave' },
   orange_money: { src: '/images/logo%20OrangeMoney.png', libelle: 'Orange Money' },
   free_money: { src: '/images/logo%20FreeMoney.png', libelle: 'Free Money' },
-  card: { src: '/images/logo%20Carte.png', libelle: 'Carte bancaire' },
+  card: { src: '/images/logo%20CarteBanquaire.png', libelle: 'Carte bancaire' },
 };
 
 

@@ -28,7 +28,7 @@ export class AdminDashboardComponent {
     return !!date && date.startsWith(this.moisCourant());
   }
 
-  // Ce que rapporte une transaction à SamaPass. Le chiffre vient de Django : chaque vente de
+  // Ce que rapporte une transaction à Kcrowd. Le chiffre vient de Django : chaque vente de
   // billet est comptée au taux figé le jour de l'achat, une publicité à 100 % de son montant.
   private commissionDe(t: any): number {
     return commissionDeTransaction(t);
@@ -60,7 +60,7 @@ export class AdminDashboardComponent {
       utilisateurs: 'Évolution des utilisateurs inscrits',
       organisateurs: 'Évolution des organisateurs',
       evenements: 'Évolution des événements créés',
-      commissions: 'Évolution des commissions SamaPass',
+      commissions: 'Évolution des commissions Kcrowd',
     };
     return titres[this.indicateurActif()];
   });

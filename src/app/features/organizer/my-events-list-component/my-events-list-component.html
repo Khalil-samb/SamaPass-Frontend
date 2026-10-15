@@ -24,7 +24,7 @@
       <p class="text-slate-400">Chargement...</p>
     } @else if (evenementsFiltres().length === 0) {
       <div class="bg-white border border-slate-100 rounded-2xl p-12 text-center">
-        <h2 class="font-extrabold text-slate-900 mb-2">Aucun événement {{ statutFiltre() ? 'dans ce statut' : 'pour l\\'instant' }}</h2>
+        <h2 class="font-extrabold text-slate-900 mb-2">Aucun événement {{ statutFiltre() ? "dans ce statut" : "pour le moment" }}</h2>
         <p class="text-slate-500 text-sm mb-6">Créez votre premier événement pour commencer à vendre vos billets.</p>
         <a routerLink="/organisateur/evenements/nouveau" class="inline-flex items-center gap-2 bg-orange-600 text-white rounded-xl px-6 py-3 font-bold text-sm hover:bg-orange-700">
           <app-icon name="rocket" [size]="16"></app-icon>

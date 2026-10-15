@@ -128,7 +128,7 @@ export class OrganizerApplicationFormComponent implements OnInit {
   // Exigence RÉELLE pour pouvoir continuer : au moins 4 des 5 critères (pas
   // besoin du caractère spécial pour être accepté, mais fortement conseillé
   // — la barre "Robuste" ne s'affiche que si les 5 sont remplis).
-  motDePasseAcceptable = computed(() => this.nombreCriteresValides() >= 4);
+  motDePasseAcceptable = computed(() => this.motDePasse().length >= 8 && this.nombreCriteresValides() >= 4);
 
   etape1Valide = computed(() =>
     this.emailValide() &&

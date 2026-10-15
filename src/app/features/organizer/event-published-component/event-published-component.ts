@@ -35,7 +35,7 @@ export function numeroWhatsApp(brut: string): string | null {
 
 // Même message que celui de la page de modification d'événement
 export function messageCodeAgent(nom: string, porte: string, pin: string): string {
-  return `Bonjour ${nom}, voici votre code PIN SamaPass Scanner pour la porte ${porte} : ${pin}. Téléchargez l'application SamaPass Scanner et entrez ce code pour commencer.`;
+  return `Bonjour ${nom}, voici votre code PIN Kcrowd Scanner pour la porte ${porte} : ${pin}. Téléchargez l'application Kcrowd Scanner et entrez ce code pour commencer.`;
 }
 
 @Component({

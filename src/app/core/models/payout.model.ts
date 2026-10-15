@@ -1,8 +1,8 @@
 import { OrganizerPaymentMethod } from './organizer.model';
 
 // Une demande de reversement de l'argent dû à un organisateur.
-// L'argent des acheteurs passe toujours par le compte SamaPass d'abord ;
-// un Payout, c'est SamaPass qui envoie ensuite le montant net (après la commission de
+// L'argent des acheteurs passe toujours par le compte Kcrowd d'abord ;
+// un Payout, c'est Kcrowd qui envoie ensuite le montant net (après la commission de
 // chaque vente, au taux du jour de l'achat) vers le compte mobile money de l'organisateur.
 export type PayoutStatus = 'pending' | 'completed' | 'failed';
 

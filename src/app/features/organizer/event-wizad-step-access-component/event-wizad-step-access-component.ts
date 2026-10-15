@@ -175,7 +175,7 @@ export class EventWizardStepAccessComponent implements OnInit {
       window.alert("Le code PIN de cet agent sera généré à l'enregistrement. Vous pourrez l'envoyer par WhatsApp juste après.");
       return;
     }
-    const texte = `Bonjour ${agent.name}, voici votre code PIN SamaPass Scanner pour la porte ${agent.gateName} : ${agent.pinCode}. Téléchargez l'application SamaPass Scanner et entrez ce code pour commencer.`;
+    const texte = `Bonjour ${agent.name}, voici votre code PIN Kcrowd Scanner pour la porte ${agent.gateName} : ${agent.pinCode}. Téléchargez l'application Kcrowd Scanner et entrez ce code pour commencer.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(texte)}`, '_blank');
   }
 
