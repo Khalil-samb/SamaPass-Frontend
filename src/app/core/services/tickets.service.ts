@@ -18,6 +18,11 @@ export interface ResultatAchat {
   reference: string;
 }
 
+export interface DemandeAchatInvite extends DemandeAchat {
+  phone: string;
+  firstName: string;
+}
+
 export interface DemandeScan {
   qrCode?: string;
   reference?: string;
@@ -66,6 +71,16 @@ export class TicketsService {
 
   getById(ticketId: string): Observable<Ticket> {
     return this.http.get<Ticket>(`${BASE_URL}/${ticketId}/`);
+  }
+
+  // Achat sans compte : pas de jeton, prénom + téléphone
+  acheterBilletInvite(demande: DemandeAchatInvite): Observable<ResultatAchat> {
+    return this.http.post<ResultatAchat>(`${BASE_URL}/purchase/guest/`, demande);
+  }
+
+  // Lecture publique d'un billet acheté sans compte
+  getInvite(ticketId: string): Observable<Ticket> {
+    return this.http.get<Ticket>(`${BASE_URL}/invite/${ticketId}/`);
   }
 
   toutesPourAdmin(): Observable<Ticket[]> {

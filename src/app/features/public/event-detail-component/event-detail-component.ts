@@ -55,6 +55,8 @@ export class EventDetailComponent implements OnInit {
   ticketQuantities = signal<Record<string, number>>({});
   methodePaiement = signal<PaymentMethod | null>(null);
   telephoneReception = signal('');
+  prenomInvite = signal('');
+  estInvite = computed(() => !this.authStore.currentUser());
   paiementEnCours = signal(false);
   erreurPaiement = signal<string | null>(null);
 
@@ -95,7 +97,7 @@ export class EventDetailComponent implements OnInit {
 
   peutPayer = computed(() =>
     this.venteOuverte() &&
-    this.lignesPanier().length > 0 && this.methodePaiement() !== null && this.telephoneReception().trim().length > 0
+    this.lignesPanier().length > 0 && this.methodePaiement() !== null && this.telephoneReception().trim().length > 0 && (!this.estInvite() || this.prenomInvite().trim().length >= 2)
   );
 
   libelleBouton = computed(() => {
@@ -222,6 +224,16 @@ export class EventDetailComponent implements OnInit {
     this.ticketQuantities.update((m) => ({ ...m, [ticketTypeId]: actuelle - 1 }));
   }
 
+  // Avec compte : achat classique. Sans compte : prénom + téléphone, sans jeton.
+  private acheter(demande: any) {
+    if (!this.estInvite()) return this.ticketsService.acheterBillet(demande);
+    return this.ticketsService.acheterBilletInvite({
+      ...demande,
+      phone: this.telephoneReception().replace(/\s+/g, ''),
+      firstName: this.prenomInvite().trim(),
+    });
+  }
+
   partager() {
     if (navigator.share) {
       navigator.share({ title: this.event()?.title, url: window.location.href });
@@ -247,7 +259,7 @@ export class EventDetailComponent implements OnInit {
     try {
       for (const ligne of lignes) {
         const resultat = await firstValueFrom(
-          this.ticketsService.acheterBillet({
+          this.acheter({
             ticketTypeId: ligne.type.id,
             paymentMethod: methode,
             quantite: ligne.quantity,
@@ -257,7 +269,12 @@ export class EventDetailComponent implements OnInit {
       }
 
       this.paiementEnCours.set(false);
-      this.router.navigate(['/billet', tousLesBillets[0].id, 'confirmation']);
+      if (this.estInvite()) {
+        const ids = tousLesBillets.map((b) => b.id).join(',');
+        this.router.navigate(['/billet', tousLesBillets[0].id, 'confirmation'], { queryParams: { ids } });
+      } else {
+        this.router.navigate(['/billet', tousLesBillets[0].id, 'confirmation']);
+      }
     } catch (erreur: any) {
       this.paiementEnCours.set(false);
       this.erreurPaiement.set(

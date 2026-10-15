@@ -68,7 +68,7 @@ export class TicketConfirmationComponent implements OnInit {
     });
   });
 
-  montantTotalLabel = computed(() => `${(this.transaction()?.amount ?? 0).toLocaleString('fr-FR')} FCFA`);
+  montantTotalLabel = computed(() => `${(this.transaction()?.amount ?? this.ticketsMemeTransaction().reduce((s: number, b: any) => s + Number(b.price ?? 0), 0)).toLocaleString('fr-FR')} FCFA`);
 
   idBilletFormate = computed(() => (this.ticket()?.id ?? '').toUpperCase().slice(0, 16));
 
@@ -93,6 +93,8 @@ export class TicketConfirmationComponent implements OnInit {
 
   dateAchatLabel = computed(() => {
     const t = this.transaction();
+    const dateInvite = (this.ticket() as any)?.purchaseDate;
+    if (!t && dateInvite) return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'medium' }).format(new Date(dateInvite));
     if (!t) return '';
     return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'medium' }).format(new Date(t.createdAt));
   });
@@ -138,9 +140,23 @@ export class TicketConfirmationComponent implements OnInit {
     return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${ev.venue}, ${ev.address}`)}`;
   });
 
+  estInvite = computed(() => !this.authStore.currentUser());
+  telephoneInvite = computed(() => (this.ticket() as any)?.buyerPhone ?? '');
+
+  // Pas d'envoi automatique : on ouvre WhatsApp vers le numéro de l'acheteur avec le lien de son billet.
+  lienWhatsAppInvite = computed(() => {
+    const ev = this.event();
+    let chiffres = this.telephoneInvite().replace(/\D/g, '');
+    if (chiffres.startsWith('00')) chiffres = chiffres.slice(2);
+    if (chiffres.length === 9) chiffres = '221' + chiffres;
+    const lien = `${window.location.origin}/billet/${this.ticket()?.id}/confirmation`;
+    const texte = `Mon billet Kcrowd pour ${ev?.title ?? "l'événement"} : ${lien}`;
+    return `https://wa.me/${chiffres}?text=${encodeURIComponent(texte)}`;
+  });
+
   lienWhatsApp = computed(() => {
     const ev = this.event();
-    const texte = `Voici mon billet SamaPass pour ${ev?.title ?? "l'événement"} : ${window.location.href}`;
+    const texte = `Voici mon billet Kcrowd pour ${ev?.title ?? "l'événement"} : ${window.location.href}`;
     return `https://wa.me/?text=${encodeURIComponent(texte)}`;
   });
 
@@ -168,12 +184,12 @@ export class TicketConfirmationComponent implements OnInit {
     }
 
     try {
-      const billet: any = await firstValueFrom(this.ticketsService.getById(ticketId));
+      const billet: any = await firstValueFrom(this.estInvite() ? this.ticketsService.getInvite(ticketId) : this.ticketsService.getById(ticketId));
       this.ticket.set(billet);
       void this.genererQrCode(billet.qrCode);
 
       const [transaction, event] = await Promise.all([
-        firstValueFrom(this.transactionsService.getById(billet.transaction)),
+        this.estInvite() ? Promise.resolve(null as any) : firstValueFrom(this.transactionsService.getById(billet.transaction)),
         firstValueFrom(this.eventsService.getById(billet.event)),
       ]);
       this.transaction.set(transaction);
@@ -181,8 +197,11 @@ export class TicketConfirmationComponent implements OnInit {
 
       this.ticketTypesDeLEvenement.set(event.ticketTypes ?? []);
 
-      const tousLesBillets: any[] = await firstValueFrom(this.ticketsService.mesBillets());
-      this.ticketsMemeTransaction.set(tousLesBillets.filter((t) => t.transaction === billet.transaction));
+      const idsInvite = (this.route.snapshot.queryParamMap.get('ids') ?? '').split(',').filter((i) => i && i !== billet.id);
+      const tousLesBillets: any[] = this.estInvite()
+        ? [billet, ...(await Promise.all(idsInvite.map((i) => firstValueFrom(this.ticketsService.getInvite(i)).catch(() => null)))).filter(Boolean)]
+        : await firstValueFrom(this.ticketsService.mesBillets());
+      this.ticketsMemeTransaction.set(this.estInvite() ? tousLesBillets : tousLesBillets.filter((t) => t.transaction === billet.transaction));
 
       this.citiesService.getAll().subscribe((c) => this.cities.set(c ?? []));
 
@@ -224,6 +243,7 @@ export class TicketConfirmationComponent implements OnInit {
   // connexion (voir UpdateMeView côté Django, qui n'accepte que le
   // prénom/nom). Seul le prénom est vraiment envoyé et mis à jour.
   enregistrerProfil() {
+    if (this.estInvite()) return;
     this.http.patch<User>(`${environment.apiUrl}/api/auth/me/`, { firstName: this.nomProfil() }).subscribe({
       next: (utilisateurMisAJour) => {
         this.authStore.mettreAJourUtilisateur(utilisateurMisAJour);
