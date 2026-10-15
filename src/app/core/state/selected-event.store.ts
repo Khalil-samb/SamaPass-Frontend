@@ -19,6 +19,16 @@ const INTERVALLE_RAFRAICHISSEMENT_MS = 20_000;
 // rechargement.
 const DELAI_MIN_ENTRE_RETOURS_MS = 2_000;
 
+// Clé de mémorisation de l'événement choisi (survit au rechargement de la page).
+const CLE_EVENEMENT_SELECTIONNE = 'kcrowd_evenement_selectionne';
+
+function lireEvenementMemorise(): string | null {
+  try { return localStorage.getItem(CLE_EVENEMENT_SELECTIONNE); } catch { return null; }
+}
+function memoriserEvenement(id: string) {
+  try { localStorage.setItem(CLE_EVENEMENT_SELECTIONNE, id); } catch { /* navigation privée... */ }
+}
+
 @Injectable({ providedIn: 'root' })
 export class SelectedEventStore {
   events = signal<EventEntity[]>([]);
@@ -146,6 +156,7 @@ export class SelectedEventStore {
 
   selectionner(eventId: string) {
     this.selectedEventId.set(eventId);
+    memoriserEvenement(eventId);
   }
 
   // Quelqu'un revient sur l'onglet (ex. après avoir acheté un billet de test dans
@@ -172,7 +183,11 @@ export class SelectedEventStore {
     // Événement sélectionné : à la première arrivée, ou s'il n'existe plus
     const actuel = this.selectedEventId();
     if ((!actuel || !events.some((e) => e.id === actuel)) && events.length > 0) {
-      const enCours = events.find((e) => e.status === 'published') ?? events[0];
+      const memorise = lireEvenementMemorise();
+      const enCours =
+        events.find((e) => e.id === memorise) ??
+        events.find((e) => e.status === 'published') ??
+        events[0];
       this.selectedEventId.set(enCours.id);
     }
   }
