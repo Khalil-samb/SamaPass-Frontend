@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, computed, ElementRef, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, computed, effect, ElementRef, OnDestroy, OnInit, signal, untracked, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import jsQR from 'jsqr';
 
@@ -8,11 +8,25 @@ import { SelectedEventStore } from '../../../core/state/selected-event.store';
 import { AccessGatesService } from '../../../core/services/access-gates.service';
 import { TicketsService } from '../../../core/services/tickets.service';
 
+interface DetailsScan {
+  acheteur: string;
+  telephone: string;
+  categorie: string;
+  evenement: string;
+  prix: number;
+  dateAchat: string;
+  scanneLe: string | null;
+  porte: string | null;
+  agent: string | null;
+  reference: string;
+}
+
 interface ResultatScan {
   statut: 'valide' | 'doublon' | 'invalide';
   message: string;
   ticket?: Ticket;
   billet?: Ticket;
+  details?: DetailsScan;
 }
 
 @Component({
@@ -37,6 +51,7 @@ export class TicketScannerComponent implements OnInit, AfterViewInit, OnDestroy 
   erreurCamera = signal<string | null>(null);
   dernierResultat = signal<ResultatScan | null>(null);
   doublonsSession = signal(0);
+  historique = signal<ResultatScan[]>([]);
 
   saisieManuelle = '';
 
@@ -51,18 +66,36 @@ export class TicketScannerComponent implements OnInit, AfterViewInit, OnDestroy 
     public eventStore: SelectedEventStore,
     private accessGatesService: AccessGatesService,
     private ticketsService: TicketsService
-  ) {}
-
-  ngOnInit() {
-    const eventId = this.eventStore.selectedEventId();
-    if (!eventId) return;
-
-    this.accessGatesService.getByEvent(eventId).subscribe((portes) => {
-      this.gates.set(portes);
-      if (portes.length > 0) this.porteSelectionnee.set(portes[0].id);
+  ) {
+    // Se relance à chaque changement d'événement sélectionné, y compris quand il
+    // n'est connu qu'après le chargement du store (rechargement de la page).
+    effect(() => {
+      const eventId = this.eventStore.selectedEventId();
+      if (!eventId) return;
+      untracked(() => {
+        this.chargerPortes(eventId);
+        this.chargerBillets(eventId);
+      });
     });
+  }
 
-    this.chargerBillets(eventId);
+  ngOnInit() {}
+
+  private chargerPortes(eventId: string) {
+    this.gates.set([]);
+    this.porteSelectionnee.set('');
+    this.accessGatesService.getByEvent(eventId).subscribe({
+      next: (portes) => {
+        // réponse d'un ancien événement arrivée en retard : on l'ignore
+        if (this.eventStore.selectedEventId() !== eventId) return;
+        this.gates.set(portes);
+        const actuelle = this.porteSelectionnee();
+        if (portes.length > 0 && !portes.some((p) => p.id === actuelle)) {
+          this.porteSelectionnee.set(portes[0].id);
+        }
+      },
+      error: () => this.gates.set([]),
+    });
   }
 
   private chargerBillets(eventId: string) {
@@ -128,37 +161,74 @@ export class TicketScannerComponent implements OnInit, AfterViewInit, OnDestroy 
   private verifierParQrCode(qrCode: string) {
     this.ticketsService.scannerBillet({ qrCode, gateId: this.porteSelectionnee() || undefined }).subscribe({
       next: (resultat) => {
-        this.dernierResultat.set(resultat);
+        this.enregistrerResultat(resultat);
         if (resultat.statut === 'doublon') this.doublonsSession.update((n) => n + 1);
         this.rafraichirBillets();
       },
       error: (erreur) => {
-        this.dernierResultat.set({ statut: 'invalide', message: erreur.error?.message ?? 'Billet introuvable.' });
+        this.dernierResultat.set({ statut: 'invalide', message: this.messageErreurScan(erreur) });
       },
     });
   }
 
   saisirManuellement() {
-    const saisie = this.saisieManuelle.trim();
+    const saisie = this.saisieManuelle.replace(/[\s-]/g, '').toLowerCase();
     if (!saisie) return;
 
     this.ticketsService.scannerBillet({ reference: saisie, gateId: this.porteSelectionnee() || undefined }).subscribe({
       next: (resultat) => {
-        this.dernierResultat.set(resultat);
+        this.enregistrerResultat(resultat);
         if (resultat.statut === 'doublon') this.doublonsSession.update((n) => n + 1);
         this.rafraichirBillets();
       },
       error: (erreur) => {
-        this.dernierResultat.set({ statut: 'invalide', message: erreur.error?.message ?? 'Billet introuvable.' });
+        this.dernierResultat.set({ statut: 'invalide', message: this.messageErreurScan(erreur) });
       },
     });
 
     this.saisieManuelle = '';
   }
 
+  // Message adapté à la vraie cause : réseau coupé, panne serveur, billet inconnu...
+  private messageErreurScan(erreur: any): string {
+    if (erreur?.status === 0) return 'Connexion impossible : vérifiez votre réseau.';
+    if (erreur?.status >= 500) return 'Erreur du serveur. Réessayez dans un instant.';
+    if (erreur?.status === 400) return 'Code invalide : saisissez les 8 caractères de la référence.';
+    return erreur?.error?.message ?? erreur?.error?.erreur ?? 'Billet introuvable.';
+  }
+
   private rafraichirBillets() {
     const eventId = this.eventStore.selectedEventId();
     if (eventId) this.chargerBillets(eventId);
+  }
+
+  private enregistrerResultat(resultat: ResultatScan) {
+    this.dernierResultat.set(resultat);
+    this.historique.update((h) => [resultat, ...h].slice(0, 5));
+    try {
+      navigator.vibrate?.(resultat.statut === 'valide' ? 60 : [120, 60, 120]);
+    } catch {
+      /* pas de vibration sur cet appareil */
+    }
+  }
+
+  heure(iso?: string | null): string {
+    if (!iso) return '—';
+    return new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(iso));
+  }
+
+  dateHeure(iso?: string | null): string {
+    if (!iso) return '—';
+    return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso));
+  }
+
+  ilYa(iso?: string | null): string {
+    if (!iso) return '';
+    const s = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
+    if (s < 60) return `il y a ${s} s`;
+    const m = Math.round(s / 60);
+    if (m < 60) return `il y a ${m} min`;
+    return `il y a ${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')}`;
   }
 
   signalerLitige(ticket: Ticket) {

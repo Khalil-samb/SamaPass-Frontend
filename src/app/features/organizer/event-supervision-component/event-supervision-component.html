@@ -2,14 +2,10 @@
       <p class="text-slate-400">Sélectionnez un événement pour voir sa supervision.</p>
     } @else {
 
-      <div class="flex items-center justify-between mb-6">
-        <span class="flex items-center gap-1.5 bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
-          <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
-          Réseau Mesh actif (synchro p2p) — décoratif, en attente du backend
-        </span>
+      <div class="flex mb-6 sm:justify-end">
         <a
           routerLink="/organisateur/scanner/camera"
-          class="flex items-center gap-2 bg-orange-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-orange-700"
+          class="flex w-full sm:w-auto items-center justify-center gap-2 bg-orange-600 text-white rounded-xl px-5 py-3.5 sm:py-2.5 text-base sm:text-sm font-bold hover:bg-orange-700 active:bg-orange-800 transition-colors"
         >
           <app-icon name="qr-code" [size]="16"></app-icon>
           Lancer le Scanner Caméra

@@ -73,7 +73,7 @@ export class EventSupervisionComponent implements OnInit {
   }
 
   renvoyerCode(agent: ScannerAgent) {
-    const texte = `Bonjour ${agent.name}, votre code PIN SamaPass Scanner pour ${this.nomPorte((agent as any).gate)} : ${agent.pinCode}.`;
+    const texte = `Bonjour ${agent.name}, votre code PIN Kcrowd Scanner pour ${this.nomPorte((agent as any).gate)} : ${agent.pinCode}.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(texte)}`, '_blank');
   }
 }

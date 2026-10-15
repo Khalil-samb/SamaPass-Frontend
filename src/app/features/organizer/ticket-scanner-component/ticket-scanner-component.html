@@ -62,38 +62,78 @@
         <div class="bg-white border border-slate-100 rounded-2xl p-5">
           <h3 class="font-bold text-slate-800 text-sm mb-3">Dernier billet scanné</h3>
 
-          @if (!dernierResultat()) {
-            <p class="text-sm text-slate-400">Aucun scan pour l'instant.</p>
-          } @else {
-            @if (dernierResultat()!.statut === 'valide') {
+          @if (dernierResultat(); as r) {
+            @if (r.statut === 'valide') {
               <div class="bg-green-600 text-white rounded-xl p-4 mb-3">
-                <p class="font-bold text-sm">✓ Billet valide — entrée autorisée</p>
+                <p class="text-[11px] font-bold tracking-wider opacity-90">ENTRÉE AUTORISÉE</p>
+                @if (r.details) {
+                  <p class="mt-1 text-2xl font-extrabold leading-tight break-words">{{ r.details.acheteur }}</p>
+                  <p class="mt-0.5 text-sm font-semibold opacity-95">{{ r.details.categorie }}</p>
+                }
               </div>
-            } @else if (dernierResultat()!.statut === 'doublon') {
+            } @else if (r.statut === 'doublon') {
               <div class="bg-orange-600 text-white rounded-xl p-4 mb-3">
-                <p class="font-bold text-sm">⚠ Billet déjà scanné (doublon)</p>
+                <p class="text-[11px] font-bold tracking-wider opacity-90">DÉJÀ SCANNÉ — REFUSER L'ENTRÉE</p>
+                @if (r.details) {
+                  <p class="mt-1 text-2xl font-extrabold leading-tight break-words">{{ r.details.acheteur }}</p>
+                  <p class="mt-1 text-sm font-semibold">
+                    Premier scan {{ ilYa(r.details.scanneLe) }} ({{ heure(r.details.scanneLe) }})
+                    @if (r.details.porte) {
+                      à la porte {{ r.details.porte }}
+                    }
+                    @if (r.details.agent) {
+                      · par {{ r.details.agent }}
+                    }
+                  </p>
+                }
               </div>
             } @else {
               <div class="bg-red-600 text-white rounded-xl p-4 mb-3">
-                <p class="font-bold text-sm">✕ Billet invalide</p>
+                <p class="text-[11px] font-bold tracking-wider opacity-90">BILLET INVALIDE</p>
+                <p class="mt-1 text-lg font-extrabold leading-tight">{{ r.message }}</p>
+                @if (r.details) {
+                  <p class="mt-1 text-sm font-semibold">{{ r.details.acheteur }} · {{ r.details.categorie }}</p>
+                }
               </div>
             }
-            <p class="text-xs text-slate-500 mb-3">{{ dernierResultat()!.message }}</p>
 
-            @if (dernierResultat()!.ticket; as t) {
-              <div class="text-xs space-y-1.5 mb-3">
-                <p><span class="text-slate-400">Référence :</span> <span class="font-semibold text-slate-700">#{{ t.id.slice(-8).toUpperCase() }}</span></p>
-                <p><span class="text-slate-400">Catégorie :</span> <span class="font-semibold text-slate-700">{{ categorieDuTicket(t) }}</span></p>
-                <p><span class="text-slate-400">Titulaire :</span> <span class="font-semibold text-slate-700">{{ nomAcheteur(t) }}</span></p>
-                <p><span class="text-slate-400">Montant payé :</span> <span class="font-semibold text-slate-700">{{ t.price.toLocaleString('fr-FR') }} FCFA</span></p>
-              </div>
+            @if (r.details; as d) {
+              <dl class="text-xs space-y-1.5 mb-3">
+                <div class="flex justify-between gap-3"><dt class="text-slate-400">Téléphone</dt><dd class="font-semibold text-slate-700">{{ d.telephone }}</dd></div>
+                <div class="flex justify-between gap-3"><dt class="text-slate-400">Événement</dt><dd class="font-semibold text-slate-700 text-right">{{ d.evenement }}</dd></div>
+                <div class="flex justify-between gap-3"><dt class="text-slate-400">Montant payé</dt><dd class="font-semibold text-slate-700">{{ d.prix.toLocaleString('fr-FR') }} FCFA</dd></div>
+                <div class="flex justify-between gap-3"><dt class="text-slate-400">Acheté le</dt><dd class="font-semibold text-slate-700">{{ dateHeure(d.dateAchat) }}</dd></div>
+                <div class="flex justify-between gap-3"><dt class="text-slate-400">Référence</dt><dd class="font-semibold text-slate-700">#{{ d.reference }}</dd></div>
+                @if (r.statut === 'valide' && d.porte) {
+                  <div class="flex justify-between gap-3"><dt class="text-slate-400">Porte</dt><dd class="font-semibold text-slate-700">{{ d.porte }}</dd></div>
+                }
+              </dl>
+            }
 
-              @if (dernierResultat()!.statut !== 'invalide') {
-                <button type="button" (click)="signalerLitige(t)" class="w-full border border-red-200 text-red-600 rounded-lg py-2 text-xs font-semibold hover:bg-red-50">
+            @if (r.billet; as b) {
+              @if (r.statut !== 'invalide') {
+                <button type="button" (click)="signalerLitige(b)" class="w-full border border-red-200 text-red-600 rounded-lg py-2 text-xs font-semibold hover:bg-red-50">
                   Signaler un litige
                 </button>
               }
             }
+
+            @if (historique().length > 1) {
+              <div class="mt-4 border-t border-slate-100 pt-3">
+                <p class="text-[10px] font-bold text-slate-400 tracking-wide mb-2">DERNIERS SCANS</p>
+                <ul class="space-y-1.5">
+                  @for (ancien of historique().slice(1); track $index) {
+                    <li class="flex items-center gap-2 text-xs">
+                      <span class="w-2 h-2 rounded-full shrink-0" [class]="ancien.statut === 'valide' ? 'bg-green-500' : ancien.statut === 'doublon' ? 'bg-orange-500' : 'bg-red-500'"></span>
+                      <span class="truncate font-semibold text-slate-700">{{ ancien.details?.acheteur ?? ancien.message }}</span>
+                      <span class="ml-auto shrink-0 text-slate-400">{{ ancien.details?.categorie }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          } @else {
+            <p class="text-sm text-slate-400">Aucun scan pour l'instant.</p>
           }
         </div>
 
