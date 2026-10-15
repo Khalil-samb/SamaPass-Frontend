@@ -1,5 +1,5 @@
 @if (chargement()) {
-  <p class="text-center text-slate-400 py-20">Chargement de votre profil...</p>
+  <p class="text-center text-slate-400 text-sm py-20">Chargement de votre profil...</p>
 
 } @else if (erreurChargement()) {
   <p class="text-center text-red-600 py-20">{{ erreurChargement() }}</p>
@@ -7,11 +7,20 @@
 } @else if (profil(); as p) {
   <div class="max-w-6xl mx-auto font-sans text-slate-800">
 
-    <div class="mb-6">
-      <h1 class="text-lg font-extrabold text-slate-900">Profil de l'organisation</h1>
-      <p class="text-xs text-slate-400 mt-1">
-        Ces informations apparaissent sur vos événements et servent à vous verser vos recettes.
-      </p>
+    <div class="bg-slate-900 text-white rounded-2xl p-5 sm:p-6 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div class="min-w-0">
+        <span class="text-[10px] font-bold tracking-wider text-orange-400">ESPACE ORGANISATEUR</span>
+        <h1 class="text-xl sm:text-2xl font-black tracking-tight mt-1 truncate">Paramètres</h1>
+        <p class="text-xs sm:text-sm text-slate-300 mt-1">
+          Ces informations apparaissent sur vos événements et servent à vous verser vos recettes.
+        </p>
+      </div>
+      <span
+        class="self-start sm:self-center shrink-0 text-[10px] font-bold rounded-full px-3 py-1.5"
+        [class]="p.status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-red-500/15 text-red-300'"
+      >
+        {{ p.status === 'active' ? 'COMPTE ACTIF' : 'COMPTE SUSPENDU' }}
+      </span>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -20,7 +29,7 @@
       <div class="lg:col-span-2 space-y-6 order-2 lg:order-1">
 
         <!-- 1. Mon organisation -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6">
           <h2 class="font-extrabold text-slate-900 text-base mb-1">Mon organisation</h2>
           <p class="text-xs text-slate-400 mb-5">Le nom et le logo que le public voit sur vos événements.</p>
 
@@ -120,7 +129,7 @@
         </div>
 
         <!-- 2. Responsable du compte -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6">
           <h2 class="font-extrabold text-slate-900 text-base mb-1">Responsable du compte</h2>
           <p class="text-xs text-slate-400 mb-5">La personne qui gère cet espace organisateur.</p>
 
@@ -217,7 +226,7 @@
         </div>
 
         <!-- 3. Compte de reversement -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6">
           <div class="flex items-center gap-2 mb-1">
             <app-icon name="wallet" [size]="18" class="text-orange-700"></app-icon>
             <h2 class="font-extrabold text-slate-900 text-base">Compte de reversement</h2>
@@ -230,7 +239,7 @@
               type="button"
               (click)="methode.set('wave')"
               class="rounded-lg border-2 px-4 py-3 text-sm font-bold transition-colors"
-              [class]="methode() === 'wave' ? 'border-orange-600 bg-orange-600 text-orange-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+              [class]="methode() === 'wave' ? 'border-orange-600 bg-orange-50 text-orange-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
             >
               Wave
             </button>
@@ -238,7 +247,7 @@
               type="button"
               (click)="methode.set('orange_money')"
               class="rounded-lg border-2 px-4 py-3 text-sm font-bold transition-colors"
-              [class]="methode() === 'orange_money' ? 'border-orange-600 bg-orange-600 text-orange-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+              [class]="methode() === 'orange_money' ? 'border-orange-600 bg-orange-50 text-orange-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
             >
               Orange Money
             </button>
@@ -304,7 +313,7 @@
         </div>
 
         <!-- 4. Notifications -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6">
           <h2 class="font-extrabold text-slate-900 text-base mb-1">Notifications</h2>
           <p class="text-xs text-slate-400 mb-5">Choisissez ce dont vous voulez être prévenu.</p>
 
@@ -343,7 +352,7 @@
         </div>
 
         <!-- 5. Sécurité -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6">
           <div class="flex items-center gap-2 mb-1">
             <app-icon name="shield-check" [size]="18" class="text-orange-700"></app-icon>
             <h2 class="font-extrabold text-slate-900 text-base">Sécurité</h2>
@@ -425,9 +434,9 @@
 
       <!-- ═══════════════ COLONNE DE DROITE : RÉSUMÉ + COMPLÉTUDE ═══════════════ -->
       <div class="space-y-4 order-1 lg:order-2">
-        <div class="bg-white border border-slate-200 rounded-xl p-5 lg:sticky lg:top-6">
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 lg:sticky lg:top-6">
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-14 h-14 rounded-xl overflow-hidden bg-orange-600 text-orange-700 font-extrabold text-lg flex items-center justify-center shrink-0">
+            <div class="w-14 h-14 rounded-xl overflow-hidden bg-orange-100 text-orange-700 font-extrabold text-lg flex items-center justify-center shrink-0">
               @if (p.logoUrl) {
                 <img [src]="p.logoUrl" class="w-full h-full object-cover" alt="" />
               } @else {
