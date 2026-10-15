@@ -50,6 +50,8 @@ export class EventWizardStepTicketsComponent implements OnInit {
   // eux, ces champs repartaient à leurs valeurs par défaut et écrasaient les
   // vrais réglages de l'événement à l'enregistrement.
   @Input() reglagesInitiaux?: Partial<EventEntity>;
+  // Jauge maximale de l'événement (étape 1) : le total des catégories ne peut pas la dépasser.
+  @Input() jaugeMax = 0;
   @Output() etapeCompletee = new EventEmitter<ResultatEtape2>();
   @Output() retour = new EventEmitter<void>();
 
@@ -128,12 +130,43 @@ export class EventWizardStepTicketsComponent implements OnInit {
     }
   }
 
+  get totalAlloue(): number {
+    return this.ticketTypes().reduce((s, t) => s + (t.quantityTotal || 0), 0);
+  }
+  get resteJauge(): number {
+    return this.jaugeMax - this.totalAlloue;
+  }
+  // Places libres pour la catégorie en cours d'ajout / d'édition (le total des AUTRES catégories est déduit)
+  get placesPourFormulaire(): number {
+    const enEdition = this.indexEnEdition();
+    const autres = this.ticketTypes().reduce((s, t, i) => (i === enEdition ? s : s + (t.quantityTotal || 0)), 0);
+    return this.jaugeMax - autres;
+  }
+
   ouvrirAjout() {
     this.indexEnEdition.set(null);
     this.nomForm.set('');
     this.prixForm.set(0);
     this.quotaForm.set(0);
     this.perksForm.set([]);
+    this.formulaireOuvert.set(true);
+  }
+
+  // Modèles de catégories : un clic préremplit le formulaire (nom, prix suggéré, quota, avantages).
+  // L'organisateur ajuste seulement le prix et la quantité, puis enregistre comme d'habitude.
+  modeles = [
+    { id: 'standard', label: 'Standard', nom: 'Standard', prix: 5000, quota: 200, perks: ['Accès à l\'événement'] },
+    { id: 'vip', label: 'VIP', nom: 'VIP', prix: 15000, quota: 50, perks: ['Accès prioritaire', 'Place réservée'] },
+    { id: 'early', label: 'Early bird', nom: 'Early bird', prix: 3000, quota: 100, perks: ['Tarif réduit de lancement'] },
+  ];
+
+  appliquerModele(m: { nom: string; prix: number; quota: number; perks: string[] }) {
+    this.indexEnEdition.set(null);
+    this.nomForm.set(m.nom);
+    this.prixForm.set(m.prix);
+    this.quotaForm.set(this.jaugeMax > 0 ? Math.max(0, Math.min(m.quota, this.resteJauge)) : m.quota);
+    this.perksForm.set([...m.perks]);
+    this.erreurValidation.set(null);
     this.formulaireOuvert.set(true);
   }
 
@@ -165,6 +198,14 @@ export class EventWizardStepTicketsComponent implements OnInit {
     }
 
     const index = this.indexEnEdition();
+    if (this.jaugeMax > 0 && this.quotaForm() > this.placesPourFormulaire) {
+      this.erreurValidation.set(
+        this.placesPourFormulaire > 0
+          ? `La jauge de l'événement est de ${this.jaugeMax.toLocaleString('fr-FR')} places : il n'en reste que ${this.placesPourFormulaire.toLocaleString('fr-FR')} pour cette catégorie.`
+          : `La jauge de l'événement (${this.jaugeMax.toLocaleString('fr-FR')} places) est déjà entièrement répartie. Réduisez une autre catégorie ou augmentez la jauge à l'étape 1.`
+      );
+      return;
+    }
     const existante = index !== null ? this.ticketTypes()[index] : null;
 
     // Un quota ne peut pas descendre sous le nombre de billets déjà vendus
@@ -215,6 +256,13 @@ export class EventWizardStepTicketsComponent implements OnInit {
   continuer() {
     if (this.ticketTypes().length === 0) {
       this.erreurValidation.set('Ajoutez au moins une catégorie de billet avant de continuer (même une seule, pour un événement à entrée unique).');
+      return;
+    }
+
+    if (this.jaugeMax > 0 && this.totalAlloue > this.jaugeMax) {
+      this.erreurValidation.set(
+        `Le total des catégories (${this.totalAlloue.toLocaleString('fr-FR')}) dépasse la jauge de l'événement (${this.jaugeMax.toLocaleString('fr-FR')}). Réduisez un quota, ou augmentez la jauge à l'étape 1.`
+      );
       return;
     }
 

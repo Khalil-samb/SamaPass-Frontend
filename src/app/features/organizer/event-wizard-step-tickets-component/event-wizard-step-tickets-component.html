@@ -5,6 +5,16 @@
     <h2 class="section-title text-lg mb-1">Grille des billets &amp; catégories</h2>
     <p class="text-xs text-slate-400 mb-5">Configurez les types d'accès, tarifs, jauges et avantages inclus pour vos participants.</p>
 
+    @if (jaugeMax > 0) {
+      <p class="mb-4 text-xs font-bold" [class]="totalAlloue > jaugeMax ? 'text-red-600' : 'text-slate-700'">
+        Total réparti : <strong>{{ totalAlloue.toLocaleString('fr-FR') }}</strong>/{{ jaugeMax.toLocaleString('fr-FR') }} places
+        @if (resteJauge >= 0) {
+          <span class="font-medium text-slate-400"> · il en reste {{ resteJauge.toLocaleString('fr-FR') }} à répartir</span>
+        } @else {
+          <span class="font-medium"> · dépasse la jauge de {{ (-resteJauge).toLocaleString('fr-FR') }}</span>
+        }
+      </p>
+    }
     <div class="space-y-3 mb-4">
       @for (type of ticketTypes(); track $index) {
         <div class="border border-slate-200 hover:border-slate-300 rounded-xl p-4 flex items-center justify-between gap-4 transition-all bg-white/60">
@@ -20,7 +30,7 @@
                 <span class="bg-emerald-100 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase">Actif</span>
               </div>
               <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 font-medium">
-                <span>Jauge : <strong class="text-slate-700">{{ type.quantityTotal.toLocaleString('fr-FR') }}</strong> places</span>
+                <span>Jauge : <strong class="text-slate-700">{{ type.quantityTotal.toLocaleString('fr-FR') }}</strong>{{ jaugeMax > 0 ? '/' + jaugeMax.toLocaleString('fr-FR') : '' }} places</span>
 
                 @if (type.perks.length > 0) {
                   <span class="text-slate-300">•</span>
@@ -58,6 +68,18 @@
     </div>
 
     @if (!formulaireOuvert()) {
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <span class="text-xs font-bold text-slate-500">Modèles rapides :</span>
+        @for (m of modeles; track m.id) {
+          <button
+            type="button"
+            (click)="appliquerModele(m)"
+            class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:border-orange-400 hover:text-orange-600 transition-colors"
+          >
+            {{ m.label }}
+          </button>
+        }
+      </div>
       <button
         type="button"
         (click)="ouvrirAjout()"
@@ -82,6 +104,9 @@
           <label class="block">
             <span class="text-xs font-bold text-slate-700 block mb-1">QUOTA (PLACES) <span class="text-orange-600">*</span></span>
             <input type="number" min="1" [(ngModel)]="quotaFormModel" placeholder="500" class="glass-input font-bold text-slate-900" />
+            @if (jaugeMax > 0) {
+              <span class="mt-1 block text-[10px] font-medium text-slate-400">Places libres : {{ placesPourFormulaire.toLocaleString('fr-FR') }}/{{ jaugeMax.toLocaleString('fr-FR') }}</span>
+            }
           </label>
         </div>
 

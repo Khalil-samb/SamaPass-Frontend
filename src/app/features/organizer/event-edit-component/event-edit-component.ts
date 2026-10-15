@@ -394,6 +394,16 @@ export class EventEditComponent implements OnInit {
   }
 
   // publier = true : après avoir enregistré TOUT le reste, publie l'événement (dernière étape)
+  // Les diminutions de quota passent AVANT les augmentations et les créations : Django vérifie la jauge à chaque
+  // enregistrement, une augmentation ne doit pas être refusée parce qu'une diminution n'est pas encore faite.
+  private ordreEnregistrementTypes<T extends { id?: string; quantityTotal: number }>(
+    types: T[],
+    avant: { id: string; quantityTotal: number }[]
+  ): T[] {
+    const variation = (t: T) => t.quantityTotal - (avant.find((a) => a.id === t.id)?.quantityTotal ?? 0);
+    return [...types].sort((a, b) => variation(a) - variation(b));
+  }
+
   async enregistrer(publier = false) {
     if (this.enregistrementEnCours()) return;
     // Les engagements sont vérifiés ICI aussi, pas seulement par le bouton désactivé
@@ -422,7 +432,7 @@ export class EventEditComponent implements OnInit {
       // 2. Catégories de billets : créer les nouvelles, modifier celles qui ont changé
       etape = 'des catégories de billets';
       const idParNomType = new Map<string, string>();
-      for (const t of types) {
+      for (const t of this.ordreEnregistrementTypes(types, inst.types)) {
         if (!t.id) {
           const cree = await firstValueFrom(
             this.ticketTypesService.creerCategorie(id, {
@@ -569,7 +579,7 @@ export class EventEditComponent implements OnInit {
   // Envoie à un agent qu'on vient de créer son VRAI code, par WhatsApp.
   envoyerCodeParWhatsApp(agent: NouvelAgentCree) {
     if (agent.pinCode === PIN_A_GENERER) return;
-    const texte = `Bonjour ${agent.name}, voici votre code PIN SamaPass Scanner pour la porte ${agent.gateName} : ${agent.pinCode}. Téléchargez l'application SamaPass Scanner et entrez ce code pour commencer.`;
+    const texte = `Bonjour ${agent.name}, voici votre code PIN Kcrowd Scanner pour la porte ${agent.gateName} : ${agent.pinCode}. Téléchargez l'application Kcrowd Scanner et entrez ce code pour commencer.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(texte)}`, '_blank');
   }
 

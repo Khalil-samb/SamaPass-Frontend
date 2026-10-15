@@ -48,6 +48,7 @@
     />
   } @else if (etapeActuelle() === 2) {
     <app-event-wizard-step-tickets-component
+      [jaugeMax]="brouillon().maxCapacity ?? 0"
       [valeursInitiales]="ticketTypesDraft()"
       (etapeCompletee)="onEtape2Terminee($event)"
       (retour)="etapeActuelle.set(1)"
