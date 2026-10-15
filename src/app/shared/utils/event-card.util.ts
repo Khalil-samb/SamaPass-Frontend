@@ -9,8 +9,8 @@ import { EventCardVM, EventCardBadge, EtatVentes } from '../ui/card-event-compon
 // désactivent la carte ; « not_open » reste cliquable (on peut voir la fiche).
 const ETATS_DESACTIVES: Record<string, { badge: string; variant: EventCardBadge['variant']; label: string }> = {
   ended: { badge: 'Terminé', variant: 'dark', label: 'Événement terminé' },
-  closed: { badge: 'Ventes closes', variant: 'dark', label: 'Ventes closes' },
-  sold_out: { badge: 'Complet', variant: 'urgent', label: 'Complet' },
+  // « closed » (ventes closes) n'est volontairement plus ici : la carte reste normale, avec seulement l'étiquette.
+  // « sold_out » (complet) n'est plus ici non plus : seul un événement vraiment passé est grisé.
 };
 
 export function construireCarteEvenement(event: any): EventCardVM {
@@ -31,6 +31,8 @@ export function construireCarteEvenement(event: any): EventCardVM {
     badges.push({ text: desactive.badge, variant: desactive.variant });
   } else {
     if (etat === 'not_open') badges.push({ text: 'Bientôt', variant: 'official' });
+    if (etat === 'closed') badges.push({ text: 'Ventes closes', variant: 'dark' });
+    if (etat === 'sold_out') badges.push({ text: 'Complet', variant: 'urgent' });
     if (event.isSponsored) badges.push({ text: 'À la une', variant: 'featured' });
   }
 
@@ -46,5 +48,6 @@ export function construireCarteEvenement(event: any): EventCardVM {
     badges,
     disabled: !!desactive,
     stateLabel: desactive?.label,
+    etiquetteBouton: etat === 'closed' ? 'Ventes closes' : etat === 'sold_out' ? 'Événement complet' : undefined,
   };
 }

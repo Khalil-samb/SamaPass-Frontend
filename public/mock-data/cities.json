@@ -1,7 +1,82 @@
 [
-  { "id": "city-001", "name": "Dakar", "region": "Dakar" },
-  { "id": "city-002", "name": "Thiès", "region": "Thiès" },
-  { "id": "city-003", "name": "Saint-Louis", "region": "Saint-Louis" },
-  { "id": "city-004", "name": "Saly / Mbour", "region": "Thiès" },
-  { "id": "city-005", "name": "Ziguinchor", "region": "Ziguinchor" }
+  {
+    "id": "city-001",
+    "name": "Dakar",
+    "region": "Dakar"
+  },
+  {
+    "id": "city-002",
+    "name": "Thiès",
+    "region": "Thiès"
+  },
+  {
+    "id": "city-003",
+    "name": "Saint-Louis",
+    "region": "Saint-Louis"
+  },
+  {
+    "id": "city-004",
+    "name": "Saly / Mbour",
+    "region": "Thiès"
+  },
+  {
+    "id": "city-005",
+    "name": "Ziguinchor",
+    "region": "Ziguinchor"
+  },
+  {
+    "id": "city-006",
+    "name": "Kaolack",
+    "region": "Kaolack"
+  },
+  {
+    "id": "city-007",
+    "name": "Louga",
+    "region": "Louga"
+  },
+  {
+    "id": "city-008",
+    "name": "Diourbel",
+    "region": "Diourbel"
+  },
+  {
+    "id": "city-009",
+    "name": "Touba",
+    "region": "Diourbel"
+  },
+  {
+    "id": "city-010",
+    "name": "Tambacounda",
+    "region": "Tambacounda"
+  },
+  {
+    "id": "city-011",
+    "name": "Kolda",
+    "region": "Kolda"
+  },
+  {
+    "id": "city-012",
+    "name": "Kédougou",
+    "region": "Kédougou"
+  },
+  {
+    "id": "city-013",
+    "name": "Matam",
+    "region": "Matam"
+  },
+  {
+    "id": "city-014",
+    "name": "Fatick",
+    "region": "Fatick"
+  },
+  {
+    "id": "city-015",
+    "name": "Kaffrine",
+    "region": "Kaffrine"
+  },
+  {
+    "id": "city-016",
+    "name": "Sédhiou",
+    "region": "Sédhiou"
+  }
 ]

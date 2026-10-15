@@ -43,6 +43,10 @@
             <span class="flex items-center gap-1.5 bg-slate-200 text-slate-500 rounded-xl px-4 py-2 text-sm font-bold whitespace-nowrap cursor-not-allowed select-none">
               {{ event.stateLabel }}
             </span>
+          } @else if (event.etiquetteBouton) {
+            <span class="flex items-center gap-1.5 bg-slate-100 text-slate-600 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold whitespace-nowrap select-none">
+              {{ event.etiquetteBouton }}
+            </span>
           } @else {
             <a
               [routerLink]="['/evenements', event.id]"

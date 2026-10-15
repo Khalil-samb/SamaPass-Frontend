@@ -28,6 +28,9 @@ export interface EventCardVM {
   disabled?: boolean;
   // Texte affiché à la place du bouton « Acheter » quand la carte est désactivée.
   stateLabel?: string;
+  // Événement pas encore passé mais non achetable (ventes closes, complet) : la carte reste normale,
+  // seul le bouton « Acheter » est remplacé par ce texte.
+  etiquetteBouton?: string;
 }
 
 const CLASSES_PAR_BADGE: Record<EventCardBadgeVariant, string> = {
