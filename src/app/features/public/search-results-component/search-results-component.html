@@ -2,7 +2,7 @@
       <h1 class="text-lg font-extrabold text-slate-900 mb-5">Tous les événements</h1>
 
       <div class="mb-5">
-        <app-search-bar-component [cities]="cities()" [categories]="categories()" (search)="onRecherche($event)" />
+        <app-search-bar-component [cities]="cities()" [categories]="categories()" [motCleInitial]="motCle()" [villeInitiale]="cityId()" [categorieInitiale]="categoryId()" (search)="onRecherche($event)" />
       </div>
 
       <div class="flex flex-wrap gap-2 mb-6">

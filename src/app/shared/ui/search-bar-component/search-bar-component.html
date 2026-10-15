@@ -1,19 +1,19 @@
 <div class="bg-white rounded-2xl  p-3 flex flex-col md:flex-row gap-2">
   <input
     type="text"
-    [(ngModel)]="motCle"
+    [ngModel]="motCle" (ngModelChange)="motCle = $event; rechercheEnDirect()" (keydown.enter)="lancerLaRecherche()"
     placeholder="Rechercher un événement..."
     class="flex-1 px-4 py-2.5 outline-none text-[15px]"
   />
 
-  <select [(ngModel)]="cityId" class="px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-600">
+  <select [ngModel]="cityId" (ngModelChange)="cityId = $event; lancerLaRecherche()" class="px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-600">
     <option value="">Toutes les villes</option>
     @for (city of cities; track city.id) {
       <option [value]="city.id">{{ city.name }}</option>
     }
   </select>
 
-  <select [(ngModel)]="categoryId" class="px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-600">
+  <select [ngModel]="categoryId" (ngModelChange)="categoryId = $event; lancerLaRecherche()" class="px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-600">
     <option value="">Toutes les catégories</option>
     @for (category of categories; track category.id) {
       <option [value]="category.id">{{ category.name }}</option>

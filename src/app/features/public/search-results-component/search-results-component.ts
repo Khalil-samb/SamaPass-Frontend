@@ -80,17 +80,31 @@ export class SearchResultsComponent implements OnInit {
   }
 
   resultats = computed<EventCardVM[]>(() => {
-    const mot = this.motCle().toLowerCase().trim();
+    const mot = this.normaliser(this.motCle());
 
     const filtres = this.allEvents()
       .filter((e) => ['published', 'sold_out', 'finished'].includes(e.status))
       .filter((e) => !this.cityId() || e.cityId === this.cityId())
       .filter((e) => !this.categoryId() || e.categoryId === this.categoryId())
       .filter((e) => this.dansLaPeriode(new Date(e.startDate), this.periode()))
-      .filter((e) => !mot || e.title.toLowerCase().includes(mot) || e.venue.toLowerCase().includes(mot));
+      .filter((e) => this.correspondAuMot(e, mot));
 
     return filtres.map((e) => construireCarteEvenement(e));
   });
+
+  // Sans accents ni majuscules : « thies » trouve « Thiès »
+  private normaliser(texte: string): string {
+    return (texte ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
+
+  // Le mot-clé cherche dans le titre, le lieu, la ville ET la catégorie ; plusieurs mots se combinent.
+  private correspondAuMot(e: EventEntity, mot: string): boolean {
+    if (!mot) return true;
+    const ville = this.cities().find((c) => c.id === e.cityId)?.name ?? '';
+    const categorie = this.categories().find((c) => c.id === e.categoryId)?.name ?? '';
+    const texte = this.normaliser(`${e.title} ${e.venue} ${ville} ${categorie}`);
+    return mot.split(/\s+/).every((m) => texte.includes(m));
+  }
 
   private dansLaPeriode(dateEvenement: Date, periode: string): boolean {
     if (!periode) return true;
@@ -104,13 +118,13 @@ export class SearchResultsComponent implements OnInit {
 
     if (periode === 'weekend') {
       const jour = maintenant.getDay(); // 0 = dimanche, 6 = samedi
-      const joursAvantSamedi = (6 - jour + 7) % 7;
+      const joursAvantSamedi = jour === 0 ? -1 : 6 - jour; // dimanche : le week-end en cours a commencé hier
       const samedi = new Date(debutJour);
       samedi.setDate(samedi.getDate() + joursAvantSamedi);
       const finDimanche = new Date(samedi);
       finDimanche.setDate(finDimanche.getDate() + 1);
       finDimanche.setHours(23, 59, 59);
-      return dateEvenement >= samedi && dateEvenement <= finDimanche;
+      return dateEvenement >= (jour === 0 ? debutJour : samedi) && dateEvenement <= finDimanche;
     }
 
     if (periode === 'week') {
