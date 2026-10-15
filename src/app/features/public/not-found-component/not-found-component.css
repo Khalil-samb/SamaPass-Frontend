@@ -1,0 +1,37 @@
+/* Page 404 : fond animé (le halo est dessiné par le composant), billet déchiré et entrée en douceur. */
+
+.fond {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  animation: fond-entree 2s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+.billet { filter: none; overflow: visible; }
+
+.moitie { transform-box: fill-box; }
+.moitie-g { transform-origin: right bottom; animation: derive-gauche 5.5s ease-in-out infinite; }
+.moitie-d { transform-origin: left bottom; animation: derive-droite 5.5s ease-in-out infinite; }
+
+.entree { animation: monter 0.9s 0.25s ease-out both; }
+
+@keyframes fond-entree {
+  from { opacity: 0; transform: scale(1.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes derive-gauche {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-7px, -4px) rotate(-3deg); }
+}
+@keyframes derive-droite {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(7px, 3px) rotate(3deg); }
+}
+@keyframes monter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fond, .moitie-g, .moitie-d, .entree { animation: none; }
+}
